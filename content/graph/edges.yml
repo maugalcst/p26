@@ -1,0 +1,26 @@
+# Conexiones del grafo: un edge por línea, { from, to, weight? }.
+# Relaciones verificables: Epicor ↔ su stack y DraftAgent; proyectos backend ↔ .NET/Docker/MongoDB;
+# tnews ↔ Arch/Ollama; servicio social ↔ Next.js/Prisma/FIME.
+- { from: epicor, to: draftagent }
+- { from: epicor, to: webdriverio }
+- { from: epicor, to: jira }
+- { from: epicor, to: zephyr }
+- { from: epicor, to: azure-devops }
+- { from: epicor, to: github-copilot }
+- { from: epicor, to: dotnet-csharp }
+- { from: draftagent, to: webdriverio }
+- { from: draftagent, to: github-copilot }
+- { from: draftagent, to: jira }
+- { from: dnslabapi, to: dotnet-csharp }
+- { from: dnslabapi, to: docker }
+- { from: dnslabapi, to: mongodb }
+- { from: tennis-store, to: dotnet-csharp }
+- { from: personal-finance, to: dotnet-csharp }
+- { from: meditriage, to: dotnet-csharp }
+- { from: tnews, to: arch-hyprland }
+- { from: tnews, to: ollama }
+- { from: arch-hyprland, to: nextjs }
+- { from: servicio-social, to: nextjs }
+- { from: servicio-social, to: prisma }
+- { from: fime-uanl, to: servicio-social }
+- { from: fime-uanl, to: dotnet-csharp }

@@ -1,0 +1,63 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 998;
+  background: var(--bg-0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+
+.log {
+  font-size: 13px;
+  line-height: 1.85;
+  color: var(--fg-1);
+  max-width: 52ch;
+}
+
+.line {
+  white-space: nowrap;
+}
+
+.tag {
+  color: var(--ok);
+}
+
+.dim {
+  color: var(--fg-2);
+}
+
+.spin {
+  display: inline-block;
+  color: var(--warm);
+  animation: spin 0.9s steps(8) infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation: none;
+  }
+}
+
+.waiting {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ready {
+  opacity: 1;
+  transition: opacity 0.35s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ready {
+    transition: none;
+  }
+}

@@ -1,0 +1,253 @@
+.wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+}
+
+.wrap svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- trazas (PCB) ---- */
+
+.link {
+  fill: none;
+  stroke: var(--line-strong);
+  stroke-width: 1;
+  opacity: 0.8;
+  transition: stroke 0.16s ease, opacity 0.16s ease;
+}
+
+.linkActive {
+  stroke: var(--cool);
+  stroke-width: 1.2;
+  opacity: 1;
+}
+
+.linkHover {
+  stroke: var(--cool);
+  stroke-width: 1.2;
+  opacity: 1;
+}
+
+.linkDim {
+  opacity: 0.1;
+}
+
+.via {
+  fill: var(--line-strong);
+  pointer-events: none;
+  transition: fill 0.16s ease;
+}
+
+.linkActive .via,
+.linkHover .via {
+  fill: var(--cool);
+}
+
+.linkDim .via {
+  fill: var(--line-strong);
+}
+
+/* ---- nodos: chip recto (PCB) ---- */
+
+.node {
+  cursor: grab;
+  transition: opacity 0.16s ease;
+}
+
+.node:active {
+  cursor: grabbing;
+}
+
+.nodeDim {
+  opacity: 0.3;
+}
+
+.chip {
+  fill: var(--bg-1);
+  stroke: var(--line-strong);
+  stroke-width: 1;
+  transition: fill 0.15s ease, stroke 0.15s ease;
+}
+
+.node:hover .chip {
+  fill: var(--bg-2);
+  stroke: var(--cool);
+}
+
+.node:focus-visible .chip {
+  stroke: var(--warm);
+}
+
+.nodeActive .chip {
+  stroke: var(--warm);
+}
+
+.status {
+  fill: var(--fg-3);
+}
+
+.label {
+  fill: var(--fg-1);
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  pointer-events: none;
+  user-select: none;
+  transition: fill 0.15s ease;
+}
+
+.meta {
+  fill: var(--fg-3);
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  pointer-events: none;
+  user-select: none;
+}
+
+.node:hover .label {
+  fill: var(--fg-0);
+}
+
+.node:hover .meta {
+  fill: var(--fg-2);
+}
+
+/* estatus systemd: verde activo, ámbar en pausa/estudiando, gris archivo */
+.st-active .status {
+  fill: var(--ok);
+}
+.st-wip .status {
+  fill: var(--warn);
+}
+.st-studying .status {
+  fill: var(--warn);
+}
+.st-built .status,
+.st-archived .status {
+  fill: var(--fg-3);
+}
+
+.hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -24px;
+  margin: 0;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--fg-3);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ============================================================
+   Móvil · niveles como filas + trazas on-demand
+   ============================================================ */
+
+.mWrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  padding: var(--space-2) var(--space-1) var(--space-5);
+}
+
+.mLevel {
+  margin-bottom: var(--space-4);
+}
+
+.mLabel {
+  margin: 0 0 var(--space-2);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fg-2);
+}
+
+.mRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mChip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  background: var(--bg-1);
+  color: var(--fg-1);
+  font-size: 12px;
+}
+
+.mChip:hover {
+  border-color: var(--cool);
+  color: var(--fg-0);
+  text-decoration: none;
+}
+
+.mChip:focus-visible {
+  outline: 1px dashed var(--warm);
+  outline-offset: 2px;
+}
+
+.mChipActive {
+  border-color: var(--warm);
+}
+
+.mDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--fg-3);
+  flex-shrink: 0;
+}
+
+.st-active .mDot {
+  background: var(--ok);
+}
+.st-wip .mDot {
+  background: var(--warn);
+}
+.st-studying .mDot {
+  background: var(--warn);
+}
+.st-built .mDot,
+.st-archived .mDot {
+  background: var(--fg-3);
+}
+
+.mText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.mTitle {
+  color: var(--fg-1);
+}
+
+.mMeta {
+  color: var(--fg-3);
+  font-size: 10px;
+}
+
+.mChipActive .mTitle,
+.mChip:hover .mTitle {
+  color: var(--fg-0);
+}
+
+.mTraces {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}

@@ -1,39 +1,62 @@
-import Graph from '@/components/Graph';
-import Menu from '@/components/Menu';
-import { getGraph, toRenderCategory } from '@/lib/graph';
-import type { RenderGraphLink, RenderGraphNode } from '@/lib/graph/types';
-import { site } from '@/data/site';
-import styles from './page.module.css';
+import Link from "next/link";
+import { site, experiences, projects, skillGroups, education } from "@/data/content";
 
 export default function Home() {
-  const { items, edges } = getGraph();
-
-  const renderNodes: RenderGraphNode[] = items.map((n) => ({
-    id: n.id,
-    category: toRenderCategory(n.category),
-  }));
-  const renderLinks: RenderGraphLink[] = edges.map((e) => ({
-    source: e.from,
-    target: e.to,
-  }));
-
   return (
-    <main className={styles.main}>
-      <header className={styles.topbar}>
-        <span className={styles.prompt}>
-          {site.handle}@port<span className={styles.colon}>:</span>~
-          <span className={styles.dollar}>$</span>
-        </span>
-        <span className="tui-label">graph-daemon · navegación principal</span>
-      </header>
+    <main>
+      <h1>{site.name} — Portafolio 2026</h1>
+      <p>
+        {site.role} · {site.location}
+      </p>
 
-      <section className={styles.stage} aria-label="Grafo de nodos">
-        <Graph nodes={renderNodes} links={renderLinks} items={items} />
+      <section>
+        <h2>Experiencia</h2>
+        <ul>
+          {experiences.map((e) => (
+            <li key={e.id}>
+              <Link href={`/experiencia/${e.id}`}>
+                {e.role} en {e.company}
+              </Link>{" "}
+              — {e.location}
+            </li>
+          ))}
+        </ul>
       </section>
 
-      <footer className={styles.foot}>
-        <Menu />
-      </footer>
+      <section>
+        <h2>Proyectos</h2>
+        <ul>
+          {projects.map((p) => (
+            <li key={p.id}>
+              <Link href={`/proyectos/${p.id}`}>{p.title}</Link> — {p.tag}
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section>
+        <h2>Skills</h2>
+        <ul>
+          {skillGroups.map((g) => (
+            <li key={g.id}>
+              <Link href={`/skills#${g.id}`}>{g.label}</Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section>
+        <h2>Educación</h2>
+        <ul>
+          {education.map((e) => (
+            <li key={e.id}>
+              <Link href={`/educacion/${e.id}`}>
+                {e.degree}, {e.school}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
     </main>
   );
 }

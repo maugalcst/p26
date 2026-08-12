@@ -15,8 +15,8 @@ export default async function SkillDetail({ params }: { params: Promise<{ id: st
     <main>
       <Link href="/skills">← Skills</Link>
       <h1>{s.name}</h1>
-      {g && <p>Grupo: {g.label}</p>}
-      <p>Nivel: {s.level}</p>
+      {g && <p><span className="meta">Grupo: {g.label}</span></p>}
+      <p><span className="meta">Nivel: {s.level}</span></p>
       <p>{s.note}</p>
       {s.relatedProjects.length > 0 && (
         <>

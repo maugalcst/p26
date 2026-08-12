@@ -1,6 +1,6 @@
 /* TODO: confirmar token de color exacto del sistema de diseño */
 .rotating-cursor-area {
-  --cursor-color: #096fc7;
+  --cursor-color: #0137bf;
   --cursor-bar-thickness: 3px; /* override por JS en cada frame del motion */
   position: relative;
   cursor: none;
@@ -16,8 +16,8 @@
   left: 0;
   top: 0;
   z-index: 1000;
-  width: 18px; /* "brazo a brazo" total — tamaño estándar */
-  height: 18px;
+  width: 15px; /* "brazo a brazo" total — tamaño estándar */
+  height: 15px;
   pointer-events: none;
   user-select: none;
   transform: translate(-50%, -50%) rotate(0deg);

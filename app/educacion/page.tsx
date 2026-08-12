@@ -11,7 +11,7 @@ export default function EducationIndex() {
             <Link href={`/educacion/${e.id}`}>
               {e.degree}, {e.school}
             </Link>{" "}
-            · {e.status}
+            · <span className="meta">{e.status}</span>
           </li>
         ))}
       </ul>

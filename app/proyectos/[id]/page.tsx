@@ -14,7 +14,7 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
     <main>
       <Link href="/proyectos">← Proyectos</Link>
       <h1>{p.title}</h1>
-      <p>{p.tag} · {p.context}</p>
+      <p><span className="meta">{p.tag} · {p.context}</span></p>
       <p>{p.description}</p>
       <h2>Stack</h2>
       <ul>

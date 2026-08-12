@@ -11,15 +11,15 @@ const SETTLE_VEL = 0.15; // px/ms — umbral de velocidad para pausar
 const MAX_DT = 32; // ms — clamp del delta entre frames
 
 // Geometría de la cruz
-const BAR_THICKNESS = 2; // grosor normal de cada barra
-const BAR_THICKNESS_PEAK = 1.4; // mínimo durante el giro (adelgazamiento sutil)
+const BAR_THICKNESS = 3.3; // grosor normal de cada barra
+const BAR_THICKNESS_PEAK = 2.4; // mínimo durante el giro (adelgazamiento sutil)
 
 // Click izquierdo — giro 180° a la izquierda (acumulativo, se queda ahí)
-const TWIST_STEP = -80; // grados por click
+const TWIST_STEP = -90; // grados por click
 const TWIST_MS = 230; // duración total — casi instantáneo pero suave
 
 // Click derecho — giro infinito
-const SPIN_REVOLUTION_MS = 700; // ~1.1s por vuelta completa
+const SPIN_REVOLUTION_MS = 1000; // ~1.1s por vuelta completa
 
 /* ====== Math ====== */
 

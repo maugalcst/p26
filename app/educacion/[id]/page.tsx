@@ -15,7 +15,7 @@ export default async function EducationDetail({ params }: { params: Promise<{ id
     <main>
       <Link href="/educacion">← Educación</Link>
       <h1>{e.degree}</h1>
-      <p>{e.school} · {e.period}</p>
+      <p><span className="meta">{e.school} · {e.period}</span></p>
       <p>{e.details}</p>
       {exp && (
         <p>

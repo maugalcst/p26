@@ -11,7 +11,7 @@ export default function ExperiencesIndex() {
             <Link href={`/experiencia/${e.id}`}>
               {e.role} en {e.company}
             </Link>{" "}
-            — {e.location} · {e.start}–{e.end}
+            — <span className="meta">{e.location} · {e.start}–{e.end}</span>
             <p>{e.summary}</p>
           </li>
         ))}

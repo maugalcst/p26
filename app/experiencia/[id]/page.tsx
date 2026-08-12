@@ -17,7 +17,7 @@ export default async function ExperienceDetail({ params }: { params: Promise<{ i
         {exp.role} en {exp.company}
       </h1>
       <p>
-        {exp.type} · {exp.location} · {exp.start}–{exp.end}
+        <span className="meta">{exp.type} · {exp.location} · {exp.start}–{exp.end}</span>
       </p>
       <p>{exp.summary}</p>
       <h2>Responsabilidades</h2>

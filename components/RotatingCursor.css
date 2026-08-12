@@ -1,0 +1,70 @@
+/* TODO: confirmar token de color exacto del sistema de diseño */
+.rotating-cursor-area {
+  --cursor-color: #096fc7;
+  --cursor-bar-thickness: 3px; /* override por JS en cada frame del motion */
+  position: relative;
+  cursor: none;
+}
+
+.rotating-cursor-area * {
+  cursor: none !important;
+}
+
+/* Cruz giratoria */
+.cursor-cross {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  width: 18px; /* "brazo a brazo" total — tamaño estándar */
+  height: 18px;
+  pointer-events: none;
+  user-select: none;
+  transform: translate(-50%, -50%) rotate(0deg);
+  opacity: 0; /* se activa al primer mousemove */
+  transition: opacity 120ms ease, background 120ms ease;
+}
+
+/* Cruz giratoria — 2 barras (horizontal + vertical) */
+.cursor-cross::before,
+.cursor-cross::after {
+  content: "";
+  position: absolute;
+  background: var(--cursor-color);
+}
+
+/* Barra horizontal */
+.cursor-cross::before {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: var(--cursor-bar-thickness);
+  transform: translateY(-50%);
+}
+
+/* Barra vertical */
+.cursor-cross::after {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: var(--cursor-bar-thickness);
+  transform: translateX(-50%);
+}
+
+/* Feedback de click simplificado (solo prefers-reduced-motion) — sin rotación */
+.cursor-cross.cursor-click-flash {
+  --cursor-color: #6ab0d6;
+  opacity: 0.45;
+}
+
+/* Touch: se restaura el cursor nativo y se oculta el custom */
+@media (hover: none) and (pointer: coarse) {
+  .rotating-cursor-area,
+  .rotating-cursor-area * {
+    cursor: auto;
+  }
+
+  .cursor-cross {
+    display: none;
+  }
+}

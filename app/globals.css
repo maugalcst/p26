@@ -1,8 +1,9 @@
 :root {
   /* color — nunca #000/#fff puros */
-  --bg: #fafaf8;
-  --fg: #1a1a1a;
+  --bg: #efedea;
+  --fg: #39312c;
   --fg-secondary: color-mix(in srgb, var(--fg) 62%, transparent);
+  --cursor-color: #0137bf;
 
   /* tipografía (Bagnard vía @fontsource + Satoshi/Departure locales, self-hosted) */
   --font-display: 'Bagnard', serif; /* headings display — un solo peso (400), sin bold falso */
@@ -24,6 +25,11 @@
 
   --tracking-display: -0.02em;
   --tracking-caps: 0.09em;
+
+  /* marco de hairlines — separación del contenido y color de la línea */
+  --frame-inset: clamp(24px, 4vw, 40px);
+  --frame-line: color-mix(in srgb, var(--fg) 30%, transparent);
+  --frame-offset: clamp(10px, 1.5vw, 16px);
 
   color-scheme: light;
 }
@@ -149,4 +155,134 @@ section:first-of-type {
 nav {
   font-family: var(--font-meta);
   font-size: 0.85em;
+}
+
+/* ---------- marco de hairlines fijo al viewport ---------- */
+main {
+  padding-inline: calc(var(--frame-inset) + 12px);
+}
+
+@media (min-width: 768px) {
+  main {
+    padding-inline: calc(var(--frame-inset) * 2);
+  }
+}
+
+.frame {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  pointer-events: none;
+}
+
+.frame > span {
+  position: absolute;
+}
+
+/* horizontales: trazos cortos, despegadas de la orilla */
+.frame .frame__top,
+.frame .frame__bottom {
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+
+.frame .frame__top {
+  top: var(--frame-offset);
+}
+
+.frame .frame__bottom {
+  bottom: var(--frame-offset);
+}
+
+/* verticales: trazos cortos, despegadas de la orilla */
+.frame .frame__left,
+.frame .frame__right {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+
+.frame .frame__left {
+  left: var(--frame-offset);
+}
+
+.frame .frame__right {
+  right: var(--frame-offset);
+}
+
+/* Dos capas sobre el mismo box (inset: 0), crossfade dashed ↔ solid:
+   ::before dibuja los trazos, ::after el sólido. border-style no es animable,
+   por eso cada capa se funde por opacidad en direcciones opuestas. */
+.frame .frame__top::before,
+.frame .frame__bottom::before,
+.frame .frame__top::after,
+.frame .frame__bottom::after,
+.frame .frame__left::before,
+.frame .frame__right::before,
+.frame .frame__left::after,
+.frame .frame__right::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+/* trazos */
+.frame .frame__top::before,
+.frame .frame__bottom::before {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--frame-line) 0 6px,
+    transparent 6px 12px
+  );
+}
+
+.frame .frame__left::before,
+.frame .frame__right::before {
+  background: repeating-linear-gradient(
+    180deg,
+    var(--frame-line) 0 6px,
+    transparent 6px 12px
+  );
+}
+
+/* sólido (oculto en reposo) */
+.frame .frame__top::after,
+.frame .frame__bottom::after,
+.frame .frame__left::after,
+.frame .frame__right::after {
+  background: var(--frame-line);
+  opacity: 0;
+}
+
+.frame .frame__top::before,
+.frame .frame__bottom::before,
+.frame .frame__left::before,
+.frame .frame__right::before,
+.frame .frame__top::after,
+.frame .frame__bottom::after,
+.frame .frame__left::after,
+.frame .frame__right::after {
+  transition: opacity 700ms ease-in-out;
+}
+
+/* en movimiento: el trazo se funde a sólido */
+html.cursor-motion .frame .frame__top::before,
+html.cursor-motion .frame .frame__bottom::before,
+html.cursor-motion .frame .frame__left::before,
+html.cursor-motion .frame .frame__right::before {
+  opacity: 0;
+}
+
+html.cursor-motion .frame .frame__top::after,
+html.cursor-motion .frame .frame__bottom::after,
+html.cursor-motion .frame .frame__left::after,
+html.cursor-motion .frame .frame__right::after {
+  opacity: 1;
+}
+
+@media print {
+  .frame {
+    display: none;
+  }
 }

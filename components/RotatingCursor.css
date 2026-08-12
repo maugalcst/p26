@@ -16,13 +16,13 @@
   left: 0;
   top: 0;
   z-index: 1000;
-  width: 15px; /* "brazo a brazo" total — tamaño estándar */
-  height: 15px;
+  width: var(--cursor-size, 15px); /* "brazo a brazo" total — tamaño estándar */
+  height: var(--cursor-size, 15px);
   pointer-events: none;
   user-select: none;
   transform: translate(-50%, -50%) rotate(0deg);
   opacity: 0; /* se activa al primer mousemove */
-  transition: opacity 120ms ease, background 120ms ease;
+  transition: width 180ms ease, height 180ms ease, opacity 120ms ease, background 120ms ease;
 }
 
 /* Cruz giratoria — 2 barras (horizontal + vertical) */

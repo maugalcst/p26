@@ -35,6 +35,12 @@ export default function RootLayout({
           <Nav />
           {children}
         </RotatingCursor>
+        <div className="frame" aria-hidden="true">
+          <span className="frame__top" />
+          <span className="frame__right" />
+          <span className="frame__bottom" />
+          <span className="frame__left" />
+        </div>
       </body>
     </html>
   );

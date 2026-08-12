@@ -1,13 +1,13 @@
 import Link from "next/link";
 
 const links = [
-  { href: "/", label: "Inicio" },
-  { href: "/experiencia", label: "Experiencia" },
-  { href: "/proyectos", label: "Proyectos" },
-  { href: "/skills", label: "Skills" },
-  { href: "/educacion", label: "Educación" },
-  { href: "/sobre-mi", label: "Sobre mí" },
-  { href: "/contacto", label: "Contacto" },
+  { href: "/", label: "INICIO" },
+  { href: "/experiencia", label: "EXPERIENCIA" },
+  { href: "/proyectos", label: "PROYECTOS" },
+  { href: "/skills", label: "SKILLS" },
+  { href: "/educacion", label: "EDUCACIÓN" },
+  { href: "/sobre-mi", label: "SOBRE MÍ" },
+  { href: "/contacto", label: "CONTACTO" },
 ];
 
 export default function Nav() {

@@ -14,6 +14,10 @@ const MAX_DT = 32; // ms — clamp del delta entre frames
 const BAR_THICKNESS = 3.3; // grosor normal de cada barra
 const BAR_THICKNESS_PEAK = 2.4; // mínimo durante el giro (adelgazamiento sutil)
 
+// Compresión mientras el cursor está en movimiento
+const CURSOR_SIZE_IDLE = 15; // px — tamaño "brazo a brazo" en reposo
+const CURSOR_SIZE_MOVING = 13; // px — comprimido mientras se mueve
+
 // Click izquierdo — giro 180° a la izquierda (acumulativo, se queda ahí)
 const TWIST_STEP = -90; // grados por click
 const TWIST_MS = 230; // duración total — casi instantáneo pero suave
@@ -76,6 +80,15 @@ export function useRotatingCursor(
       cross.style.setProperty("--cursor-bar-thickness", `${th}px`);
     };
 
+    /* Mientras el cursor está en movimiento: se comprime y el marco deja de estar cortado */
+    const applyMotionState = (inMotion: boolean) => {
+      cross.style.setProperty(
+        "--cursor-size",
+        `${inMotion ? CURSOR_SIZE_MOVING : CURSOR_SIZE_IDLE}px`
+      );
+      document.documentElement.classList.toggle("cursor-motion", inMotion);
+    };
+
     const frame = (ts: number) => {
       const dt = Math.min(Math.max(ts - lastTs, 1), MAX_DT);
       lastTs = ts;
@@ -120,6 +133,9 @@ export function useRotatingCursor(
 
       const chaseAlive =
         Math.abs(target.x - pos.x) >= SETTLE_DIST || Math.abs(target.y - pos.y) >= SETTLE_DIST;
+      const inMotion = chaseAlive || mode !== "idle";
+      applyMotionState(inMotion);
+
       if (mode === "idle" && !chaseAlive) stopLoop();
       else rafId = requestAnimationFrame(frame);
     };
@@ -185,6 +201,7 @@ export function useRotatingCursor(
 
     return () => {
       if (cross) cross.style.opacity = "0";
+      document.documentElement.classList.remove("cursor-motion");
       area.removeEventListener("mousemove", onMove);
       area.removeEventListener("mousedown", onMouseDown);
       area.removeEventListener("contextmenu", onContextMenu);

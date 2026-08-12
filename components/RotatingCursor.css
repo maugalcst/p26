@@ -53,8 +53,49 @@
 
 /* Feedback de click simplificado (solo prefers-reduced-motion) — sin rotación */
 .cursor-cross.cursor-click-flash {
-  --cursor-color: #6ab0d6;
+  --cursor-color: #0137bf;
   opacity: 0.45;
+}
+
+/* Coordenadas X/Y en Departure Mono — viven en una capa fija que NO rota con
+   la cruz: X siempre a la derecha del cursor, Y siempre abajo. Aparecen solo
+   mientras el cursor se está moviendo. */
+.cursor-coord-layer {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  pointer-events: none;
+  user-select: none;
+}
+
+.cursor-coord-layer .cursor-coord {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-family: var(--font-meta, monospace);
+  font-size: 9px;
+  line-height: 1;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-secondary);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 80ms;
+}
+
+/* La patita derecha anuncia X; la inferior anuncia Y. El layer se posiciona en
+   el punto del cursor desde JS, y aquí solo se desplazan los offsets. */
+.cursor-coord--x {
+  transform: translate(14px, -50%);
+}
+
+.cursor-coord--y {
+  transform: translate(-50%, 14px);
+}
+
+html.cursor-tracking .cursor-coord-layer .cursor-coord {
+  opacity: 0.45; /* muy tenue */
 }
 
 /* Touch: se restaura el cursor nativo y se oculta el custom */
@@ -64,7 +105,8 @@
     cursor: auto;
   }
 
-  .cursor-cross {
+  .cursor-cross,
+  .cursor-coord-layer {
     display: none;
   }
 }

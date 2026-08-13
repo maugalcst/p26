@@ -51,6 +51,11 @@ body {
   font-optical-sizing: auto;
 }
 
+::selection {
+  background: #0137bf; /* color del cursor */
+  color: var(--bg);
+}
+
 h1,
 h2,
 h3,

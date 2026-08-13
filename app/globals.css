@@ -34,6 +34,18 @@
   color-scheme: light;
 }
 
+/* ---------- modo oscuro ----------
+   No es un swap literal de bg/fg: la tinta cálida (#39312c) abre paso a un
+   fondo café-casi-negro y el crema pasa a texto. El azul del sistema se
+   clarifica para no perderse sobre fondo oscuro. Los tokens derivados
+   (--fg-secondary, --frame-line) se recalculan solos vía color-mix. */
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #161413; /* tinta profunda, cálida — no #000 puro */
+  --fg: #eae3d6; /* hueso crema, heredero del --bg claro */
+  --cursor-color: #ff8762; /* azul eléctrico legible sobre oscuro */
+}
+
 * {
   box-sizing: border-box;
 }
@@ -52,7 +64,7 @@ body {
 }
 
 ::selection {
-  background: #0137bf; /* color del cursor */
+  background: var(--cursor-color);
   color: var(--bg);
 }
 
@@ -143,6 +155,57 @@ section:first-of-type {
   margin-block-start: var(--space-2);
 }
 
+/* muestra Fraunces — serif expresiva: cuerpo con temperatura editorial,
+   lede en cursiva, medida un punto más cerrada por su carácter ancho */
+.sample-fraunces p {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 1rem;
+  line-height: 1.7;
+  max-width: 30em;
+}
+
+.sample-fraunces .lede {
+  font-style: italic;
+  font-size: 1.2em;
+  line-height: 1.6;
+  max-width: 27em;
+  margin-block-end: var(--space-1);
+}
+
+/* muestra Literata — serif de lectura continua: cuerpo libro, aireado,
+   lede en cursiva como entrada literaria */
+.sample-literata p {
+  font-family: "Literata", Georgia, serif;
+  font-size: 1rem;
+  line-height: 1.7;
+  max-width: 31em;
+}
+
+.sample-literata .lede {
+  font-style: italic;
+  font-size: 1.2em;
+  line-height: 1.6;
+  max-width: 27em;
+  margin-block-end: var(--space-1);
+}
+
+/* muestra Source Serif 4 — transicional de superfamilia: cuerpo
+   corporativo, medida justa, lede en cursiva */
+.sample-source-serif p {
+  font-family: "Source Serif 4", Georgia, serif;
+  font-size: 1rem;
+  line-height: 1.7;
+  max-width: 31em;
+}
+
+.sample-source-serif .lede {
+  font-style: italic;
+  font-size: 1.2em;
+  line-height: 1.6;
+  max-width: 27em;
+  margin-block-end: var(--space-1);
+}
+
 /* texto secundario — mismo color con menor opacidad, no un gris distinto */
 .meta {
   font-family: var(--font-meta);
@@ -160,6 +223,30 @@ section:first-of-type {
 nav {
   font-family: var(--font-meta);
   font-size: 0.85em;
+}
+
+/* toggle de tema — mismo lenguaje que los links (mono, caps, inversión al hover) */
+.theme-toggle {
+  font-family: var(--font-meta);
+  font-size: 1em;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+  color: var(--fg);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  background: var(--fg);
+  color: var(--bg);
+  text-decoration: none;
+}
+
+.theme-toggle:focus-visible {
+  outline: 1px solid var(--fg);
+  outline-offset: 4px;
 }
 
 /* ---------- marco de hairlines fijo al viewport ---------- */

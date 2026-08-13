@@ -1,6 +1,4 @@
-/* TODO: confirmar token de color exacto del sistema de diseño */
 .rotating-cursor-area {
-  --cursor-color: #0137bf;
   --cursor-bar-thickness: 3px; /* override por JS en cada frame del motion */
   position: relative;
   cursor: none;
@@ -53,7 +51,6 @@
 
 /* Feedback de click simplificado (solo prefers-reduced-motion) — sin rotación */
 .cursor-cross.cursor-click-flash {
-  --cursor-color: #0137bf;
   opacity: 0.45;
 }
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ThemeToggle from "./ThemeToggle";
 
 const links = [
   { href: "/", label: "INICIO" },
@@ -19,6 +20,7 @@ export default function Nav() {
             <Link href={l.href}>{l.label}</Link>
           </li>
         ))}
+        <ThemeToggle />
       </ul>
     </nav>
   );

@@ -1,0 +1,169 @@
+/* Intro de arranque — ventana de terminal centrada sobre la página.
+   Mismo lenguaje del sitio (Departure Mono, hairlines, tracking) con la
+   metáfora de una ventana que se abre sobre el escritorio y se cierra
+   (zoom-out) para revelar el landing. */
+.boot-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 950; /* bajo el marco (999) y el cursor (1000) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--frame-inset);
+  background: var(--bg);
+  opacity: 1;
+  transition: opacity 450ms ease;
+}
+
+.boot-overlay--leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.boot-overlay--leaving .boot-window {
+  transform: scale(0.92);
+  opacity: 0;
+}
+
+.boot-window {
+  /* terminal clara en light: blanco cálido, tinta y azul del sistema */
+  --boot-bg: #f8f5f0;
+  --boot-fg: #39312c;
+  --boot-accent: #0137bf;
+  --boot-dim: color-mix(in srgb, var(--boot-fg) 52%, transparent);
+
+  width: min(92vw, 56ch);
+  max-height: min(70vh, 30em);
+  display: flex;
+  flex-direction: column;
+  background: var(--boot-bg);
+  color: var(--boot-fg);
+  border: 1px solid color-mix(in srgb, var(--boot-fg) 24%, transparent);
+  box-shadow: 0 24px 60px -28px rgba(0, 0, 0, 0.4);
+  font-family: var(--font-meta, monospace);
+  font-size: 12.5px;
+  line-height: 1.7;
+  animation: boot-in 240ms ease both;
+  transition: transform 420ms ease, opacity 420ms ease;
+}
+
+/* en modo oscuro la terminal es la oscura original; --boot-dim se
+   recalcula solo porque deriva de --boot-fg vía color-mix */
+html[data-theme="dark"] .boot-window {
+  --boot-bg: #171410;
+  --boot-fg: #eae6df;
+  --boot-accent: #6f8bff;
+}
+
+@keyframes boot-in {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+}
+
+/* Barra de título — solo el handle, sin chrome */
+.boot-titlebar {
+  display: flex;
+  align-items: center;
+  padding: 0.55em 1.1em;
+  border-bottom: 1px solid color-mix(in srgb, var(--boot-fg) 16%, transparent);
+  font-size: 0.85em;
+}
+
+.boot-titlebar__title {
+  color: var(--boot-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.boot-body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.9em 1.2em var(--space-05);
+  flex: 1 1 auto;
+}
+
+.boot-line {
+  white-space: pre-wrap;
+  text-wrap: pretty;
+  min-height: 1.75em;
+}
+
+.boot-prompt {
+  color: var(--boot-accent);
+}
+
+.boot-ok {
+  color: var(--boot-accent);
+}
+
+.boot-out {
+  color: var(--boot-dim);
+}
+
+/* Cursor de bloque parpadeante — terminal real */
+.boot-caret {
+  display: inline-block;
+  width: 0.6em;
+  height: 1.05em;
+  margin-inline-start: 0.1em;
+  vertical-align: text-bottom;
+  background: var(--boot-fg);
+  animation: boot-blink 1s steps(1) infinite;
+}
+
+@keyframes boot-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.boot-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.45em 1.1em;
+  border-top: 1px solid color-mix(in srgb, var(--boot-fg) 16%, transparent);
+  font-size: 0.85em;
+}
+
+.boot-hint {
+  color: var(--boot-dim);
+}
+
+.boot-skip {
+  font-family: var(--font-meta, monospace);
+  font-size: 1em;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+  color: var(--boot-dim);
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--boot-fg) 28%, transparent);
+  padding: 0.35em 0.9em;
+  cursor: pointer;
+  flex: none;
+}
+
+.boot-skip:hover,
+.boot-skip:focus-visible {
+  color: var(--boot-bg);
+  background: var(--boot-fg);
+  border-color: var(--boot-fg);
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boot-overlay,
+  .boot-window {
+    transition: none;
+  }
+
+  .boot-window {
+    animation: none;
+  }
+
+  .boot-caret {
+    animation: none;
+  }
+}

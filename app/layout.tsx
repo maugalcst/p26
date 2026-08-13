@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "@fontsource/bagnard";
+import "@fontsource/fraunces/400.css";
+import "@fontsource/fraunces/400-italic.css";
+import "@fontsource/literata/400.css";
+import "@fontsource/literata/400-italic.css";
+import "@fontsource/source-serif-4/400.css";
+import "@fontsource/source-serif-4/400-italic.css";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import RotatingCursor from "@/components/RotatingCursor";
+import BootSequence from "@/components/BootSequence";
 
 const fontBody = localFont({
   src: [
@@ -29,8 +36,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${fontBody.variable} ${fontMeta.variable}`}>
+    <html
+      lang="es"
+      className={`${fontBody.variable} ${fontMeta.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var s=localStorage.getItem("theme");if(s!=="light"&&s!=="dark"){s=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}document.documentElement.setAttribute("data-theme",s);}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body>
+        <BootSequence />
         <RotatingCursor>
           <Nav />
           {children}

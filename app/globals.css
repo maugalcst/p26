@@ -232,7 +232,7 @@ main {
   inset: 0;
 }
 
-/* trazos */
+/* trazos (ocultos en reposo) */
 .frame .frame__top::before,
 .frame .frame__bottom::before {
   background: repeating-linear-gradient(
@@ -240,6 +240,7 @@ main {
     var(--frame-line) 0 6px,
     transparent 6px 12px
   );
+  opacity: 0;
 }
 
 .frame .frame__left::before,
@@ -249,6 +250,7 @@ main {
     var(--frame-line) 0 6px,
     transparent 6px 12px
   );
+  opacity: 0;
 }
 
 /* sólido (visible en reposo) */
@@ -268,7 +270,7 @@ main {
 .frame .frame__bottom::after,
 .frame .frame__left::after,
 .frame .frame__right::after {
-  transition: opacity 700ms ease-in-out;
+  transition: opacity 400ms ease-in-out;
 }
 
 /* en movimiento: el sólido se funde a trazos */

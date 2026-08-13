@@ -234,7 +234,9 @@ export function useRotatingCursor(
 
       const chaseAlive =
         Math.abs(target.x - pos.x) >= SETTLE_DIST || Math.abs(target.y - pos.y) >= SETTLE_DIST;
-      const inMotion = chaseAlive || mode !== "idle";
+      // El marco solo reacciona a cambios de coordenadas reales del mouse,
+      // no a giros por aburrimiento ni clicks (spin/twist).
+      const inMotion = chaseAlive;
       applyMotionState(inMotion);
       setTracking(chaseAlive);
 

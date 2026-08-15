@@ -1,0 +1,57 @@
+/* ---------- hero reveal: los 4 videos se muestran sobre el bloque del nombre ---------- */
+
+.hero__name-wrap {
+  position: relative;
+  transform: translateY(var(--hero-lift, -3rem));
+}
+
+.hero__name-block {
+  position: relative;
+  padding: clamp(1rem, 2vh, 1.75rem) clamp(2rem, 6vw, 5rem);
+}
+
+.name-block__videos {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.name-block__videos video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* el texto del nombre queda por encima del video */
+.hero__name-block > .hero__name {
+  position: relative;
+  z-index: 1;
+}
+
+/* negativo: con video activo, el nombre intercambia bg/fg */
+.hero[data-active] .hero__name {
+  color: var(--bg);
+}
+
+/* las letras ambient y el hover del cursor se mantienen en azul */
+.hero[data-active] .decoder-char--ambient,
+.hero[data-active] .decoder-char:hover {
+  color: var(--cursor-color);
+}
+
+/* feedback en el disparador */
+.hero__meta--top,
+.hero__meta--role {
+  transition: color 200ms ease;
+}
+
+.hero[data-active="landscape"] .hero__meta--top {
+  color: var(--cursor-color);
+}
+
+.hero[data-active="terminal"] .hero__meta--role {
+  color: var(--cursor-color);
+}

@@ -81,10 +81,11 @@
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* marco de hairlines — separación del contenido y color de la línea */
-  --frame-inset: clamp(24px, 4vw, 40px);
+  --frame-inset: clamp(56px, 8vw, 120px);
   --frame-line: color-mix(in srgb, var(--fg) 20%, transparent);
-  --frame-offset: clamp(20px, 2.6vw, 32px);
-  --frame-top-offset: clamp(23px, 9vw, 108px); /* línea superior más separada — cabecera del nav */
+  --frame-offset: clamp(40px, 6vw, 96px);
+  --frame-top-offset: clamp(64px, 9vw, 128px); /* línea superior más separada — cabecera del nav */
+  --frame-grow: clamp(1.25rem, 3vw, 3rem); /* cuanto se despegan las líneas con video activo */
 
   color-scheme: light;
 }
@@ -377,10 +378,8 @@ html.nav-revealed nav {
 .hero {
   position: relative;
   min-height: calc(100svh - var(--frame-top-offset) - 2rem);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   text-align: center;
 }
 
@@ -412,6 +411,10 @@ html.nav-revealed nav {
   color: var(--cursor-color);
 }
 
+.decoder-char--ambient {
+  color: var(--cursor-color);
+}
+
 .hero__name--outline .decoder-char {
   transition: -webkit-text-stroke-color 200ms ease;
 }
@@ -422,6 +425,24 @@ html.nav-revealed nav {
 
 .hero__meta {
   margin-block-start: var(--space-2);
+}
+
+/* los metas cuelgan del bloque del nombre (el nombre queda exactamente centrado) */
+.hero__meta--top,
+.hero__meta--role {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.hero__meta--top {
+  bottom: calc(100% + var(--hero-meta-gap, clamp(0.75rem, 2vh, 1.5rem)));
+}
+
+.hero__meta--role {
+  top: calc(100% + var(--hero-meta-gap, clamp(0.75rem, 2vh, 1.5rem)));
 }
 
 .hero__mount {
@@ -436,7 +457,7 @@ html.nav-revealed nav {
 .hero__scroll {
   position: absolute;
   inset-inline: 0;
-  bottom: calc(var(--frame-offset) + 1.25rem);
+  bottom: calc(var(--frame-offset) + 3.25rem);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -450,30 +471,68 @@ html.nav-revealed nav {
   transition: opacity 600ms var(--ease-out-expo);
 }
 
-.hero__scroll__line {
-  display: block;
+.hero__scroll__track {
+  position: relative;
   width: 1px;
   height: 2.5rem;
   overflow: hidden;
   background: color-mix(in srgb, var(--fg) 30%, transparent);
 }
 
-.hero__scroll__line::after {
-  content: "";
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: var(--fg);
-  animation: hero-scroll-drift 2s var(--ease-out-expo) infinite;
+/* "+" que baja por la línea girando como engranaje — mismo lenguaje de la cruz */
+.hero__scroll__gear {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  margin-top: -7px;
+  translate: 0 -1.25rem;
+  rotate: 0deg;
+  animation:
+    hero-gear-drift 2.2s var(--ease-out-expo) infinite,
+    hero-gear-spin 2.2s linear infinite;
 }
 
-@keyframes hero-scroll-drift {
+.hero__scroll__gear::before,
+.hero__scroll__gear::after {
+  content: "";
+  position: absolute;
+  background: var(--fg);
+}
+
+.hero__scroll__gear::before {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+}
+
+.hero__scroll__gear::after {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+}
+
+@keyframes hero-gear-drift {
   0% {
-    transform: translateY(-100%);
+    translate: 0 -1.25rem;
   }
-  55%,
   100% {
-    transform: translateY(100%);
+    translate: 0 1.25rem;
+  }
+}
+
+@keyframes hero-gear-spin {
+  0% {
+    rotate: 0deg;
+  }
+  100% {
+    rotate: 360deg;
   }
 }
 
@@ -482,7 +541,7 @@ html.nav-revealed .hero__scroll {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero__scroll__line::after {
+  .hero__scroll__gear {
     animation: none;
   }
 }
@@ -525,7 +584,19 @@ main {
 
 .frame .frame__top {
   top: var(--frame-offset); /* alineada con las demás líneas en el top */
-  transition: top 700ms var(--ease-out-expo);
+}
+
+/* transiciones rápidas y suaves para el despegue de las líneas */
+.frame .frame__top,
+.frame .frame__bottom,
+.frame .frame__left,
+.frame .frame__right,
+.frame .frame__tick {
+  transition:
+    top 300ms var(--ease-out-expo),
+    bottom 300ms var(--ease-out-expo),
+    left 300ms var(--ease-out-expo),
+    right 300ms var(--ease-out-expo);
 }
 
 html.nav-revealed .frame .frame__top {
@@ -552,6 +623,22 @@ html.nav-revealed .frame .frame__top {
   right: var(--frame-offset);
 }
 
+/* ticks a media altura: marcas de registro que rompen las verticales,
+   como un crosshair que ancla el centro visual del viewport */
+.frame .frame__tick {
+  top: 50%;
+  width: clamp(1.5rem, 3.5vw, 3.5rem);
+  height: 1px;
+}
+
+.frame .frame__tick--left {
+  left: var(--frame-offset);
+}
+
+.frame .frame__tick--right {
+  right: var(--frame-offset);
+}
+
 /* Dos capas sobre el mismo box (inset: 0), crossfade dashed ↔ solid:
    ::before dibuja los trazos, ::after el sólido. border-style no es animable,
    por eso cada capa se funde por opacidad en direcciones opuestas. */
@@ -562,7 +649,9 @@ html.nav-revealed .frame .frame__top {
 .frame .frame__left::before,
 .frame .frame__right::before,
 .frame .frame__left::after,
-.frame .frame__right::after {
+.frame .frame__right::after,
+.frame .frame__tick::before,
+.frame .frame__tick::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -570,7 +659,8 @@ html.nav-revealed .frame .frame__top {
 
 /* trazos (ocultos en reposo) */
 .frame .frame__top::before,
-.frame .frame__bottom::before {
+.frame .frame__bottom::before,
+.frame .frame__tick::before {
   background: repeating-linear-gradient(
     90deg,
     var(--frame-line) 0 6px,
@@ -593,7 +683,8 @@ html.nav-revealed .frame .frame__top {
 .frame .frame__top::after,
 .frame .frame__bottom::after,
 .frame .frame__left::after,
-.frame .frame__right::after {
+.frame .frame__right::after,
+.frame .frame__tick::after {
   background: var(--frame-line);
   opacity: 1;
 }
@@ -605,7 +696,9 @@ html.nav-revealed .frame .frame__top {
 .frame .frame__top::after,
 .frame .frame__bottom::after,
 .frame .frame__left::after,
-.frame .frame__right::after {
+.frame .frame__right::after,
+.frame .frame__tick::before,
+.frame .frame__tick::after {
   transition: opacity 400ms ease-in-out;
 }
 
@@ -613,15 +706,42 @@ html.nav-revealed .frame .frame__top {
 html.cursor-motion .frame .frame__top::before,
 html.cursor-motion .frame .frame__bottom::before,
 html.cursor-motion .frame .frame__left::before,
-html.cursor-motion .frame .frame__right::before {
+html.cursor-motion .frame .frame__right::before,
+html.cursor-motion .frame .frame__tick::before {
   opacity: 1;
 }
 
 html.cursor-motion .frame .frame__top::after,
 html.cursor-motion .frame .frame__bottom::after,
 html.cursor-motion .frame .frame__left::after,
-html.cursor-motion .frame .frame__right::after {
+html.cursor-motion .frame .frame__right::after,
+html.cursor-motion .frame .frame__tick::after {
   opacity: 0;
+}
+
+/* video activo: las líneas se despegan del margen del display (hacia el centro) */
+html.video-active .frame .frame__top {
+  top: calc(var(--frame-offset) + var(--frame-grow));
+}
+
+html.video-active .frame .frame__bottom {
+  bottom: calc(var(--frame-offset) + var(--frame-grow));
+}
+
+html.video-active .frame .frame__left {
+  left: calc(var(--frame-offset) + var(--frame-grow));
+}
+
+html.video-active .frame .frame__right {
+  right: calc(var(--frame-offset) + var(--frame-grow));
+}
+
+html.video-active .frame .frame__tick--left {
+  left: calc(var(--frame-offset) + var(--frame-grow));
+}
+
+html.video-active .frame .frame__tick--right {
+  right: calc(var(--frame-offset) + var(--frame-grow));
 }
 
 @media (prefers-reduced-motion: reduce) {

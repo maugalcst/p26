@@ -71,6 +71,8 @@ export default function RootLayout({
           <span className="frame__right" />
           <span className="frame__bottom" />
           <span className="frame__left" />
+          <span className="frame__tick frame__tick--left" />
+          <span className="frame__tick frame__tick--right" />
         </div>
       </body>
     </html>

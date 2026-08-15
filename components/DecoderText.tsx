@@ -13,20 +13,44 @@ const LEVELS = [
 ];
 const TICK = 110;
 
-/* Guía post-boot: oleaje de redacción que sube y baja por letra */
-const GUIDE_STAGGER_MS = 80;
-const GUIDE_HOLD_MS = 400;
+/* Guía post-boot: oleaje rápido que recorre las letras M→o y luego G→s */
+const GUIDE_TICK_MS = 75;
+const GUIDE_STAGGER_MS = 60;
+const GUIDE_HOLD_MS = 70;
+
+/* Ambiente: cada ~1s una letra random del nombre completo hace un ciclo de
+   redacción (ida y vuelta) tiñéndose del color del cursor. Se detiene al
+   hacer scroll. */
+const AMBIENT_INTERVAL_MS = 2700;
+const AMBIENT_TICK_MS = 115;
+const AMBIENT_HOLD_MS = 270;
 
 interface DecoderTextProps {
   text: string;
   className?: string;
   guide?: boolean;
+  guideDelay?: number;
+  ambient?: boolean;
+  ambientDriver?: boolean;
 }
 
-export default function DecoderText({ text, className, guide }: DecoderTextProps) {
+/* Registro compartido de letras de todos los DecoderText ambient (el nombre
+   completo vive en varias instancias: Mauricio + Gallegos). */
+const ambientLetters: HTMLSpanElement[] = [];
+
+export default function DecoderText({
+  text,
+  className,
+  guide,
+  guideDelay = 0,
+  ambient,
+  ambientDriver,
+}: DecoderTextProps) {
   const letterRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const timerRefs = useRef<(number | null)[]>([]);
   const guideRef = useRef<(number | null)[]>([]);
+  const ambientTimers = useRef<number[]>([]);
+  const busyLetters = useRef<Set<HTMLSpanElement>>(new Set());
 
   useEffect(
     () => () => {
@@ -35,6 +59,10 @@ export default function DecoderText({ text, className, guide }: DecoderTextProps
       });
       guideRef.current.forEach((t) => {
         if (t) window.clearTimeout(t);
+      });
+      ambientTimers.current.forEach((t) => {
+        window.clearInterval(t);
+        window.clearTimeout(t);
       });
     },
     []
@@ -67,6 +95,19 @@ export default function DecoderText({ text, className, guide }: DecoderTextProps
     }
   }, []);
 
+  /* Registrar esta instancia en el pool ambiental */
+  useEffect(() => {
+    if (!ambient) return;
+    const spans = letterRefs.current.filter(Boolean) as HTMLSpanElement[];
+    spans.forEach((el) => ambientLetters.push(el));
+    return () => {
+      spans.forEach((el) => {
+        const idx = ambientLetters.indexOf(el);
+        if (idx >= 0) ambientLetters.splice(idx, 1);
+      });
+    };
+  }, [ambient]);
+
   const reduceMotion = () =>
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -83,7 +124,7 @@ export default function DecoderText({ text, className, guide }: DecoderTextProps
     if (el) el.style.fontFamily = LEVELS[level];
   };
 
-  const redact = useCallback((i: number) => {
+  const redact = useCallback((i: number, tick = TICK) => {
     if (reduceMotion()) return;
     clearTimer(i);
     let level = -1;
@@ -94,10 +135,10 @@ export default function DecoderText({ text, className, guide }: DecoderTextProps
         return;
       }
       setLevel(i, level);
-    }, TICK);
+    }, tick);
   }, []);
 
-  const restore = useCallback((i: number) => {
+  const restore = useCallback((i: number, tick = TICK) => {
     if (reduceMotion()) return;
     clearTimer(i);
     let level = LEVELS.length - 1;
@@ -110,7 +151,7 @@ export default function DecoderText({ text, className, guide }: DecoderTextProps
       }
       setLevel(i, level);
       level -= 1;
-    }, TICK);
+    }, tick);
   }, []);
 
   useEffect(() => {
@@ -118,13 +159,16 @@ export default function DecoderText({ text, className, guide }: DecoderTextProps
 
     const onBoot = () => {
       const spans = letterRefs.current.filter(Boolean);
-      const fullRedactMs = LEVELS.length * TICK;
+      const fullRedactMs = LEVELS.length * GUIDE_TICK_MS;
       spans.forEach((_, i) => {
-        const start = i * GUIDE_STAGGER_MS;
+        const start = guideDelay + i * GUIDE_STAGGER_MS;
         const settle = start + fullRedactMs + GUIDE_HOLD_MS;
-        guideRef.current[i] = window.setTimeout(() => redact(i), start);
+        guideRef.current[i] = window.setTimeout(
+          () => redact(i, GUIDE_TICK_MS),
+          start
+        );
         guideRef.current[spans.length + i] = window.setTimeout(
-          () => restore(i),
+          () => restore(i, GUIDE_TICK_MS),
           settle
         );
       });
@@ -132,7 +176,81 @@ export default function DecoderText({ text, className, guide }: DecoderTextProps
 
     window.addEventListener("boot:complete", onBoot, { once: true });
     return () => window.removeEventListener("boot:complete", onBoot);
-  }, [guide, redact, restore]);
+  }, [guide, guideDelay, redact, restore]);
+
+  /* Driver ambiental: arranca tras el guide (post-boot) y se apaga al scrollear */
+  useEffect(() => {
+    if (!ambientDriver || reduceMotion()) return;
+
+    const clearAmbient = () => {
+      ambientTimers.current.forEach((t) => {
+        window.clearInterval(t);
+        window.clearTimeout(t);
+      });
+      ambientTimers.current = [];
+      busyLetters.current.clear();
+    };
+
+    const runCycle = (el: HTMLSpanElement) => {
+      busyLetters.current.add(el);
+      el.classList.add("decoder-char--ambient");
+
+      let level = -1;
+      const upId = window.setInterval(() => {
+        level += 1;
+        if (level >= LEVELS.length) {
+          window.clearInterval(upId);
+          const restoreId = window.setTimeout(() => {
+            let level2 = LEVELS.length - 1;
+            const downId = window.setInterval(() => {
+              if (level2 < 0) {
+                window.clearInterval(downId);
+                el.style.fontFamily = "";
+                el.classList.remove("decoder-char--ambient");
+                busyLetters.current.delete(el);
+                return;
+              }
+              el.style.fontFamily = LEVELS[level2];
+              level2 -= 1;
+            }, AMBIENT_TICK_MS);
+            ambientTimers.current.push(downId);
+          }, AMBIENT_HOLD_MS);
+          ambientTimers.current.push(restoreId);
+          return;
+        }
+        el.style.fontFamily = LEVELS[level];
+      }, AMBIENT_TICK_MS);
+      ambientTimers.current.push(upId);
+    };
+
+    const onScroll = () => {
+      clearAmbient();
+      window.clearInterval(loopId);
+      window.removeEventListener("scroll", onScroll);
+    };
+
+    let loopId = 0;
+    const startLoop = () => {
+      loopId = window.setInterval(() => {
+        const pool = ambientLetters.filter(
+          (el) => el.isConnected && !busyLetters.current.has(el)
+        );
+        if (!pool.length) return;
+        runCycle(pool[Math.floor(Math.random() * pool.length)]);
+      }, AMBIENT_INTERVAL_MS);
+    };
+
+    /* Arranca al terminar el boot (igual que el guide) */
+    window.addEventListener("boot:complete", startLoop, { once: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("boot:complete", startLoop);
+      window.clearInterval(loopId);
+      clearAmbient();
+    };
+  }, [ambientDriver]);
 
   return (
     <span className={className} role="text" aria-label={text}>

@@ -46,6 +46,12 @@ export default function BootSequence() {
   }, []);
 
   useEffect(() => {
+    if (done) {
+      window.dispatchEvent(new CustomEvent("boot:complete"));
+    }
+  }, [done]);
+
+  useEffect(() => {
     let cancelled = false;
 
     const skip = () => {

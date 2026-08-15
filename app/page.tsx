@@ -6,10 +6,10 @@ export default function Home() {
     <main>
       <header className="hero">
         <h1 className="hero__name">
-          <DecoderText text="Mauricio" />
+          <DecoderText text="Mauricio" guide />
         </h1>
-        <p className="hero__name hero__name--outline">
-          <DecoderText text="Gallegos" />
+        <p className="hero__name">
+          <DecoderText text="Gallegos" guide />
         </p>
         <p className="hero__meta">
           {site.role} · {site.location}{" "}

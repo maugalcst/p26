@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 const LEVELS = [
   "Redaction",
@@ -13,19 +13,28 @@ const LEVELS = [
 ];
 const TICK = 110;
 
+/* Guía post-boot: oleaje de redacción que sube y baja por letra */
+const GUIDE_STAGGER_MS = 80;
+const GUIDE_HOLD_MS = 400;
+
 interface DecoderTextProps {
   text: string;
   className?: string;
+  guide?: boolean;
 }
 
-export default function DecoderText({ text, className }: DecoderTextProps) {
+export default function DecoderText({ text, className, guide }: DecoderTextProps) {
   const letterRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const timerRefs = useRef<(number | null)[]>([]);
+  const guideRef = useRef<(number | null)[]>([]);
 
   useEffect(
     () => () => {
       timerRefs.current.forEach((t) => {
         if (t) window.clearInterval(t);
+      });
+      guideRef.current.forEach((t) => {
+        if (t) window.clearTimeout(t);
       });
     },
     []
@@ -74,7 +83,7 @@ export default function DecoderText({ text, className }: DecoderTextProps) {
     if (el) el.style.fontFamily = LEVELS[level];
   };
 
-  const redact = (i: number) => {
+  const redact = useCallback((i: number) => {
     if (reduceMotion()) return;
     clearTimer(i);
     let level = -1;
@@ -86,9 +95,9 @@ export default function DecoderText({ text, className }: DecoderTextProps) {
       }
       setLevel(i, level);
     }, TICK);
-  };
+  }, []);
 
-  const restore = (i: number) => {
+  const restore = useCallback((i: number) => {
     if (reduceMotion()) return;
     clearTimer(i);
     let level = LEVELS.length - 1;
@@ -102,7 +111,28 @@ export default function DecoderText({ text, className }: DecoderTextProps) {
       setLevel(i, level);
       level -= 1;
     }, TICK);
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!guide || reduceMotion()) return;
+
+    const onBoot = () => {
+      const spans = letterRefs.current.filter(Boolean);
+      const fullRedactMs = LEVELS.length * TICK;
+      spans.forEach((_, i) => {
+        const start = i * GUIDE_STAGGER_MS;
+        const settle = start + fullRedactMs + GUIDE_HOLD_MS;
+        guideRef.current[i] = window.setTimeout(() => redact(i), start);
+        guideRef.current[spans.length + i] = window.setTimeout(
+          () => restore(i),
+          settle
+        );
+      });
+    };
+
+    window.addEventListener("boot:complete", onBoot, { once: true });
+    return () => window.removeEventListener("boot:complete", onBoot);
+  }, [guide, redact, restore]);
 
   return (
     <span className={className} role="text" aria-label={text}>

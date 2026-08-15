@@ -378,8 +378,10 @@ html.nav-revealed nav {
 .hero {
   position: relative;
   min-height: calc(100svh - var(--frame-top-offset) - 2rem);
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
@@ -431,8 +433,9 @@ html.nav-revealed nav {
 .hero__meta--top,
 .hero__meta--role {
   position: absolute;
-  left: 0;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
   margin: 0;
   white-space: nowrap;
 }

@@ -82,7 +82,8 @@ export default function DecoderText({
           max = Math.max(max, el.getBoundingClientRect().width);
         });
         el.style.fontFamily = original || "";
-        el.style.width = `${max}px`;
+        const fontSize = parseFloat(getComputedStyle(el).fontSize) || 16;
+        el.style.width = `${(max / fontSize).toFixed(4)}em`;
       });
     };
 

@@ -39,7 +39,6 @@
   background: var(--boot-bg);
   color: var(--boot-fg);
   border: 1px solid color-mix(in srgb, var(--boot-fg) 24%, transparent);
-  box-shadow: 0 24px 60px -28px rgba(0, 0, 0, 0.4);
   font-family: var(--font-meta, monospace);
   font-size: 12.5px;
   line-height: 1.7;

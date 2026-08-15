@@ -1,191 +1,29 @@
-import Link from "next/link";
-import { site, experiences, projects, skillGroups, education } from "@/data/content";
+import DecoderText from "@/components/DecoderText";
+import { site } from "@/data/content";
 
 export default function Home() {
   return (
     <main>
-      <h1 className="display">{site.name} — Portafolio 2026</h1>
-      <p className="meta">
-        {site.role} · {site.location}
-      </p>
-
-      <section>
-        <h2>Experiencia</h2>
-        <ul>
-          {experiences.map((e) => (
-            <li key={e.id}>
-              <Link href={`/experiencia/${e.id}`}>
-                {e.role} en {e.company}
-              </Link>{" "}
-              — {e.location}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section>
-        <h2>Proyectos</h2>
-        <ul>
-          {projects.map((p) => (
-            <li key={p.id}>
-              <Link href={`/proyectos/${p.id}`}>{p.title}</Link> — {p.tag}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section>
-        <h2>Skills</h2>
-        <ul>
-          {skillGroups.map((g) => (
-            <li key={g.id}>
-              <Link href={`/skills#${g.id}`}>{g.label}</Link>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section>
-        <h2>Educación</h2>
-        <ul>
-          {education.map((e) => (
-            <li key={e.id}>
-              <Link href={`/educacion/${e.id}`}>
-                {e.degree}, {e.school}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
-    <section>
-        <h2>Textos de muestra</h2>
-        <p className="meta">Párrafos de relleno para revisar el cuerpo — borrar antes de publicar</p>
-        <p>
-          La tipografía es el arte de ordenar el lenguaje. No se trata solo de
-          que las letras sean legibles, sino de que el ritmo con el que caen en
-          la página sostenga la atención de quien lee. Una buena medida de columna,
-          una interlínea generosa y una escala discreta hacen más por un texto que
-          cualquier adorno decorativo.
+      <header className="hero">
+        <h1 className="hero__name">
+          <DecoderText text="Mauricio" />
+        </h1>
+        <p className="hero__name hero__name--outline">
+          <DecoderText text="Gallegos" />
         </p>
-        <p>
-          Cuando abres un libro, una revista o una página web, tu ojo no lee
-          letra por letra: lee formas, detecta patrones y deja que los espacios
-          en blanco le digan dónde termina una idea y empieza otra. El espacio es
-          el silencio del texto, y el silencio, bien medido, es lo que hace que
-          las palabras suenen. Por eso un encabezado se acerca a su párrafo y se
-          aleja del anterior: la proximidad también es semántica.
+        <p className="hero__meta">
+          {site.role} · {site.location}{" "}
+          <svg className="hero__mount" viewBox="0 0 1280 894" aria-hidden="true">
+            <g transform="translate(0,894) scale(0.1,-0.1)" fill="currentColor" stroke="none">
+              <path d="M8448 8935 c-3 -3 -63 -15 -134 -26 -310 -47 -382 -92 -678 -434 -236 -271 -227 -259 -286 -405 -86 -217 -145 -329 -239 -455 -97 -129 -158 -184 -511 -455 -238 -183 -357 -314 -506 -559 -38 -62 -89 -139 -113 -169 -35 -44 -44 -64 -43 -89 4 -48 -10 -91 -107 -348 -48 -126 -114 -313 -146 -415 -32 -102 -61 -189 -66 -194 -15 -17 -87 45 -248 210 -186 191 -303 344 -509 661 -178 275 -229 343 -291 389 -48 35 -182 92 -238 101 -49 8 -110 -33 -248 -171 -174 -173 -226 -246 -477 -671 -153 -259 -237 -384 -262 -390 -11 -3 -93 -14 -181 -26 -88 -11 -166 -26 -174 -32 -36 -30 -146 -184 -201 -282 -95 -171 -379 -741 -704 -1413 -435 -900 -1001 -2026 -1139 -2267 -335 -586 -502 -848 -730 -1150 -118 -155 -217 -309 -217 -337 0 -34 134 59 420 293 129 105 274 223 322 261 109 86 135 118 300 363 219 324 258 393 1071 1880 418 765 492 899 580 1040 77 124 167 245 182 245 37 0 48 -179 17 -296 -46 -172 -204 -491 -599 -1213 -195 -355 -228 -409 -375 -598 -33 -42 -102 -243 -84 -243 23 0 267 101 325 135 71 42 69 40 371 413 134 166 251 302 259 302 14 0 13 -39 -5 -371 -6 -92 -4 -107 10 -112 18 -7 17 -8 90 123 27 47 69 112 94 145 53 69 77 139 122 362 51 248 70 319 96 354 14 19 36 70 49 114 13 44 42 141 64 215 22 74 50 182 61 240 150 738 383 1229 671 1413 30 19 103 60 164 92 109 57 109 57 185 53 62 -3 89 -10 153 -40 111 -53 176 -106 412 -338 116 -114 225 -215 243 -225 39 -23 39 -31 8 -160 -40 -161 -126 -353 -326 -730 -56 -104 -183 -345 -282 -535 -99 -190 -209 -388 -243 -440 -83 -129 -251 -335 -360 -445 -228 -230 -692 -565 -1215 -879 -135 -81 -319 -201 -410 -265 -91 -65 -199 -137 -240 -160 -92 -52 -149 -105 -209 -196 -48 -74 -118 -221 -108 -231 3 -3 47 17 99 44 51 28 336 164 633 302 902 421 1024 490 1375 784 218 183 274 240 462 468 348 423 410 510 691 978 182 304 407 719 538 995 142 300 286 662 466 1175 322 917 394 1082 538 1226 57 59 81 75 125 88 67 20 139 21 146 2 3 -7 -13 -121 -36 -252 -83 -489 -125 -653 -197 -784 -20 -36 -120 -189 -223 -340 -356 -522 -403 -600 -473 -790 -104 -281 -159 -505 -197 -810 -33 -257 -25 -410 22 -410 63 0 83 42 152 321 72 291 115 422 178 539 79 148 262 417 496 729 522 696 549 752 898 1894 159 521 193 617 237 665 37 40 53 29 77 -50 80 -269 194 -626 204 -643 7 -11 49 -36 92 -54 156 -68 379 -178 392 -193 11 -14 6 -24 -37 -72 -61 -67 -90 -123 -126 -240 -31 -103 -33 -100 66 -139 168 -65 306 -62 1034 23 350 42 325 36 325 71 0 59 -113 150 -352 283 l-111 62 -101 182 -101 181 -70 27 c-268 105 -332 132 -429 182 -63 33 -112 65 -116 77 -5 11 -16 137 -24 280 -9 143 -19 286 -23 318 -5 56 -5 57 19 57 55 0 176 -108 273 -244 25 -36 96 -149 156 -253 61 -103 112 -190 114 -191 2 -2 104 -18 227 -36 l223 -32 160 -134 c299 -250 580 -448 760 -534 61 -30 259 -113 440 -186 356 -142 597 -254 741 -343 50 -31 201 -139 337 -239 135 -101 270 -198 301 -217 157 -95 329 -125 427 -76 45 23 179 109 179 115 -1 3 -44 34 -98 70 -53 36 -180 125 -282 199 -631 458 -738 530 -1195 806 -558 337 -772 483 -989 673 -153 135 -225 226 -538 687 -179 263 -292 395 -484 566 -264 234 -463 388 -622 481 -56 33 -105 64 -108 69 -6 10 -28 12 -36 4z" />
+            </g>
+          </svg>
         </p>
-        <p>
-          Esta franja está pensada para probar el cuerpo en Satoshi a distintas
-          longitudes: párrafos que apenas completan una línea, frases de ancho
-          medio y bloques largos que obligan a la última línea a quedarse sola.
-          Presta atención a las viudas y a los cortes de línea — si algo se siente
-          suelto, es el momento de tocar la medida, no el color.
-        </p>
-        <p>
-          Y si te desvías, no está mal: la regla es empezar con lo clásico y
-          romperlo con intención. Un{" "}
-          <Link href="/sobre-mi">enlace en el cuerpo</Link> debe decirse a sí
-          mismo — subrayado limpio, monoespaciado, sin depender del color para
-          existir. Este texto es un placeholder para que veas cómo se comporta
-          todo junto antes de escribir de verdad.
-        </p>
-      </section>
-      <section className="sample-fraunces">
-        <h2>Fraunces — Textos de muestra</h2>
-        <p className="meta">
-          Serif expresiva con optical sizing — Undercase Type · OFL
-        </p>
-        <p className="lede">
-          Hay serif que solo acompañan y hay serif que tienen opinión.
-          Fraunces pertenece a la segunda clase: escribe con una pluma, no
-          con un bolígrafo.
-        </p>
-        <p>
-          Heredera de la tipografía expresiva de principios del siglo XX,
-          Fraunces guarda un secreto: su eje óptico. En los tamaños de
-          titular despliega su carácter — la «w» canchera, los terminales
-          redondeados — y en el cuerpo se recoge, baja el contraste y sube
-          la x para dejar de ser espectáculo y volverse lectura. Cambia de
-          voz según el contexto sin cambiar de nombre.
-        </p>
-        <p>
-          Es el contraste justo para una página que quiere sentirse artesanal
-          sin ser decorativa. Sus serif cuelgan como los de una revista
-          independiente: las notas al margen, los pull quotes, la primera
-          línea de un capítulo. Combínala con una grotesca como Satoshi y la
-          jerarquía se dibuja sola.
-        </p>
-        <p>
-          Aquí, al tamaño del cuerpo, apenas se intuye su temperamento: es
-          el susurro de una fuente que sabe gritar.{" "}
-          <Link href="/sobre-mi">Un enlace en el cuerpo</Link> se mantiene
-          tan legible como la voz que lo rodea.
-        </p>
-      </section>
-      <section className="sample-literata">
-        <h2>Literata — Textos de muestra</h2>
-        <p className="meta">
-          Serif de lectura continua en pantalla — TypeTogether · OFL
-        </p>
-        <p className="lede">
-          Newsreader lee el periódico; Literata lee la novela. Fue creada
-          para Google Play Books y pensada para una sola cosa: que una
-          historia de diez mil palabras se lea sin que el ojo se canse.
-        </p>
-        <p>
-          Nació como la tipografía de los libros digitales de Google y hoy,
-          en su tercera versión, es una familia variable con cortes de
-          titular, cuerpo y leyenda. Su x es alta, su contraste moderado y
-          su ritmo recuerda a la imprenta de toda la vida sin renunciar a
-          la nitidez de una pantalla moderna.
-        </p>
-        <p>
-          Literata resuelve un problema que los serif clásicos arrastran en
-          digital: la cursiva. En lugar de una letra inclinada que se
-          desdibuja en la cuadrícula de píxeles, usa una cursiva erguida,
-          legible a cualquier tamaño. Es el tipo de decisión que solo se
-          toma cuando la lectura continua es el objetivo y no un efecto
-          secundario.
-        </p>
-        <p>
-          Por eso su lugar natural es el texto largo: el artículo, el
-          ensayo, la documentación. Y un{" "}
-          <Link href="/sobre-mi">enlace en el cuerpo</Link> se mantiene tan
-          firme como el resto de la línea.
-        </p>
-      </section>
-      <section className="sample-source-serif">
-        <h2>Source Serif 4 — Textos de muestra</h2>
-        <p className="meta">
-          Transicional con optical sizing — Adobe Originals · OFL
-        </p>
-        <p className="lede">
-          La respuesta a la pregunta de siempre: ¿qué pasa si quiero un
-          serif que además se lleve bien con mi sans? Aquí la solución es
-          una superfamilia que comparte esqueleto.
-        </p>
-        <p>
-          Source Serif 4 es la serif transicional de Adobe, dibujada por
-          Frank Grießhammer como compañera de Source Sans. Comparten
-          estructura, proporciones y peso: son un par hecho a medida, el
-          ejemplo perfecto de cómo combinar sans y serif sin que se
-          peleen por el protagonismo.
-        </p>
-        <p>
-          En su cuarta versión suma cinco tamaños ópticos — caption, small
-          text, text, subhead y display —, así que las letras se redibujan
-          según el tamaño: más anchas y espaciadas en el cuerpo, más
-          apretadas y elegantes en el titular. Es una de las pocas familias
-          gratuitas con ese nivel de ingeniería tipográfica.
-        </p>
-        <p>
-          Es neutra sin ser sosa, autoritaria sin ser fría: la voz del
-          cuerpo corporativo que no necesita gritar. Y el{" "}
-          <Link href="/sobre-mi">enlace en el cuerpo</Link> queda tan claro
-          como el resto del texto.
-        </p>
-      </section>
+        <span className="hero__scroll" aria-hidden="true">
+          <span className="hero__scroll__label">scroll</span>
+          <span className="hero__scroll__line" />
+        </span>
+      </header>
     </main>
   );
 }

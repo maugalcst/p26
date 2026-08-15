@@ -8,6 +8,13 @@
   cursor: none !important;
 }
 
+/* El custom cursor cubre todo el viewport: el nativo se oculta también en
+   html/body para que no asome en las bandas fuera del área de contenido. */
+html,
+body {
+  cursor: none;
+}
+
 /* Cruz giratoria */
 .cursor-cross {
   position: fixed;
@@ -97,6 +104,8 @@ html.cursor-tracking .cursor-coord-layer .cursor-coord {
 
 /* Touch: se restaura el cursor nativo y se oculta el custom */
 @media (hover: none) and (pointer: coarse) {
+  html,
+  body,
   .rotating-cursor-area,
   .rotating-cursor-area * {
     cursor: auto;

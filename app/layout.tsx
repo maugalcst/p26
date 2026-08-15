@@ -9,6 +9,7 @@ import "@fontsource/source-serif-4/400.css";
 import "@fontsource/source-serif-4/400-italic.css";
 import "./globals.css";
 import Nav from "@/components/Nav";
+import ScrollNav from "@/components/ScrollNav";
 import RotatingCursor from "@/components/RotatingCursor";
 import BootSequence from "@/components/BootSequence";
 
@@ -22,6 +23,16 @@ const fontBody = localFont({
 const fontMeta = localFont({
   src: "./fonts/DepartureMono-Regular.woff2",
   variable: "--font-meta",
+  weight: "400",
+});
+const fontReglo = localFont({
+  src: "./fonts/Reglo-Bold.woff2",
+  variable: "--font-reglo",
+  weight: "700",
+});
+const fontYoungSerif = localFont({
+  src: "./fonts/YoungSerif-Regular.woff2",
+  variable: "--font-young-serif",
   weight: "400",
 });
 
@@ -38,7 +49,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${fontBody.variable} ${fontMeta.variable}`}
+      className={`${fontBody.variable} ${fontMeta.variable} ${fontReglo.variable} ${fontYoungSerif.variable}`}
       suppressHydrationWarning
     >
       <head>
@@ -50,6 +61,7 @@ export default function RootLayout({
       </head>
       <body>
         <BootSequence />
+        <ScrollNav />
         <RotatingCursor>
           <Nav />
           {children}

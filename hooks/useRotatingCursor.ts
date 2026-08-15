@@ -327,18 +327,21 @@ export function useRotatingCursor(
       }
     };
 
-    area.addEventListener("mousemove", onMove);
-    area.addEventListener("mousedown", onMouseDown);
-    area.addEventListener("contextmenu", onContextMenu);
+    /* Los listeners van en window, no en el área: el custom cursor debe
+       cubrir TODO el viewport (incluidas las bandas de padding del body
+       y las líneas del marco), no solo la caja de contenido. */
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mousedown", onMouseDown);
+    window.addEventListener("contextmenu", onContextMenu);
 
     return () => {
       if (cross) cross.style.opacity = "0";
       document.documentElement.classList.remove("cursor-motion", "cursor-tracking");
       clearTimeout(trackingTimer);
       cancelBoredTimer();
-      area.removeEventListener("mousemove", onMove);
-      area.removeEventListener("mousedown", onMouseDown);
-      area.removeEventListener("contextmenu", onContextMenu);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mousedown", onMouseDown);
+      window.removeEventListener("contextmenu", onContextMenu);
       clearTimeout(flashTimer);
       stopLoop();
     };

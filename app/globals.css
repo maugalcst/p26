@@ -1,7 +1,58 @@
+/* Redaction — familia de redacción progresiva (7 niveles). Cada nivel es una
+   familia distinta para poder alternar entre ellas por letra en runtime. */
+@font-face {
+  font-family: "Redaction";
+  src: url("/fonts/Redaction-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Redaction";
+  src: url("/fonts/Redaction-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Redaction10";
+  src: url("/fonts/Redaction10-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Redaction20";
+  src: url("/fonts/Redaction20-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Redaction35";
+  src: url("/fonts/Redaction35-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Redaction50";
+  src: url("/fonts/Redaction50-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Redaction70";
+  src: url("/fonts/Redaction70-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Redaction100";
+  src: url("/fonts/Redaction100-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
 :root {
   /* color — nunca #000/#fff puros */
   --bg: #efedea;
-  --fg: #39312c;
+  --fg: #2c2726;
   --fg-secondary: color-mix(in srgb, var(--fg) 62%, transparent);
   --cursor-color: #0137bf;
 
@@ -25,6 +76,9 @@
 
   --tracking-display: -0.02em;
   --tracking-caps: 0.09em;
+
+  /* easing — exponencial suave para los movimientos del nav/marco */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
   /* marco de hairlines — separación del contenido y color de la línea */
   --frame-inset: clamp(24px, 4vw, 40px);
@@ -233,6 +287,28 @@ nav {
   z-index: 900; /* bajo el overlay de boot (950) y el marco (999) */
   font-family: var(--font-meta);
   font-size: 0.85em;
+  /* estado por scroll: en el top la línea superior se alinea con las demás
+     y el nav está oculto; al bajar (html.nav-revealed) la línea desciende
+     y el nav aparece con un desliz sutil */
+  opacity: 0;
+  transform: translateY(-10px);
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 700ms var(--ease-out-expo),
+    transform 700ms var(--ease-out-expo),
+    visibility 0s linear 700ms;
+}
+
+html.nav-revealed nav {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity 700ms var(--ease-out-expo),
+    transform 700ms var(--ease-out-expo),
+    visibility 0s;
 }
 
 .nav-items {
@@ -297,8 +373,127 @@ nav {
   text-decoration: none;
 }
 
+/* ---------- hero — nombre con efecto decoder ---------- */
+.hero {
+  position: relative;
+  min-height: calc(100svh - var(--frame-top-offset) - 2rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.hero__name {
+  font-family: "Bagnard", serif;
+  font-weight: 400;
+  font-size: clamp(2.5rem, 7.5vw, 9.5rem);
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  margin: 0;
+  text-wrap: nowrap;
+  font-size-adjust: from-font;
+}
+
+.hero__name--outline {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--fg);
+  margin-top: 0.05em;
+}
+
+.decoder-char {
+  display: inline-block;
+  line-height: 1;
+  text-align: center;
+  transition: color 200ms ease;
+}
+
+.decoder-char:hover {
+  color: var(--cursor-color);
+}
+
+.hero__name--outline .decoder-char {
+  transition: -webkit-text-stroke-color 200ms ease;
+}
+
+.hero__name--outline .decoder-char:hover {
+  -webkit-text-stroke-color: var(--cursor-color);
+}
+
+.hero__meta {
+  margin-block-start: var(--space-2);
+}
+
+.hero__mount {
+  display: inline-block;
+  width: 1.1em;
+  height: auto;
+  vertical-align: -0.12em;
+  color: var(--cursor-color);
+  fill: currentColor;
+}
+
+.hero__scroll {
+  position: absolute;
+  inset-inline: 0;
+  bottom: calc(var(--frame-offset) + 1.25rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.625rem;
+  font-family: var(--font-meta);
+  font-size: 0.625rem;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--fg) 45%, transparent);
+  opacity: 1;
+  transition: opacity 600ms var(--ease-out-expo);
+}
+
+.hero__scroll__line {
+  display: block;
+  width: 1px;
+  height: 2.5rem;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--fg) 30%, transparent);
+}
+
+.hero__scroll__line::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--fg);
+  animation: hero-scroll-drift 2s var(--ease-out-expo) infinite;
+}
+
+@keyframes hero-scroll-drift {
+  0% {
+    transform: translateY(-100%);
+  }
+  55%,
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+html.nav-revealed .hero__scroll {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__scroll__line::after {
+    animation: none;
+  }
+}
+
 /* ---------- marco de hairlines fijo al viewport ---------- */
+
+
+
 main {
+  position: relative;
+  z-index: 1;
   margin-top: var(--frame-top-offset);
   padding-inline: calc(var(--frame-inset) + 12px);
 }
@@ -329,7 +524,12 @@ main {
 }
 
 .frame .frame__top {
-  top: var(--frame-top-offset);
+  top: var(--frame-offset); /* alineada con las demás líneas en el top */
+  transition: top 700ms var(--ease-out-expo);
+}
+
+html.nav-revealed .frame .frame__top {
+  top: var(--frame-top-offset); /* desciende junto con la aparición del nav */
 }
 
 .frame .frame__bottom {
@@ -422,6 +622,14 @@ html.cursor-motion .frame .frame__bottom::after,
 html.cursor-motion .frame .frame__left::after,
 html.cursor-motion .frame .frame__right::after {
   opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  nav,
+  html.nav-revealed nav,
+  .frame .frame__top {
+    transition: none;
+  }
 }
 
 @media print {

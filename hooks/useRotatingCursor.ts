@@ -12,25 +12,25 @@ const MAX_DT = 32; // ms — clamp del delta entre frames
 
 // Geometría de la cruz
 const BAR_THICKNESS = 3.3; // grosor normal de cada barra
-const BAR_THICKNESS_PEAK = 2.4; // mínimo durante el giro (adelgazamiento sutil)
+const BAR_THICKNESS_PEAK = 3.1; // mínimo durante el giro (adelgazamiento sutil)
 
 // Compresión mientras el cursor está en movimiento
 const CURSOR_SIZE_IDLE = 15; // px — tamaño "brazo a brazo" en reposo
-const CURSOR_SIZE_MOVING = 14; // px — comprimido mientras se mueve
+const CURSOR_SIZE_MOVING = 15; // px — comprimido mientras se mueve
 
 // Click izquierdo — giro 180° a la izquierda (acumulativo, se queda ahí)
-const TWIST_STEP = -90; // grados por click
+const TWIST_STEP = -180; // grados por click
 const TWIST_MS = 230; // duración total — casi instantáneo pero suave
 
 // Click derecho — giro infinito
 const SPIN_REVOLUTION_MS = 1000; // ~1.1s por vuelta completa
 
 // Aburrimiento — cuando el cursor está quieto, juguetea solo
-const BORED_IDLE_MS = 1400; // ms quieto antes de empezar a moverse
+const BORED_IDLE_MS = 2000; // ms quieto antes de empezar a moverse
 const BORED_TURN_MIN = 450; // duración mínima de cada giro juguetón
 const BORED_TURN_MAX = 1200; // duración máxima
 const BORED_PAUSE_MS = 350; // pausa entre giros
-const BORED_ARC = 38; // grados máximos por giro (se elige aleatorio dentro de ±)
+const BORED_ARC = 200; // grados máximos por giro (se elige aleatorio dentro de ±)
 const BORED_RETURN_MS = 500; // al despertar, vuelve suave a la orientación "+"
 
 /* ====== Math ====== */

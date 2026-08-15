@@ -28,8 +28,9 @@
 
   /* marco de hairlines — separación del contenido y color de la línea */
   --frame-inset: clamp(24px, 4vw, 40px);
-  --frame-line: color-mix(in srgb, var(--fg) 30%, transparent);
-  --frame-offset: clamp(10px, 1.5vw, 16px);
+  --frame-line: color-mix(in srgb, var(--fg) 20%, transparent);
+  --frame-offset: clamp(20px, 2.6vw, 32px);
+  --frame-top-offset: clamp(23px, 9vw, 108px); /* línea superior más separada — cabecera del nav */
 
   color-scheme: light;
 }
@@ -41,9 +42,9 @@
    (--fg-secondary, --frame-line) se recalculan solos vía color-mix. */
 html[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #161413; /* tinta profunda, cálida — no #000 puro */
-  --fg: #eae3d6; /* hueso crema, heredero del --bg claro */
-  --cursor-color: #ff8762; /* azul eléctrico legible sobre oscuro */
+  --bg: #0f0e0e; /* tinta profunda, cálida — no #000 puro */
+  --fg: #eae1d6; /* hueso crema, heredero del --bg claro */
+  --cursor-color: #fd8187; /* azul eléctrico legible sobre oscuro */
 }
 
 * {
@@ -221,12 +222,31 @@ section:first-of-type {
 }
 
 nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--frame-top-offset);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 900; /* bajo el overlay de boot (950) y el marco (999) */
   font-family: var(--font-meta);
   font-size: 0.85em;
 }
 
-/* toggle de tema — mismo lenguaje que los links (mono, caps, inversión al hover) */
-.theme-toggle {
+.nav-items {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem;
+  list-style: none;
+  padding: 0;
+}
+
+/* botones del nav — mismo lenguaje que los links (mono, caps, inversión al hover) */
+.theme-toggle,
+.menu-toggle {
   font-family: var(--font-meta);
   font-size: 1em;
   text-transform: uppercase;
@@ -238,19 +258,48 @@ nav {
   cursor: pointer;
 }
 
-.theme-toggle:hover {
+.theme-toggle:hover,
+.menu-toggle:hover {
   background: var(--fg);
   color: var(--bg);
   text-decoration: none;
 }
 
-.theme-toggle:focus-visible {
+.theme-toggle:focus-visible,
+.menu-toggle:focus-visible {
   outline: 1px solid var(--fg);
   outline-offset: 4px;
 }
 
+/* MENU — dropdown bajo el botón */
+.menu-dropdown {
+  position: relative;
+}
+
+.menu-dropdown__list {
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  right: 0;
+  min-width: 13em;
+  padding: var(--space-05) 0;
+  background: var(--bg);
+  border: 1px solid var(--frame-line);
+  box-shadow: 0 16px 40px -20px rgba(0, 0, 0, 0.35);
+}
+
+.menu-dropdown__list li + li {
+  margin-block-start: 0;
+}
+
+.menu-dropdown__list a {
+  display: block;
+  padding: 0.35em 1.1em;
+  text-decoration: none;
+}
+
 /* ---------- marco de hairlines fijo al viewport ---------- */
 main {
+  margin-top: var(--frame-top-offset);
   padding-inline: calc(var(--frame-inset) + 12px);
 }
 
@@ -280,7 +329,7 @@ main {
 }
 
 .frame .frame__top {
-  top: var(--frame-offset);
+  top: var(--frame-top-offset);
 }
 
 .frame .frame__bottom {

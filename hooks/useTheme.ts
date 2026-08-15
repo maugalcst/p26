@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useLayoutEffect, useState } from "react";
 
 export type Theme = "light" | "dark";
 
@@ -18,7 +18,10 @@ function getInitialTheme(): Theme {
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>("light");
 
-  useEffect(() => {
+  /* useLayoutEffect: sincroniza el label del botón con el tema ya aplicado
+     por el script inline de <head> ANTES del primer paint (un useEffect
+     normal dejaba el label inicial incorrecto durante un frame). */
+  useLayoutEffect(() => {
     setTheme(getInitialTheme());
 
     /* Si el usuario no fijó preferencia manual, seguir al sistema */

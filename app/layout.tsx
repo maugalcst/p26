@@ -1,12 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "@fontsource/bagnard";
-import "@fontsource/fraunces/400.css";
-import "@fontsource/fraunces/400-italic.css";
-import "@fontsource/literata/400.css";
-import "@fontsource/literata/400-italic.css";
-import "@fontsource/source-serif-4/400.css";
-import "@fontsource/source-serif-4/400-italic.css";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import ScrollNav from "@/components/ScrollNav";
@@ -25,16 +19,6 @@ const fontMeta = localFont({
   variable: "--font-meta",
   weight: "400",
 });
-const fontReglo = localFont({
-  src: "./fonts/Reglo-Bold.woff2",
-  variable: "--font-reglo",
-  weight: "700",
-});
-const fontYoungSerif = localFont({
-  src: "./fonts/YoungSerif-Regular.woff2",
-  variable: "--font-young-serif",
-  weight: "400",
-});
 
 export const metadata: Metadata = {
   title: "Mau — Portafolio 2026",
@@ -49,7 +33,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${fontBody.variable} ${fontMeta.variable} ${fontReglo.variable} ${fontYoungSerif.variable}`}
+      className={`${fontBody.variable} ${fontMeta.variable}`}
       suppressHydrationWarning
     >
       <head>
@@ -71,8 +55,6 @@ export default function RootLayout({
           <span className="frame__right" />
           <span className="frame__bottom" />
           <span className="frame__left" />
-          <span className="frame__tick frame__tick--left" />
-          <span className="frame__tick frame__tick--right" />
         </div>
       </body>
     </html>

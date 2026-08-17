@@ -13,6 +13,53 @@ export default function HeroReveal() {
   const videoRefs = useRef<Partial<Record<VideoKey, HTMLVideoElement | null>>>(
     {},
   );
+  const videosBoxRef = useRef<HTMLDivElement | null>(null);
+
+  /* Líneas de cota: miden la distancia entre cada borde del contenedor de
+     videos y la orilla del viewport (hasta donde topa la pantalla), y la
+     exponen como --cota-top/right/bottom/left para que el CSS las dibuje
+     con scale desde el borde. Solo se re-mide; nunca se anima layout. */
+  useEffect(() => {
+    const wrap = videosBoxRef.current;
+    if (!wrap) return;
+
+    const measure = () => {
+      const r = wrap.getBoundingClientRect();
+      wrap.style.setProperty("--cota-top", `${Math.max(0, r.top)}px`);
+      wrap.style.setProperty(
+        "--cota-right",
+        `${Math.max(0, window.innerWidth - r.right)}px`,
+      );
+      wrap.style.setProperty(
+        "--cota-bottom",
+        `${Math.max(0, window.innerHeight - r.bottom)}px`,
+      );
+      wrap.style.setProperty("--cota-left", `${Math.max(0, r.left)}px`);
+    };
+
+    measure();
+
+    let ticking = false;
+    const reMeasure = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        measure();
+        ticking = false;
+      });
+    };
+
+    window.addEventListener("resize", reMeasure);
+    window.addEventListener("scroll", reMeasure, { passive: true });
+    const ro = new ResizeObserver(reMeasure);
+    ro.observe(wrap);
+
+    return () => {
+      window.removeEventListener("resize", reMeasure);
+      window.removeEventListener("scroll", reMeasure);
+      ro.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     for (const key of VIDEOS) {
@@ -54,7 +101,7 @@ export default function HeroReveal() {
         <p className="hero__name" data-key="abstract2">
           <DecoderText text="Gallegos" guide guideDelay={240} ambient />
         </p>
-        <div className="name-block__videos" aria-hidden="true">
+        <div className="name-block__videos" ref={videosBoxRef} aria-hidden="true">
           {VIDEOS.map((key) => (
             <video
               key={key}
@@ -62,6 +109,7 @@ export default function HeroReveal() {
                 videoRefs.current[key] = el;
               }}
               src={`/videos/${key}.mp4`}
+              poster={`/videos/${key}.jpg`}
               muted
               loop
               playsInline
@@ -69,6 +117,12 @@ export default function HeroReveal() {
               hidden={active !== key}
             />
           ))}
+          {/* Líneas de cota: conectan cada borde del video con el marco.
+              No rodean el video — lo unen al viewport. */}
+          <span className="cota cota--top" />
+          <span className="cota cota--right" />
+          <span className="cota cota--bottom" />
+          <span className="cota cota--left" />
         </div>
       </div>
       <p className="hero__meta hero__meta--role" data-key="terminal">

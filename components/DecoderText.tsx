@@ -237,7 +237,12 @@ export default function DecoderText({
           (el) => el.isConnected && !busyLetters.current.has(el)
         );
         if (!pool.length) return;
-        runCycle(pool[Math.floor(Math.random() * pool.length)]);
+        const count = Math.min(2, pool.length);
+        for (let i = 0; i < count; i++) {
+          const idx = Math.floor(Math.random() * pool.length);
+          runCycle(pool[idx]);
+          pool.splice(idx, 1);
+        }
       }, AMBIENT_INTERVAL_MS);
     };
 

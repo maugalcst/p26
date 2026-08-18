@@ -339,10 +339,6 @@ html.nav-revealed nav {
   transition: color 200ms ease;
 }
 
-.decoder-char:hover {
-  color: var(--cursor-color);
-}
-
 .decoder-char--ambient {
   color: var(--cursor-color);
 }

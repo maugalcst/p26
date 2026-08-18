@@ -105,6 +105,7 @@ export default function HeroReveal() {
           {VIDEOS.map((key) => (
             <video
               key={key}
+              className={`name-block__video name-block__video--${key}`}
               ref={(el) => {
                 videoRefs.current[key] = el;
               }}

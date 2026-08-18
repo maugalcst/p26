@@ -33,6 +33,7 @@
    marco: sin animación de aparición/desaparición (aparecen al instante). */
 .name-block__videos .cota {
   position: absolute;
+  z-index: 1;
   pointer-events: none;
   will-change: transform, opacity;
   opacity: 0;
@@ -168,9 +169,8 @@ html.cursor-motion .name-block__videos .cota::after {
   color: var(--bg);
 }
 
-/* las letras ambient y el hover del cursor se mantienen en azul */
-.hero[data-active] .decoder-char--ambient,
-.hero[data-active] .decoder-char:hover {
+/* las letras ambient se mantienen en azul */
+.hero[data-active] .decoder-char--ambient {
   color: var(--cursor-color);
 }
 

@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "@fontsource/bagnard";
 import "./globals.css";
-import Nav from "@/components/Nav";
-import ScrollNav from "@/components/ScrollNav";
-import RotatingCursor from "@/components/RotatingCursor";
-import BootSequence from "@/components/BootSequence";
+import "./layout.css";
+import "./utilities.css";
+import Nav from "@/features/nav/Nav";
+import ScrollNav from "@/features/nav/ScrollNav";
+import ScrollProgress from "@/features/scroll/ScrollProgress";
+import RotatingCursor from "@/features/cursor/RotatingCursor";
+import BootSequence from "@/features/boot/BootSequence";
 
 const fontBody = localFont({
   src: [
@@ -45,6 +48,7 @@ export default function RootLayout({
       </head>
       <body>
         <BootSequence />
+        <ScrollProgress />
         <ScrollNav />
         <RotatingCursor>
           <Nav />

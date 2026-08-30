@@ -1,0 +1,417 @@
+@media (min-resolution: 2dppx) {
+  .projects__vline {
+    width: 0.5px;
+  }
+
+  .projects__row::after {
+    height: 0.5px;
+  }
+}
+
+/* ---------- sección 01 · proyectos ----------
+   Una pantalla exacta (el nav fijo ocupa --frame-top-offset arriba), sin
+   scroll interno. Banda del título delimitada por hairlines horizontales y
+   debajo la retícula asimétrica 62/38 dividida por una hairline vertical. */
+.projects {
+  position: relative;
+  margin-block-start: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* banda del título: dos elementos en una fila (título a la izquierda,
+   contador a la derecha), separados por padding-block generoso y
+   cerrados abajo con una hairline que cruza solo el ancho del bloque
+   (no el viewport: el usuario pidió desaparecer la línea infinita).
+   Sangra al marco con .bleed-left y compensa con padding-left para
+   alinear el <h2> con el media. */
+.projects__title-band {
+  position: relative;
+  /* misma sangría que el media: arranca en el marco, no en el inset
+     del padding de main. Sin padding-left: el <h2> queda pegado al
+     borde del marco (mueve padding-left para darle respiro). */
+  margin-left: calc(var(--frame-offset) - 1rem - var(--main-pad-x, calc(var(--frame-inset) * 2)));
+  padding-block: clamp(1.25rem, 2.4vh, 2rem);
+  padding-left: 60;
+  padding-right: calc(var(--frame-offset) + var(--frame-inset) / 2);
+  margin-block-end: clamp(0.75rem, 1.6vh, 1.25rem);
+}
+
+.projects__title {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: var(--step-2);
+  line-height: 1.1;
+  letter-spacing: var(--tracking-caps);
+  color: var(--fg);
+  margin: 0;
+}
+
+/* ---------- retícula 62 / 38 ----------
+   La columna derecha (índice + detalle) se extiende hasta la línea derecha
+   del marco (margen negativo + columna 1fr): los títulos de los proyectos
+   caben en un solo renglón y las divisorias llegan al margen. La media
+   ocupa TODA la columna izquierda (grid-row 1 / -1, ver .projects__media):
+   sangra hasta el marco sin margen y su borde derecho es la hairline
+   vertical. Sin hueco arriba: su borde superior se alinea con el primer
+   renglón del índice. */
+.projects__grid {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  margin-right: calc(var(--frame-offset) - 1rem - var(--main-pad-x, calc(var(--frame-inset) * 2)));
+  grid-template-columns: calc(0.62 * (100vw - 2rem - 2 * var(--main-pad-x, calc(var(--frame-inset) * 2)))) 1fr;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "media index"
+    "media detail";
+  align-items: start;
+}
+
+/* hairline vertical: infinita — 200vh de alto centrada en el viewport
+   (sale 50vh por arriba y por abajo, se pierde fuera del display).
+   Pegada al borde derecho del media. La grilla empieza en
+   (1rem + 2*frame-inset) y mide (100vw - 2rem - 4*frame-inset); el
+   media ocupa el 62% de esa grilla. Borde derecho del media =
+   inicio + 0.62 * ancho. */
+.projects__vline {
+  position: fixed;
+  top: -50vh;
+  height: 200vh;
+  left: calc(
+    1rem + var(--main-pad-x, calc(var(--frame-inset) * 2)) + 0.62 * (100vw - 2rem - 2 * var(--main-pad-x, calc(var(--frame-inset) * 2)))
+  );
+  width: 1px;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 400ms ease-in-out;
+}
+
+/* sección en viewport: ambas hairlines aparecen con fade.
+   La señal es html.scroll-mid (de ScrollProgress), no IntersectionObserver,
+   porque el observer de la <section> siempre ve 100% (la sección
+   ocupa toda la celda del grid de main). scroll-mid se activa
+   cuando data-progress >= 0.5, el punto donde el crossfade del
+   scroll-virtual empieza a mostrar projects sobre el hero. */
+html.scroll-mid .projects__vline {
+  opacity: 1;
+}
+
+.projects__vline::before,
+.projects__vline::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+/* trazos (ocultos en reposo) */
+.projects__vline::before {
+  background: repeating-linear-gradient(
+    180deg,
+    var(--frame-line) 0 6px,
+    transparent 6px 12px
+  );
+  opacity: 0;
+}
+
+/* sólido (visible en reposo) */
+.projects__vline::after {
+  background: var(--frame-line);
+  opacity: 1;
+}
+
+.projects__vline::before,
+.projects__vline::after {
+  transition: opacity 400ms ease-in-out;
+}
+
+/* cursor en movimiento: el sólido se funde a trazos, igual que el marco */
+html.cursor-motion .projects__vline::before {
+  opacity: 1;
+}
+
+html.cursor-motion .projects__vline::after {
+  opacity: 0;
+}
+
+/* ---------- columna izquierda · medios ----------
+   El recuadro ocupa toda la columna izquierda: cruza la fila de aire del
+   índice (grid-row 1 / -1) con su borde superior alineado al primer renglón
+   del índice, sin hueco vacío arriba. Sangra sin margen lateral hasta el
+   marco a la izquierda (margen negativo) y hasta la hairline vertical a la
+   derecha (el borde de su celda). */
+.projects__media {
+  grid-area: media;
+  align-self: start;
+  margin-left: calc(var(--frame-offset) - 1rem - var(--main-pad-x, calc(var(--frame-inset) * 2)));
+  aspect-ratio: 16 / 10;
+  position: relative;
+}
+
+/* placeholder: número del proyecto en la esquina superior izquierda,
+   stack de tecnologías abajo a la derecha. Mismo lenguaje que el resto
+   (sans para el número, mono para el stack, fondo translúcido). */
+.projects__placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--space-1) var(--space-15);
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
+  color: color-mix(in srgb, var(--fg) 40%, transparent);
+  font-family: var(--font-meta);
+  font-size: 0.85em;
+  overflow: hidden;
+}
+
+.projects__placeholder__no {
+  font-family: var(--font-meta);
+  font-size: clamp(4rem, 12vw, 9rem);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--fg-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.projects__placeholder__stack {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0 0.75em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+}
+
+.projects__placeholder__stack li + li {
+  margin-block-start: 0;
+}
+
+/* ---------- columna derecha · índice ----------
+   Tres estados por fondo y color, nunca bordes de caja:
+   inactivo = fg al 55% sin fondo; hover = azul al 8%; seleccionado = azul
+   sólido con texto --bg. El acento azul no existe en reposo. */
+.projects__index {
+  grid-area: index;
+  position: relative;
+  z-index: 2; /* los renglones cruzan la hairline vertical al seleccionarse */
+}
+
+.projects__index li + li {
+  margin-block-start: 0;
+}
+
+.projects__row {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 0.55em;
+  width: 100%;
+  padding: 0.55em 0.75em;
+  border: 0;
+  background: transparent;
+  color: color-mix(in srgb, var(--fg) 55%, transparent);
+  font-family: var(--font-meta);
+  font-size: 0.9em;
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
+}
+
+.projects__row__no {
+  font-variant-numeric: tabular-nums;
+}
+
+/* hairline divisoria bajo cada renglón: delimita solo la lista del
+   índice (no se extiende fuera de la celda). Dos capas en crossfade
+   igual que el marco (sólido en reposo, trazos con cursor-motion).
+   El primer row además lleva una hairline arriba (mismo lenguaje). */
+.projects__row::before,
+.projects__row::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  transition: opacity 400ms ease-in-out;
+}
+
+/* trazos (ocultos en reposo) */
+.projects__row::before {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--frame-line) 0 6px,
+    transparent 6px 12px
+  );
+  opacity: 0;
+}
+
+/* sólido (visible en reposo) */
+.projects__row::after {
+  background: var(--frame-line);
+  opacity: 1;
+}
+
+/* cursor en movimiento: el sólido se funde a trazos, igual que el marco */
+html.cursor-motion .projects__row::before {
+  opacity: 1;
+}
+
+html.cursor-motion .projects__row::after {
+  opacity: 0;
+}
+
+/* primer row: hairline adicional arriba. Wrapper interno con sus
+   propios ::before/::after que hacen el crossfade (sólido en reposo,
+   trazos con cursor-motion). El ::before/::after del row sigue
+   dibujando la hairline inferior (que ahora se ve bien entre
+   01 - tnews y 02 - DraftAgent). */
+.projects__row__top-hairline {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  pointer-events: none;
+}
+
+.projects__row__top-hairline::before,
+.projects__row__top-hairline::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transition: opacity 400ms ease-in-out;
+}
+
+.projects__row__top-hairline::before {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--frame-line) 0 6px,
+    transparent 6px 12px
+  );
+  opacity: 0;
+}
+
+.projects__row__top-hairline::after {
+  background: var(--frame-line);
+  opacity: 1;
+}
+
+html.cursor-motion .projects__row__top-hairline::before {
+  opacity: 1;
+}
+
+html.cursor-motion .projects__row__top-hairline::after {
+  opacity: 0;
+}
+
+.projects__row:hover {
+  background: color-mix(in srgb, var(--cursor-color) 8%, transparent);
+  color: var(--fg);
+}
+
+/* seleccionado: azul sólido con texto --bg, alineado al borde de su
+   columna (la hairline vertical), sin sangrar a la izquierda */
+.projects__row.projects__row--selected {
+  background: var(--cursor-color);
+  color: var(--bg);
+}
+
+.projects__row:focus-visible {
+  outline: 1px solid var(--fg);
+  outline-offset: 4px;
+}
+
+/* ---------- columna derecha · detalle ----------
+   Aire: separado de la hairline vertical (padding-left), de la lista de
+   proyectos de arriba (margin-block-start) y del margen derecho (padding-right). */
+.projects__detail {
+  grid-area: detail;
+  margin-block-start: var(--space-2);
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
+}
+
+.projects__detail__title {
+  font-family: "Redaction";
+  font-weight: 700;
+  font-size: var(--step-1);
+  line-height: 1.2;
+  margin-block-start: 0;
+  margin-block-end: var(--space-1);
+}
+
+.projects__detail__desc {
+  line-height: 1.6;
+  text-align: left;
+  text-wrap: pretty;
+  color: var(--fg-secondary);
+}
+
+.projects__detail__stack {
+  margin-block-start: var(--space-1);
+  font-family: var(--font-meta);
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-secondary);
+}
+
+.projects__detail__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-block-start: var(--space-1);
+}
+
+.projects__detail__links a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.projects__detail__links a:hover {
+  background: none;
+  color: var(--fg);
+  text-decoration: underline;
+}
+
+/* ---------- móvil · una columna ----------
+   Medios arriba, índice, detalle. El inset lo da main (frame-inset + 12px
+   en < 768px), misma retícula que el resto del contenido. */
+@media (max-width: 767px) {
+  .projects {
+    height: auto;
+  }
+
+  .projects__grid {
+    margin-right: 0;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-template-areas:
+      "media"
+      "index"
+      "detail";
+  }
+
+  /* la media vuelve a la retícula como celda normal de la grilla */
+  .projects__media {
+    margin-left: 0;
+    aspect-ratio: 16 / 10;
+  }
+
+  /* en móvil el title-band respeta el padding-inline de main */
+  .projects__title-band {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .projects__vline {
+    display: none;
+  }
+}

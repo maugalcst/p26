@@ -1,0 +1,252 @@
+/* ---------- hero reveal: los 4 videos se muestran sobre el bloque del nombre ---------- */
+
+.hero__name-wrap {
+  position: relative;
+  /* ajuste manual del bloque completo (ciudad + nombre + rol).
+     Vive en .hero__name-wrap y no en .hero__inner porque .hero__inner
+     es el .scroll-target y su transform lo sobrescribe scroll-virtual
+     (ver app/layout.css). Negativo = sube, positivo = baja. */
+  transform: translateY(-2.5rem);
+}
+
+.hero__name-block {
+  position: relative;
+  padding: clamp(1rem, 2vh, 1.75rem) clamp(2rem, 6vw, 5rem);
+}
+
+.name-block__videos {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.name-block__videos video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* [hidden] del UA es (0,1,0); .name-block__videos video es (0,2,0) y
+   ganaría, dejando los videos visibles siempre. Forzamos display:none
+   con una regla más específica para que el atributo hidden de React
+   (hidden={active !== key}) oculte los videos inactivos. */
+.name-block__videos video[hidden] {
+  display: none;
+}
+
+/* ---------- líneas de cota (DESACTIVADAS) ----------
+   Las 4 cotas están ocultas. Los <span.cota> siguen en el JSX; si se
+   quieren reactivar, basta con borrar este bloque display:none y
+   restaurar el CSS de las cotas (ver historial de git). */
+.name-block__videos .cota {
+  display: none;
+}
+
+/* el texto del nombre queda por encima del video */
+.hero__name-block > .hero__name {
+  position: relative;
+  z-index: 1;
+}
+
+/* negativo: con video activo, el nombre intercambia bg/fg */
+.hero[data-active] .hero__name {
+  color: var(--bg);
+}
+
+/* las letras ambient se mantienen en azul */
+.hero[data-active] .decoder-char--ambient {
+  color: var(--cursor-color);
+}
+
+/* feedback en el disparador */
+.hero__meta--top,
+.hero__meta--role {
+  transition: color 200ms ease;
+}
+
+.hero[data-active="landscape"] .hero__meta--top {
+  color: var(--cursor-color);
+}
+
+.hero[data-active="terminal"] .hero__meta--role {
+  color: var(--cursor-color);
+}
+
+/* ---------- layout del hero ----------
+   Restaurado de globals.css tras la restructuración. El header .hero
+   ocupa la celda del grid de main; .hero__inner es el wrapper que
+   recibe la animación del scroll virtual (transform/opacity). El
+   contenido se centra dentro de .hero (no de .hero__inner) para que
+   el centrado vertical no se afecte por el translateY del scroll. */
+
+.hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.hero__inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero__name {
+  font-family: "Bagnard", serif;
+  font-weight: 400;
+  font-size: clamp(2.5rem, 7.5vw, 9.5rem);
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  margin: 0;
+  text-wrap: nowrap;
+  font-size-adjust: from-font;
+}
+
+.decoder-char {
+  display: inline-block;
+  line-height: 1;
+  text-align: center;
+  transition: color 200ms ease;
+}
+
+.decoder-char--ambient {
+  color: var(--cursor-color);
+}
+
+.hero__meta {
+  margin-block-start: var(--space-2);
+}
+
+/* el role ya no es absolute: vive en el flow del flex del hero__inner,
+   debajo del name-wrap. El flex column con justify-content: center
+   lo centra junto con el name-wrap como bloque único. Así el name
+   queda siempre verticalmente centrado y el role nunca se solapa con
+   el scroll-hint (que es absolute al bottom del hero). */
+.hero__meta--top,
+.hero__meta--role {
+  width: max-content;
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* el meta top sigue siendo absolute para colgar encima del name-block.
+   Su bottom = 100% + gap respecto al name-block (que es position:
+   relative) — el mismo cálculo de antes, sin cambio de semántica. */
+.hero__meta--top {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + var(--hero-meta-gap, clamp(0.75rem, 2vh, 1.5rem)));
+  transform: translate(-50%, 0);
+}
+
+/* el role vive en el flow del flex (sin position), hereda el centrado
+   horizontal del .hero__inner. Necesita position: relative para
+   mantener la referencia del data-key (hover del video). */
+.hero__meta--role {
+  position: relative;
+  margin-block-start: 20;
+  margin-inline: auto;
+}
+
+.hero__mount {
+  display: inline-block;
+  width: 1.1em;
+  height: auto;
+  vertical-align: -0.12em;
+  color: var(--cursor-color);
+  fill: currentColor;
+}
+
+.hero__scroll {
+  position: absolute;
+  inset-inline: 0;
+  bottom: calc(var(--frame-offset) + 1.75rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.625rem;
+  font-family: var(--font-meta);
+  font-size: 0.625rem;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--fg) 45%, transparent);
+  opacity: 1;
+  transition: opacity 600ms var(--ease-out-expo);
+}
+
+.hero__scroll__track {
+  position: relative;
+  width: 1px;
+  height: 2.5rem;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--fg) 30%, transparent);
+}
+
+/* "+" que baja por la línea girando como engranaje — mismo lenguaje de la cruz */
+.hero__scroll__gear {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  margin-top: -7px;
+  translate: 0 -1.25rem;
+  rotate: 0deg;
+  animation:
+    hero-gear-drift 2.2s var(--ease-out-expo) infinite,
+    hero-gear-spin 2.2s linear infinite;
+}
+
+.hero__scroll__gear::before,
+.hero__scroll__gear::after {
+  content: "";
+  position: absolute;
+  background: var(--fg);
+}
+
+.hero__scroll__gear::before {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+}
+
+.hero__scroll__gear::after {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+}
+
+@keyframes hero-gear-drift {
+  0% { translate: 0 -1.25rem; }
+  100% { translate: 0 1.25rem; }
+}
+
+@keyframes hero-gear-spin {
+  0% { rotate: 0deg; }
+  100% { rotate: 360deg; }
+}
+
+html.nav-revealed .hero__scroll {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__scroll__gear {
+    animation: none;
+  }
+}

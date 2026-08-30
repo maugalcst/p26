@@ -1,6 +1,6 @@
 "use client";
 
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from "@/features/theme/useTheme";
 
 export default function ThemeToggle() {
   const { theme, toggle } = useTheme();

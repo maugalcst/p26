@@ -1,0 +1,63 @@
+/* =============================================================================
+   utilities.css — utilities de sangría y layout.
+
+   CONCEPTO CLAVE:
+   main tiene padding-inline. Sus hijos directos heredan ese padding
+   automáticamente (el flujo normal). Para que un elemento:
+     - cruce el viewport (hairlines infinitas, marcos, sangrías a la
+       izquierda del media), usa .bleed-x, .bleed-left, .bleed-right
+     - respete el padding sin ser hijo de main (cualquier nivel), usa
+       .in-margin (que replica el padding de main)
+
+   Si cambias --frame-inset o el padding de body, todo se reajusta
+   automáticamente porque las utilities derivan de esas variables.
+
+   REGLA: si necesitas un cálculo de sangría que no está aquí, primero
+   pregúntate si puedes expresarlo con estas utilities. Si no, añade
+   una utility nueva y documenta por qué.
+
+   Mobile: en <768px el padding-inline de main es ligeramente diferente
+   (ver app/layout.css), pero las utilities no lo necesitan — main se
+   encarga.
+   ========================================================================== */
+
+/* ---------- .bleed-x: cruza el viewport de borde a borde ------------------
+   Usa para hairlines infinitas, fondos a sangre, líneas que cruzan.
+   width: 100vw + margin-left: calc(-1rem - padding-inline-de-main).
+   En ≥768 el padding-inline de main es --frame-inset*2; en <768 es
+   --frame-inset + 12px. Como main ya tiene el padding escalado en una
+   sola curva (ver app/layout.css), podemos usar la misma fórmula para
+   ambos casos. La fórmula "duplica" el sangrado: -1rem (body) y el
+   padding-inline efectivo. En el caso más simple (desktop, 240px de
+   padding), margin-left = -256px, y width: 100vw cruza 0..100vw. */
+.bleed-x {
+  width: 100vw;
+  margin-left: calc(-1rem - var(--main-pad-x, calc(var(--frame-inset) * 2)));
+}
+
+/* ---------- .bleed-left: sangra solo a la izquierda ------------------------
+   Para un elemento que debe tocar el borde izquierdo del viewport
+   pero respeta el padding derecho. width se queda en 100% (ancho del
+   padre), margin-left compensa para llegar al borde del viewport. */
+.bleed-left {
+  margin-left: calc(-1rem - var(--main-pad-x, calc(var(--frame-inset) * 2)));
+}
+
+/* ---------- .bleed-right: sangra solo a la derecha ----------------------- */
+.bleed-right {
+  margin-right: calc(-1rem - var(--main-pad-x, calc(var(--frame-inset) * 2)));
+}
+
+/* ---------- .in-margin: replica el padding de main ------------------------
+   Para un elemento que NO es hijo de main (ej. un modal, un tooltip, un
+   portal) pero quiere respetar el mismo sangrado. Equivale a ponerlo
+   como hijo de main. Útil combinado con position: fixed. */
+.in-margin {
+  padding-inline: var(--main-pad-x, calc(var(--frame-inset) * 2));
+}
+
+/* ---------- Helpers adicionales ------------------------------------------ */
+
+/* Para que el padding de main esté disponible como variable sin
+   recalcular en cada utility. La variable --main-pad-x NO se declara
+   aquí porque se sincroniza con main via el siguiente override. */

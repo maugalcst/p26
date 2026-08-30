@@ -1,54 +1,68 @@
-/* Redaction — familia de redacción progresiva (7 niveles). Cada nivel es una
-   familia distinta para poder alternar entre ellas por letra en runtime. */
+/* =============================================================================
+   globals.css — solo lo que afecta a TODO el documento:
+   1. @font-face de Redaction (7 niveles, animación DecoderText)
+   2. Tokens (--bg, --fg, --step-*, --frame-*, --scroll-progress, etc.)
+   3. Reset mínimo (box-sizing, margins base de tipografía, etc.)
+   4. Tipografía global (h1..h6, p, a, ul/ol, .meta)
+   5. Tema oscuro (html[data-theme="dark"])
+
+   NO contiene:
+   - Layout de main, nav, frame, scroll-virtual (→ app/layout.css)
+   - Utilities de sangría (→ app/utilities.css)
+   - Estilos de features (→ cada feature/*.css)
+   ========================================================================== */
+
+/* ---------- 1. Redaction: familia de redacción progresiva (7 niveles) ----- */
 @font-face {
   font-family: "Redaction";
-  src: url("/fonts/Redaction-Regular.woff2") format("woff2");
+  src: url("/assets/fonts/Redaction-Regular.woff2") format("woff2");
   font-weight: 400;
   font-display: swap;
 }
 @font-face {
   font-family: "Redaction";
-  src: url("/fonts/Redaction-Bold.woff2") format("woff2");
+  src: url("/assets/fonts/Redaction-Bold.woff2") format("woff2");
   font-weight: 700;
   font-display: swap;
 }
 @font-face {
   font-family: "Redaction10";
-  src: url("/fonts/Redaction10-Regular.woff2") format("woff2");
+  src: url("/assets/fonts/Redaction10-Regular.woff2") format("woff2");
   font-weight: 400;
   font-display: swap;
 }
 @font-face {
   font-family: "Redaction20";
-  src: url("/fonts/Redaction20-Regular.woff2") format("woff2");
+  src: url("/assets/fonts/Redaction20-Regular.woff2") format("woff2");
   font-weight: 400;
   font-display: swap;
 }
 @font-face {
   font-family: "Redaction35";
-  src: url("/fonts/Redaction35-Regular.woff2") format("woff2");
+  src: url("/assets/fonts/Redaction35-Regular.woff2") format("woff2");
   font-weight: 400;
   font-display: swap;
 }
 @font-face {
   font-family: "Redaction50";
-  src: url("/fonts/Redaction50-Regular.woff2") format("woff2");
+  src: url("/assets/fonts/Redaction50-Regular.woff2") format("woff2");
   font-weight: 400;
   font-display: swap;
 }
 @font-face {
   font-family: "Redaction70";
-  src: url("/fonts/Redaction70-Regular.woff2") format("woff2");
+  src: url("/assets/fonts/Redaction70-Regular.woff2") format("woff2");
   font-weight: 400;
   font-display: swap;
 }
 @font-face {
   font-family: "Redaction100";
-  src: url("/fonts/Redaction100-Regular.woff2") format("woff2");
+  src: url("/assets/fonts/Redaction100-Regular.woff2") format("woff2");
   font-weight: 400;
   font-display: swap;
 }
 
+/* ---------- 2. Tokens ----------------------------------------------------- */
 :root {
   /* color — nunca #000/#fff puros */
   --bg: #efedea;
@@ -57,7 +71,7 @@
   --cursor-color: #0137bf;
 
   /* tipografía (Bagnard vía @fontsource + Satoshi/Departure locales, self-hosted) */
-  --font-display: 'Bagnard', serif; /* headings display — un solo peso (400), sin bold falso */
+  --font-display: 'Bagnard', serif; /* headings display — un solo peso (400) */
   /* --font-body = Satoshi (400/700), --font-meta = Departure Mono (400) vía next/font */
 
   /* escala — 4 escalones, razón 1.25 (1.5625 = 1.25², 1.953 = 1.25³) */
@@ -79,17 +93,24 @@
   /* easing — exponencial suave para los movimientos del nav/marco */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* marco de hairlines — separación del contenido y color de la línea */
+  /* marco de hairlines — separación del contenido y color de la línea.
+     Estos son los ÚNICOS tokens de margen; todos los cálculos de sangría
+     se derivan de aquí vía app/utilities.css. Si cambias uno, todo se
+     reajusta automáticamente. */
   --frame-inset: clamp(56px, 8vw, 120px);
   --frame-line: color-mix(in srgb, var(--fg) 20%, transparent);
   --frame-offset: clamp(40px, 6vw, 96px);
   --frame-top-offset: clamp(64px, 9vw, 128px); /* línea superior más separada — cabecera del nav */
   --frame-grow: clamp(1.25rem, 3vw, 3rem); /* cuanto se despegan las líneas con video activo */
 
+  /* scroll virtual 0..1 — escrito por features/scroll/ScrollProgress.
+     Único estado global de scroll; las features lo leen con var(--scroll-progress). */
+  --scroll-progress: 0;
+
   color-scheme: light;
 }
 
-/* ---------- modo oscuro ----------
+/* ---------- tema oscuro ----------
    No es un swap literal de bg/fg: la tinta cálida (#39312c) abre paso a un
    fondo café-casi-negro y el crema pasa a texto. El azul del sistema se
    clarifica para no perderse sobre fondo oscuro. Los tokens derivados
@@ -101,13 +122,23 @@ html[data-theme="dark"] {
   --cursor-color: #fd8187; /* azul eléctrico legible sobre oscuro */
 }
 
+/* ---------- 3. Reset mínimo ----------------------------------------------- */
 * {
   box-sizing: border-box;
 }
 
+html,
+body {
+  /* scroll virtual: el navegador no desplaza. ScrollProgress captura
+     wheel/touch y publica --scroll-progress en :root. El height:100% se
+     mantiene para que la altura del documento no genere scrollbar nativa. */
+  overflow: hidden;
+  height: 100%;
+}
+
 body {
   margin: 0;
-  padding: 1rem;
+  padding: 1rem; /* margen externo (sangrado) del marco */
   font-family: var(--font-body);
   font-size: var(--step-0);
   line-height: 1.7;
@@ -123,6 +154,7 @@ body {
   color: var(--bg);
 }
 
+/* ---------- 4. Tipografía global ------------------------------------------ */
 h1,
 h2,
 h3,
@@ -194,463 +226,10 @@ li + li {
   margin-block-start: var(--space-05);
 }
 
-section {
-  margin-block-start: var(--space-3);
-}
-
-section:first-of-type {
-  margin-block-start: var(--space-2);
-}
-
-
-
-/* texto secundario — mismo color con menor opacidad, no un gris distinto */
+/* ---------- 5. Utilidades tipográficas ------------------------------------ */
 .meta {
   font-family: var(--font-meta);
   font-size: 0.85em;
   color: var(--fg-secondary);
   font-variant-numeric: tabular-nums;
-}
-
-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: var(--frame-top-offset);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 900; /* bajo el overlay de boot (950) y el marco (999) */
-  font-family: var(--font-meta);
-  font-size: 0.85em;
-  /* estado por scroll: en el top la línea superior se alinea con las demás
-     y el nav está oculto; al bajar (html.nav-revealed) la línea desciende
-     y el nav aparece con un desliz sutil */
-  opacity: 0;
-  transform: translateY(-10px);
-  visibility: hidden;
-  pointer-events: none;
-  transition:
-    opacity 700ms var(--ease-out-expo),
-    transform 700ms var(--ease-out-expo),
-    visibility 0s linear 700ms;
-}
-
-html.nav-revealed nav {
-  opacity: 1;
-  transform: translateY(0);
-  visibility: visible;
-  pointer-events: auto;
-  transition:
-    opacity 700ms var(--ease-out-expo),
-    transform 700ms var(--ease-out-expo),
-    visibility 0s;
-}
-
-.nav-items {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1.25rem;
-  list-style: none;
-  padding: 0;
-}
-
-/* botones del nav — mismo lenguaje que los links (mono, caps, inversión al hover) */
-.theme-toggle,
-.menu-toggle {
-  font-family: var(--font-meta);
-  font-size: 1em;
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-caps);
-  color: var(--fg);
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-}
-
-.theme-toggle:hover,
-.menu-toggle:hover {
-  background: var(--fg);
-  color: var(--bg);
-  text-decoration: none;
-}
-
-.theme-toggle:focus-visible,
-.menu-toggle:focus-visible {
-  outline: 1px solid var(--fg);
-  outline-offset: 4px;
-}
-
-/* MENU — dropdown bajo el botón */
-.menu-dropdown {
-  position: relative;
-}
-
-.menu-dropdown__list {
-  position: absolute;
-  top: calc(100% + 0.6rem);
-  right: 0;
-  min-width: 13em;
-  padding: var(--space-05) 0;
-  background: var(--bg);
-  border: 1px solid var(--frame-line);
-  box-shadow: 0 16px 40px -20px rgba(0, 0, 0, 0.35);
-}
-
-.menu-dropdown__list li + li {
-  margin-block-start: 0;
-}
-
-.menu-dropdown__list a {
-  display: block;
-  padding: 0.35em 1.1em;
-  text-decoration: none;
-}
-
-/* ---------- hero — nombre con efecto decoder ---------- */
-.hero {
-  position: relative;
-  min-height: calc(100svh - var(--frame-top-offset) - 2rem);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-.hero__name {
-  font-family: "Bagnard", serif;
-  font-weight: 400;
-  font-size: clamp(2.5rem, 7.5vw, 9.5rem);
-  line-height: 1.1;
-  letter-spacing: 0.01em;
-  margin: 0;
-  text-wrap: nowrap;
-  font-size-adjust: from-font;
-}
-
-.decoder-char {
-  display: inline-block;
-  line-height: 1;
-  text-align: center;
-  transition: color 200ms ease;
-}
-
-.decoder-char--ambient {
-  color: var(--cursor-color);
-}
-
-.hero__meta {
-  margin-block-start: var(--space-2);
-}
-
-/* los metas cuelgan del bloque del nombre (el nombre queda exactamente centrado) */
-.hero__meta--top,
-.hero__meta--role {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: max-content;
-  margin: 0;
-  white-space: nowrap;
-}
-
-.hero__meta--top {
-  bottom: calc(100% + var(--hero-meta-gap, clamp(0.75rem, 2vh, 1.5rem)));
-}
-
-.hero__meta--role {
-  top: calc(100% + var(--hero-meta-gap, clamp(0.75rem, 2vh, 1.5rem)));
-}
-
-.hero__mount {
-  display: inline-block;
-  width: 1.1em;
-  height: auto;
-  vertical-align: -0.12em;
-  color: var(--cursor-color);
-  fill: currentColor;
-}
-
-.hero__scroll {
-  position: absolute;
-  inset-inline: 0;
-  bottom: calc(var(--frame-offset) + 3.25rem);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.625rem;
-  font-family: var(--font-meta);
-  font-size: 0.625rem;
-  letter-spacing: var(--tracking-caps);
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--fg) 45%, transparent);
-  opacity: 1;
-  transition: opacity 600ms var(--ease-out-expo);
-}
-
-.hero__scroll__track {
-  position: relative;
-  width: 1px;
-  height: 2.5rem;
-  overflow: hidden;
-  background: color-mix(in srgb, var(--fg) 30%, transparent);
-}
-
-/* "+" que baja por la línea girando como engranaje — mismo lenguaje de la cruz */
-.hero__scroll__gear {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 14px;
-  height: 14px;
-  margin-left: -7px;
-  margin-top: -7px;
-  translate: 0 -1.25rem;
-  rotate: 0deg;
-  animation:
-    hero-gear-drift 2.2s var(--ease-out-expo) infinite,
-    hero-gear-spin 2.2s linear infinite;
-}
-
-.hero__scroll__gear::before,
-.hero__scroll__gear::after {
-  content: "";
-  position: absolute;
-  background: var(--fg);
-}
-
-.hero__scroll__gear::before {
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 2px;
-  transform: translateY(-50%);
-}
-
-.hero__scroll__gear::after {
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 2px;
-  transform: translateX(-50%);
-}
-
-@keyframes hero-gear-drift {
-  0% {
-    translate: 0 -1.25rem;
-  }
-  100% {
-    translate: 0 1.25rem;
-  }
-}
-
-@keyframes hero-gear-spin {
-  0% {
-    rotate: 0deg;
-  }
-  100% {
-    rotate: 360deg;
-  }
-}
-
-html.nav-revealed .hero__scroll {
-  opacity: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero__scroll__gear {
-    animation: none;
-  }
-}
-
-/* ---------- marco de hairlines fijo al viewport ---------- */
-
-
-
-main {
-  position: relative;
-  z-index: 1;
-  margin-top: var(--frame-top-offset);
-  padding-inline: calc(var(--frame-inset) + 12px);
-}
-
-@media (min-width: 768px) {
-  main {
-    padding-inline: calc(var(--frame-inset) * 2);
-  }
-}
-
-.frame {
-  position: fixed;
-  inset: 0;
-  z-index: 999;
-  pointer-events: none;
-}
-
-.frame > span {
-  position: absolute;
-}
-
-/* horizontales: trazos cortos, despegadas de la orilla */
-.frame .frame__top,
-.frame .frame__bottom {
-  left: 0;
-  right: 0;
-  height: 1px;
-}
-
-.frame .frame__top {
-  top: var(--frame-offset); /* alineada con las demás líneas en el top */
-}
-
-/* transiciones rápidas y suaves para el despegue de las líneas */
-.frame .frame__top,
-.frame .frame__bottom,
-.frame .frame__left,
-.frame .frame__right {
-  transition:
-    top 300ms var(--ease-out-expo),
-    bottom 300ms var(--ease-out-expo),
-    left 300ms var(--ease-out-expo),
-    right 300ms var(--ease-out-expo),
-    opacity 400ms ease-in-out;
-}
-
-html.nav-revealed .frame .frame__top {
-  top: var(--frame-top-offset); /* desciende junto con la aparición del nav */
-}
-
-.frame .frame__bottom {
-  bottom: var(--frame-offset);
-}
-
-/* verticales: trazos cortos, despegadas de la orilla */
-.frame .frame__left,
-.frame .frame__right {
-  top: 0;
-  bottom: 0;
-  width: 1px;
-}
-
-.frame .frame__left {
-  left: var(--frame-offset);
-}
-
-.frame .frame__right {
-  right: var(--frame-offset);
-}
-
-/* Dos capas sobre el mismo box (inset: 0), crossfade dashed ↔ solid:
-   ::before dibuja los trazos, ::after el sólido. border-style no es animable,
-   por eso cada capa se funde por opacidad en direcciones opuestas. */
-.frame .frame__top::before,
-.frame .frame__bottom::before,
-.frame .frame__top::after,
-.frame .frame__bottom::after,
-.frame .frame__left::before,
-.frame .frame__right::before,
-.frame .frame__left::after,
-.frame .frame__right::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-}
-
-/* trazos (ocultos en reposo) */
-.frame .frame__top::before,
-.frame .frame__bottom::before {
-  background: repeating-linear-gradient(
-    90deg,
-    var(--frame-line) 0 6px,
-    transparent 6px 12px
-  );
-  opacity: 0;
-}
-
-.frame .frame__left::before,
-.frame .frame__right::before {
-  background: repeating-linear-gradient(
-    180deg,
-    var(--frame-line) 0 6px,
-    transparent 6px 12px
-  );
-  opacity: 0;
-}
-
-/* sólido (visible en reposo) */
-.frame .frame__top::after,
-.frame .frame__bottom::after,
-.frame .frame__left::after,
-.frame .frame__right::after {
-  background: var(--frame-line);
-  opacity: 1;
-}
-
-.frame .frame__top::before,
-.frame .frame__bottom::before,
-.frame .frame__left::before,
-.frame .frame__right::before,
-.frame .frame__top::after,
-.frame .frame__bottom::after,
-.frame .frame__left::after,
-.frame .frame__right::after {
-  transition: opacity 400ms ease-in-out;
-}
-
-/* en movimiento: el sólido se funde a trazos */
-html.cursor-motion .frame .frame__top::before,
-html.cursor-motion .frame .frame__bottom::before,
-html.cursor-motion .frame .frame__left::before,
-html.cursor-motion .frame .frame__right::before {
-  opacity: 1;
-}
-
-html.cursor-motion .frame .frame__top::after,
-html.cursor-motion .frame .frame__bottom::after,
-html.cursor-motion .frame .frame__left::after,
-html.cursor-motion .frame .frame__right::after {
-  opacity: 0;
-}
-
-/* video activo: el marco cede protagonismo a las cotas (se funde a 35%) */
-html.video-active .frame .frame__top,
-html.video-active .frame .frame__bottom,
-html.video-active .frame .frame__left,
-html.video-active .frame .frame__right {
-  opacity: 0.35;
-}
-
-/* video activo: las líneas se despegan del margen del display (hacia el centro) */
-html.video-active .frame .frame__top {
-  top: calc(var(--frame-offset) + var(--frame-grow));
-}
-
-html.video-active .frame .frame__bottom {
-  bottom: calc(var(--frame-offset) + var(--frame-grow));
-}
-
-html.video-active .frame .frame__left {
-  left: calc(var(--frame-offset) + var(--frame-grow));
-}
-
-html.video-active .frame .frame__right {
-  right: calc(var(--frame-offset) + var(--frame-grow));
-}
-
-@media (prefers-reduced-motion: reduce) {
-  nav,
-  html.nav-revealed nav,
-  .frame .frame__top {
-    transition: none;
-  }
-}
-
-@media print {
-  .frame {
-    display: none;
-  }
 }

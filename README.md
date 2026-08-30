@@ -1,14 +1,15 @@
 # Mau — Portafolio 2026
 
 Portafolio personal de Mau (QA Automation Developer · Fullstack en formación).
-Sitio estático generado con Next.js App Router: navegación por páginas, boot
-sequence de terminal, cursor custom y un hero con efecto de redacción.
+Sitio estático generado con Next.js App Router: por ahora solo home (hero +
+sección de proyectos), con boot sequence de terminal, cursor custom y hero
+con efecto de redacción.
 
 ## Stack
 
 - Next.js 15 (App Router, Turbopack) + React 19 + TypeScript
-- Todas las páginas son estáticas (SSG/SSR) — no hay datos dinámicos
-- Contenido tipado en `data/content.ts`
+- Una sola ruta (`/`) — el resto de secciones se agregará cuando estén listas
+- Contenido del sitio (perfil) en `data/content.ts`
 - CSS puro con tokens y custom properties (sin frameworks de UI)
 
 ## Desarrollo
@@ -26,18 +27,13 @@ npm start        # servir el build
 ```
 app/
   layout.tsx            # fuentes, script anti-FOUC del tema, boot, nav, cursor, marco
-  page.tsx              # hero con efecto de redacción y videos
-  experiencia/          # índice + detalle por [id]
-  proyectos/
-  skills/
-  educacion/
-  sobre-mi/
-  contacto/
-components/             # BootSequence, Nav, MenuDropdown, ThemeToggle,
-                        # RotatingCursor, ScrollNav, HeroReveal, DecoderText
+  page.tsx              # hero con efecto de redacción y videos + sección de proyectos
+  fonts/                # Satoshi + Departure Mono (cargadas con next/font)
+components/             # BootSequence, Nav, ThemeToggle, RotatingCursor,
+                        # ScrollNav, HeroReveal, DecoderText, ProjectsSection,
+                        # RevealTitle
 data/
-  content.ts            # única fuente del contenido (experiencias, proyectos,
-                        # skills, educación, site) + getters
+  content.ts            # perfil del sitio (site)
 hooks/                  # useTheme, useRotatingCursor (spring físico)
 public/
   videos/               # 4 clips ambientales del hero (muted, poster por defecto)

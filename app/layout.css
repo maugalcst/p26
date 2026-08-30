@@ -1,0 +1,391 @@
+/* =============================================================================
+   layout.css — layout principal del documento.
+   1. <main>: padding escalado sin saltos, grid 1×1, altura del viewport
+   2. <nav>: header fijo con glass pixelado, aparece con html.nav-revealed
+   3. .frame: 4 hairlines infinitas ancladas al viewport
+   4. .scroll-virtual-progress: puente entre --scroll-progress y las features
+
+   IMPORTANTE: este archivo NO contiene estilos de features. Las features
+   importan su propio CSS. Si necesitas estilos de un componente específico,
+   van en features/<componente>/<Componente>.css.
+   ========================================================================== */
+
+/* ---------- 1. <main> -----------------------------------------------------
+   Es el área de contenido del documento. Su padding es la única fuente de
+   verdad para el sangrado lateral: cualquier elemento que quiera respetar
+   los márgenes del marco solo necesita ser hijo directo de main. Para
+   cruzar esos márgenes, usa las utilities de app/utilities.css.
+
+   La altura se calcula contra svh (small viewport height) para que en
+   móviles la barra del browser no descuadre el layout. El grid 1×1 apila
+   las secciones animables (hero, projects) en la misma celda; la opacidad
+   de cada una la controla el scroll-virtual. */
+main {
+  position: relative;
+  z-index: 1;
+  margin-top: var(--frame-top-offset);
+  height: calc(100svh - var(--frame-top-offset) - 2rem);
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  align-items: stretch;
+  /* Padding escalado: una sola curva de 56px+12 (móvil) a 240px (desktop)
+     sin saltos bruscos. El +12 es el "aire extra" que tenías en <768px. */
+  padding-inline: clamp(calc(var(--frame-inset) + 12px), calc(2 * var(--frame-inset) - 16px + 1.5vw), calc(var(--frame-inset) * 2));
+  /* Publica el padding efectivo como variable para que las utilities de
+     sangría (app/utilities.css) lo lean sin recalcular. Una sola fuente
+     de verdad: cambia aquí y todo se reajusta. */
+  --main-pad-x: clamp(calc(var(--frame-inset) + 12px), calc(2 * var(--frame-inset) - 16px + 1.5vw), calc(var(--frame-inset) * 2));
+}
+
+/* ---------- 2. <nav> ------------------------------------------------------
+   Header fijo, glass pixelado, oculto en el top, aparece con html.nav-revealed.
+   Las clases html.cursor-* se usan en otras partes; aquí solo nav-revealed. */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--frame-top-offset);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 900; /* bajo el overlay de boot (950) y el marco (999) */
+  font-family: var(--font-meta);
+  font-size: 0.85em;
+  /* los elementos que pasan por detrás se difuminan y pixelean contra el nav:
+     blur fuerte (glass) + mosaico de píxeles en retícula 5px sobre fondo
+     translúcido para que el efecto se lea como vidrio pixeleado */
+  background-color: color-mix(in srgb, var(--bg) 55%, transparent);
+  background-image: repeating-conic-gradient(
+    color-mix(in srgb, var(--fg) 4%, transparent) 0% 25%,
+    transparent 0% 50%
+  );
+  background-size: 5px 5px;
+  backdrop-filter: blur(8px) saturate(1.25);
+  -webkit-backdrop-filter: blur(8px) saturate(1.25);
+  /* estado base: oculto; al bajar (html.nav-revealed) la línea desciende
+     y el nav aparece con un desliz sutil. La visibility se difiere para
+     evitar parpadeo de focus al esconder. */
+  opacity: 0;
+  transform: translateY(-10px);
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 700ms var(--ease-out-expo),
+    transform 700ms var(--ease-out-expo),
+    visibility 0s linear 700ms;
+}
+
+html.nav-revealed nav {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity 700ms var(--ease-out-expo),
+    transform 700ms var(--ease-out-expo),
+    visibility 0s;
+}
+
+.nav-items {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem;
+  list-style: none;
+  padding: 0;
+}
+
+/* el margen global li + li empujaría los tabs 2-5 hacia abajo */
+.nav-items li + li {
+  margin-block-start: 0;
+}
+
+/* grupo separado del nav: toggle de tema anclado a una distancia del marco */
+.nav-aside {
+  position: absolute;
+  right: var(--frame-inset);
+  display: flex;
+  align-items: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* botones del nav — mismo lenguaje que los links (mono, caps, inversión al hover) */
+.theme-toggle,
+.menu-toggle {
+  font-family: var(--font-meta);
+  font-size: 1em;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+  color: var(--fg);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.theme-toggle:hover,
+.menu-toggle:hover {
+  background: var(--fg);
+  color: var(--bg);
+  text-decoration: none;
+}
+
+.theme-toggle:focus-visible,
+.menu-toggle:focus-visible {
+  outline: 1px solid var(--fg);
+  outline-offset: 4px;
+}
+
+/* MENU — dropdown bajo el botón */
+.menu-dropdown {
+  position: relative;
+}
+
+.menu-dropdown__list {
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  right: 0;
+  min-width: 13em;
+  padding: var(--space-05) 0;
+  background: var(--bg);
+  border: 1px solid var(--frame-line);
+  box-shadow: 0 16px 40px -20px rgba(0, 0, 0, 0.35);
+}
+
+.menu-dropdown__list li + li {
+  margin-block-start: 0;
+}
+
+.menu-dropdown__list a {
+  display: block;
+  padding: 0.35em 1.1em;
+  text-decoration: none;
+}
+
+/* ---------- 3. .frame: 4 hairlines infinitas ------------------------------
+   Cada hairline es un <span> hijo de .frame. position: fixed las ancla
+   al viewport. Las horizontales se extienden 100vw (left:-50vw + width:200vw
+   no funciona porque movería la posición; en su lugar usamos left:0; right:0
+   que ya da 100vw, y para ser "infinitas" extendemos con inset 0 y dejamos
+   que la línea cruce más allá si hace falta). Como aquí solo necesitamos
+   que cubran el viewport, left:0; right:0 es suficiente.
+
+   En el estado original cada hairline se extendía "50vw por cada lado"
+   con un truco de máscara; en esta versión la línea simplemente cruza
+   el viewport de borde a borde. Si en el futuro necesitas que se
+   "extienda" más, puedes darle al span un width/height mayor con
+   transform: translate(-50%, -50%) o usar un gradiente que se desvanezca. */
+.frame {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  pointer-events: none;
+}
+
+.frame > span {
+  position: absolute;
+  background: transparent;
+}
+
+/* horizontales: pegadas a top/bottom con el offset del marco */
+.frame__top,
+.frame__bottom {
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+
+.frame__top {
+  top: var(--frame-offset); /* alineada con las demás líneas en el top */
+}
+
+.frame__bottom {
+  bottom: var(--frame-offset);
+}
+
+/* verticales: pegadas a left/right con el offset del marco */
+.frame__left,
+.frame__right {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+
+.frame__left {
+  left: var(--frame-offset);
+}
+
+.frame__right {
+  right: var(--frame-offset);
+}
+
+/* transiciones rápidas y suaves para el despegue de las líneas con
+   el nav (top desciende) y con video activo (todas se separan). */
+.frame__top,
+.frame__bottom,
+.frame__left,
+.frame__right {
+  transition:
+    top 300ms var(--ease-out-expo),
+    bottom 300ms var(--ease-out-expo),
+    left 300ms var(--ease-out-expo),
+    right 300ms var(--ease-out-expo),
+    opacity 400ms ease-in-out;
+}
+
+html.nav-revealed .frame__top {
+  top: var(--frame-top-offset); /* desciende junto con la aparición del nav */
+}
+
+/* video activo: el marco cede protagonismo a las cotas (se funde a 35%) */
+html.video-active .frame__top,
+html.video-active .frame__bottom,
+html.video-active .frame__left,
+html.video-active .frame__right {
+  opacity: 0.35;
+}
+
+/* video activo: las líneas se despegan del margen del display (hacia el centro) */
+html.video-active .frame__top {
+  top: calc(var(--frame-offset) + var(--frame-grow));
+}
+
+html.video-active .frame__bottom {
+  bottom: calc(var(--frame-offset) + var(--frame-grow));
+}
+
+html.video-active .frame__left {
+  left: calc(var(--frame-offset) + var(--frame-grow));
+}
+
+html.video-active .frame__right {
+  right: calc(var(--frame-offset) + var(--frame-grow));
+}
+
+/* Dos capas sobre el mismo box (::before/::after) para crossfade dashed ↔
+   solid con cursor-motion. border-style no es animable, por eso cada capa
+   se funde por opacidad. */
+.frame__top::before,
+.frame__bottom::before,
+.frame__top::after,
+.frame__bottom::after,
+.frame__left::before,
+.frame__right::before,
+.frame__left::after,
+.frame__right::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transition: opacity 400ms ease-in-out;
+}
+
+/* trazos (ocultos en reposo) */
+.frame__top::before,
+.frame__bottom::before {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--frame-line) 0 6px,
+    transparent 6px 12px
+  );
+  opacity: 0;
+}
+
+.frame__left::before,
+.frame__right::before {
+  background: repeating-linear-gradient(
+    180deg,
+    var(--frame-line) 0 6px,
+    transparent 6px 12px
+  );
+  opacity: 0;
+}
+
+/* sólido (visible en reposo). Vive en ::after para que html.cursor-motion
+   pueda apagarlo limpiamente; el span padre queda transparente. */
+.frame__top::after,
+.frame__bottom::after,
+.frame__left::after,
+.frame__right::after {
+  background: var(--frame-line);
+  opacity: 1;
+}
+
+/* en movimiento: el sólido se funde a trazos */
+html.cursor-motion .frame__top::before,
+html.cursor-motion .frame__bottom::before,
+html.cursor-motion .frame__left::before,
+html.cursor-motion .frame__right::before {
+  opacity: 1;
+}
+
+html.cursor-motion .frame__top::after,
+html.cursor-motion .frame__bottom::after,
+html.cursor-motion .frame__left::after,
+html.cursor-motion .frame__right::after {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  nav,
+  html.nav-revealed nav,
+  .frame__top {
+    transition: none;
+  }
+}
+
+@media print {
+  .frame {
+    display: none;
+  }
+}
+
+/* ---------- 4. Scroll virtual ---------------------------------------------
+   Las dos secciones animables (hero, projects) son grid items en la
+   misma celda 1/1 de main. Cada una tiene un wrapper interno (.scroll-target)
+   que recibe la transform/opacity. El wrapper se anima según el progreso.
+
+   ¿Por qué un wrapper y no la sección directa?
+   Porque si la sección tiene `transform: translateY(...)`, sus hijos con
+   `position: fixed` se anclan a la sección (containing block) en vez
+   del viewport. Por eso la transform va en el wrapper.
+
+   Contrato: cualquier sección animable del scroll virtual debe tener:
+   - clase .scroll-section en el contenedor raíz (la sección)
+   - clase .scroll-target en el wrapper interno que recibe la animación
+   - data-scroll-range="0..1" (opcional, para rangos personalizados)
+   - data-scroll-role="hero" o "after" (define cuándo entra/sale)
+
+   Por ahora solo tenemos dos roles: "hero" (visible en [0, 0.5]) y
+   "after" (visible en [0.5, 1]). El crossfade se hace en 0.5. */
+main > .scroll-section {
+  grid-column: 1;
+  grid-row: 1;
+  margin-block-start: 0;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* el hero se desvanece mientras el progreso sube; entra desde su lugar */
+main > .scroll-section.scroll-section--hero > .scroll-target {
+  opacity: max(0, 1 - calc(var(--scroll-progress) * 2));
+  transform: translateY(calc(var(--scroll-progress) * -2rem));
+}
+
+/* la sección "after" (proyectos) entra cuando el hero se va */
+main > .scroll-section.scroll-section--after {
+  pointer-events: none;
+}
+
+main > .scroll-section.scroll-section--after > .scroll-target {
+  opacity: max(0, calc((var(--scroll-progress) - 0.5) * 2));
+  transform: translateY(calc((1 - var(--scroll-progress)) * 2rem));
+}
+
+html.scroll-mid main > .scroll-section.scroll-section--after {
+  pointer-events: auto;
+}

@@ -32,7 +32,14 @@ export default function ScrollProgress() {
       current += (target - current) * 0.12;
       if (Math.abs(target - current) < 0.0005) current = target;
       setProgress(current);
-      if (current !== target) raf = requestAnimationFrame(tick);
+      if (current !== target) {
+        raf = requestAnimationFrame(tick);
+      } else {
+        // snap: resetear raf para que la próxima llamada a move()
+        // pueda lanzar un nuevo tick. Sin esto, raf conserva el ID
+        // del último frame y move() ve !raf === false y no arranca.
+        raf = 0;
+      }
     };
 
     const move = (delta: number) => {

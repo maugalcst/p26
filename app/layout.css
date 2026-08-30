@@ -315,18 +315,20 @@ html.video-active .frame__right {
   opacity: 1;
 }
 
-/* en movimiento: el sólido se funde a trazos */
-html.cursor-motion .frame__top::before,
-html.cursor-motion .frame__bottom::before,
-html.cursor-motion .frame__left::before,
-html.cursor-motion .frame__right::before {
+/* en movimiento: el sólido se funde a trazos. Solo aplica cuando el
+   hero está en pantalla (scroll-hero, p < 0.2); en projects o
+   experience el marco se queda en su estado de reposo. */
+html.scroll-hero.cursor-motion .frame__top::before,
+html.scroll-hero.cursor-motion .frame__bottom::before,
+html.scroll-hero.cursor-motion .frame__left::before,
+html.scroll-hero.cursor-motion .frame__right::before {
   opacity: 1;
 }
 
-html.cursor-motion .frame__top::after,
-html.cursor-motion .frame__bottom::after,
-html.cursor-motion .frame__left::after,
-html.cursor-motion .frame__right::after {
+html.scroll-hero.cursor-motion .frame__top::after,
+html.scroll-hero.cursor-motion .frame__bottom::after,
+html.scroll-hero.cursor-motion .frame__left::after,
+html.scroll-hero.cursor-motion .frame__right::after {
   opacity: 0;
 }
 
@@ -345,8 +347,8 @@ html.cursor-motion .frame__right::after {
 }
 
 /* ---------- 4. Scroll virtual ---------------------------------------------
-   Las dos secciones animables (hero, projects) son grid items en la
-   misma celda 1/1 de main. Cada una tiene un wrapper interno (.scroll-target)
+   Las secciones animables (hero, projects, experience) son grid items en
+   la misma celda 1/1 de main. Cada una tiene un wrapper interno (.scroll-target)
    que recibe la transform/opacity. El wrapper se anima según el progreso.
 
    ¿Por qué un wrapper y no la sección directa?
@@ -354,14 +356,18 @@ html.cursor-motion .frame__right::after {
    `position: fixed` se anclan a la sección (containing block) en vez
    del viewport. Por eso la transform va en el wrapper.
 
-   Contrato: cualquier sección animable del scroll virtual debe tener:
-   - clase .scroll-section en el contenedor raíz (la sección)
-   - clase .scroll-target en el wrapper interno que recibe la animación
-   - data-scroll-range="0..1" (opcional, para rangos personalizados)
-   - data-scroll-role="hero" o "after" (define cuándo entra/sale)
+   Distribución del recorrido con 3 secciones. Mesetas de 0.2 y crossfades
+   largos de 0.3 entre ellas (smooth). La sección N se desvanece
+   completamente antes de que la N+1 llegue a su meseta.
 
-   Por ahora solo tenemos dos roles: "hero" (visible en [0, 0.5]) y
-   "after" (visible en [0.5, 1]). El crossfade se hace en 0.5. */
+     [0.0, 0.2]   hero al 100% (meseta)
+     [0.2, 0.5]   hero fade out + projects fade in (crossfade 0.3)
+     [0.5, 0.7]   projects al 100% (meseta)
+     [0.7, 0.9]   projects fade out + experience fade in (crossfade 0.2)
+     [0.9, 1.0]   experience al 100% (meseta) */
+
+/* por defecto todas las secciones del grid 1/1 son invisibles y no
+   ocupan interacción. Cada rol las activa con su ventana. */
 main > .scroll-section {
   grid-column: 1;
   grid-row: 1;
@@ -370,22 +376,115 @@ main > .scroll-section {
   min-height: 0;
 }
 
-/* el hero se desvanece mientras el progreso sube; entra desde su lugar */
+main > .scroll-section > .scroll-target {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 400ms ease, visibility 0s linear 400ms;
+}
+
+/* HERO: ventana [0, 0.5]. Meseta 1 en [0, 0.2], fade out [0.2, 0.5].
+   pointer-events:none por defecto: el hero está en la celda 1/1 del grid
+   junto con projects y experience. Si no se corta, sus hovers caen sobre
+   el hero invisible desde otras secciones y disparan el video-active
+   (las hairlines del marco se mueven aunque no estés en el hero). Solo
+   recibe pointer-events cuando html.scroll-hero está activo. */
+main > .scroll-section.scroll-section--hero {
+  pointer-events: none;
+}
+
+html.scroll-hero main > .scroll-section.scroll-section--hero {
+  pointer-events: auto;
+}
+
 main > .scroll-section.scroll-section--hero > .scroll-target {
-  opacity: max(0, 1 - calc(var(--scroll-progress) * 2));
+  opacity: max(0, min(1, calc((0.5 - var(--scroll-progress)) * 3.333)));
+  visibility: visible;
   transform: translateY(calc(var(--scroll-progress) * -2rem));
 }
 
-/* la sección "after" (proyectos) entra cuando el hero se va */
+/* PROJECTS: ventana [0.2, 0.9]. Fade in [0.2, 0.5], meseta [0.5, 0.7],
+   fade out [0.7, 0.9]. visibility:visible cuando scroll-mid (p >= 0.5).
+   El CONTENIDO INTERNO tiene su propio fade con delay: aparece tarde en
+   la meseta [0.55, 0.7] y desaparece temprano al salir [0.7, 0.78].
+   Eso da la sensación de que la info "se revela" cuando la sección
+   ya está bien plantada, no durante el crossfade. */
+html.scroll-mid main > .scroll-section.scroll-section--after > .scroll-target {
+  visibility: visible;
+}
+
 main > .scroll-section.scroll-section--after {
   pointer-events: none;
 }
 
 main > .scroll-section.scroll-section--after > .scroll-target {
-  opacity: max(0, calc((var(--scroll-progress) - 0.5) * 2));
-  transform: translateY(calc((1 - var(--scroll-progress)) * 2rem));
+  opacity: max(
+    0,
+    min(
+      calc((var(--scroll-progress) - 0.2) * 3.333),
+      calc((0.9 - var(--scroll-progress)) * 5),
+    ),
+  );
+  transform: translateY(calc((0.5 - var(--scroll-progress)) * 2rem));
 }
 
 html.scroll-mid main > .scroll-section.scroll-section--after {
   pointer-events: auto;
+}
+
+/* el contenido de projects (todo lo que está dentro de .scroll-target)
+   tiene su propio fade con transition CSS. Por qué no usamos la curva
+   con var(--scroll-progress): las transitions no se disparan cuando la
+   propiedad usa una CSS variable que cambia (solo animan cuando la
+   propiedad misma cambia de valor). Por eso usamos la clase
+   html.scroll-mid (p >= 0.5) que cambia opacity directamente.
+
+   Truco: la transition usa 400ms ease-out, lo que da un fade in que se
+   siente gradual. El "snap" en p=0.5 se ve porque la clase se toggle
+   de un frame a otro; el transition suaviza ese cambio. */
+main > .scroll-section.scroll-section--after > .scroll-target > * {
+  opacity: 0;
+  transition: opacity 400ms ease-out;
+}
+
+html.scroll-mid main > .scroll-section.scroll-section--after > .scroll-target > * {
+  opacity: 1;
+  transition-delay: 200ms; /* pequeño delay: el contenido aparece
+                              un poco después de que la sección se
+                              planta, dando la sensación de "revelar" */
+}
+
+/* EXPERIENCE: ventana [0.7, 1]. Fade in [0.7, 0.9], meseta [0.9, 1].
+   visibility:visible cuando scroll-end (p >= 0.9). */
+html.scroll-end main > .scroll-section.scroll-section--after-2 > .scroll-target {
+  visibility: visible;
+}
+
+main > .scroll-section.scroll-section--after-2 {
+  pointer-events: none;
+}
+
+main > .scroll-section.scroll-section--after-2 > .scroll-target {
+  opacity: max(0, min(1, calc((var(--scroll-progress) - 0.7) * 5)));
+  transform: translateY(calc((1 - var(--scroll-progress)) * 2rem));
+}
+
+/* ---------- 5. Nav jump transitions ---------------------------------------
+   Cuando el usuario hace click en el nav (#proyectos, #experiencia),
+   ScrollProgress aplica html.nav-jump durante 700ms. Esa clase habilita
+   transitions en los wrappers de cada sección: el cambio de
+   var(--scroll-progress) se anima con un fade suave de opacidad
+   (sin transform — solo fade, sin movimiento).
+
+   Por qué solo opacity: el usuario pidió que el fade no incluya
+   movimiento. La curva con var(--scroll-progress) sigue aplicando
+   transform: translateY al wrapper (eso da el efecto de "slide"
+   durante el scroll-virtual), pero durante nav-jump la transition
+   solo cubre opacity, no transform. */
+html.nav-jump main > .scroll-section > .scroll-target {
+  /* durante el fade por nav, anulamos el transform para evitar el
+     salto de posición al cambiar var(--scroll-progress) de golpe. */
+  transform: none !important;
+  transition:
+    opacity 600ms ease,
+    visibility 0s linear 600ms;
 }

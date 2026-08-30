@@ -21,10 +21,19 @@ export default function ScrollProgress() {
     const setProgress = (v: number) => {
       root.style.setProperty("--scroll-progress", v.toFixed(4));
       root.setAttribute("data-progress", v.toFixed(3));
-      /* mitad del recorrido: a partir de aquí el hero deja de recibir
-         pointer-events (queda debajo de los proyectos en la misma celda
-         del grid) y los proyectos vuelven a capturarlos. */
-      root.classList.toggle("scroll-mid", v >= 0.5);
+      /* projects visible durante su meseta [0.5, 0.85]. Arriba de 0.85,
+         experience está entrando y projects debe ceder — la clase
+         scroll-mid se apaga para que el contenido de projects se
+         desvanezca. */
+      root.classList.toggle("scroll-mid", v >= 0.5 && v < 0.85);
+      /* experience entra a partir de p=0.9 (inicio de su meseta). */
+      root.classList.toggle("scroll-end", v >= 0.9);
+      /* hero en su meseta [0, 0.2]. Los elementos que solo deben
+         reaccionar al cursor cuando el hero está en pantalla (marco,
+         cotas) usan html.scroll-hero.cursor-motion en lugar de solo
+         html.cursor-motion. Así no se "mueven" al pasar el cursor
+         sobre projects o experience. */
+      root.classList.toggle("scroll-hero", v < 0.2);
     };
 
     const tick = () => {
@@ -43,17 +52,22 @@ export default function ScrollProgress() {
     };
 
     const move = (delta: number) => {
-      target = Math.max(0, Math.min(1, target + delta));
+      // cap en 0.7: el scroll-virtual solo controla hero↔projects.
+      // A partir de ahí (el último 30% del recorrido), solo se llega
+      // vía click en el nav. Evita que el usuario "salte" experience
+      // por accidente con un wheel muy largo.
+      target = Math.max(0, Math.min(0.7, target + delta));
       if (!raf) raf = requestAnimationFrame(tick);
     };
 
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
-      // deltaY positivo = scroll hacia abajo. Factor 0.0035: una
-      // rueda mecánica (~100px) mueve ~0.35 — 3 ruedas cubren el
-      // recorrido entero. Un golpe de trackpad (~5px) mueve ~0.018,
-      // suficiente para sentir progreso sin saltos bruscos.
-      move(e.deltaY * 0.0035);
+      // deltaY positivo = scroll hacia abajo. Factor 0.0010: una
+      // rueda mecánica (~100px) mueve ~0.10 — 10 ruedas para ir de 0
+      // a 1. Eso da gaps grandes entre secciones. Un golpe de
+      // trackpad (~5px) mueve ~0.005, suficiente para sentir
+      // progreso sin saltos bruscos.
+      move(e.deltaY * 0.0010);
     };
 
     let touchStartY = 0;
@@ -65,7 +79,7 @@ export default function ScrollProgress() {
       const delta = touchStartY - y;
       touchStartY = y;
       e.preventDefault();
-      move(delta * 0.005);
+      move(delta * 0.0018);
     };
 
     const onKey = (e: KeyboardEvent) => {
@@ -109,8 +123,17 @@ export default function ScrollProgress() {
       );
       const idx = sections.indexOf(targetEl);
       if (idx < 0) return;
-      target = idx / Math.max(1, sections.length - 1);
-      if (!raf) raf = requestAnimationFrame(tick);
+      // cancela cualquier lerp en curso y aplica target instantáneo.
+      // La transición CSS (html.nav-jump) se encarga del fade visual.
+      cancelAnimationFrame(raf);
+      raf = 0;
+      current = idx / Math.max(1, sections.length - 1);
+      target = current;
+      setProgress(current);
+      // marca la transición de nav: las CSS rules de los wrappers
+      // usan transition para hacer fade in/out entre secciones.
+      root.classList.add("nav-jump");
+      window.setTimeout(() => root.classList.remove("nav-jump"), 700);
     };
 
     window.addEventListener("wheel", onWheel, { passive: false, capture: true });

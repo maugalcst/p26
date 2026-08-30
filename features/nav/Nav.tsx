@@ -2,6 +2,7 @@ import ThemeToggle from "@/features/theme/ThemeToggle";
 
 const sections = [
   { href: "#proyectos", label: "PROYECTOS" },
+  { href: "#experiencia", label: "EXPERIENCIA" },
 ];
 
 export default function Nav() {

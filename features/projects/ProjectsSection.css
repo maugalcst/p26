@@ -128,12 +128,13 @@ html.scroll-mid .projects__vline {
   transition: opacity 400ms ease-in-out;
 }
 
-/* cursor en movimiento: el sólido se funde a trazos, igual que el marco */
-html.cursor-motion .projects__vline::before {
+/* cursor en movimiento (solo cuando projects está en su meseta):
+   el sólido se funde a trazos, igual que el marco. */
+html.scroll-mid.cursor-motion .projects__vline::before {
   opacity: 1;
 }
 
-html.cursor-motion .projects__vline::after {
+html.scroll-mid.cursor-motion .projects__vline::after {
   opacity: 0;
 }
 
@@ -260,12 +261,12 @@ html.cursor-motion .projects__vline::after {
   opacity: 1;
 }
 
-/* cursor en movimiento: el sólido se funde a trazos, igual que el marco */
-html.cursor-motion .projects__row::before {
+/* cursor en movimiento (solo con projects en pantalla) */
+html.scroll-mid.cursor-motion .projects__row::before {
   opacity: 1;
 }
 
-html.cursor-motion .projects__row::after {
+html.scroll-mid.cursor-motion .projects__row::after {
   opacity: 0;
 }
 
@@ -303,11 +304,11 @@ html.cursor-motion .projects__row::after {
   opacity: 1;
 }
 
-html.cursor-motion .projects__row__top-hairline::before {
+html.scroll-mid.cursor-motion .projects__row__top-hairline::before {
   opacity: 1;
 }
 
-html.cursor-motion .projects__row__top-hairline::after {
+html.scroll-mid.cursor-motion .projects__row__top-hairline::after {
   opacity: 0;
 }
 

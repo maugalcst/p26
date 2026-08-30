@@ -1,0 +1,110 @@
+/* ---------- sección 02 · experiencia ----------
+   Placeholder. Misma sangría que PROYECTOS: el título hereda la sangría
+   al marco vía .projects__title-band. Por ahora no se usan utilities
+   porque el cálculo es puntual; cuando haya más secciones se unifica. */
+
+.experience {
+  position: relative;
+}
+
+.experience__content {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* banda del título: sangra al marco igual que PROYECTOS */
+.experience__title-band {
+  margin-left: calc(var(--frame-offset) - 1rem - var(--main-pad-x, calc(var(--frame-inset) * 2)));
+  padding-left: calc(var(--frame-inset) / 2);
+  padding-block: clamp(1.25rem, 2.4vh, 2rem);
+  margin-block-end: clamp(0.75rem, 1.6vh, 1.25rem);
+}
+
+.experience__title {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: var(--step-2);
+  line-height: 1.1;
+  letter-spacing: var(--tracking-caps);
+  color: var(--fg);
+  margin: 0;
+}
+
+/* lista de experiencias */
+.experience__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2.4vh, 2rem);
+  padding-left: calc(var(--frame-inset) / 2);
+  padding-right: var(--frame-inset);
+}
+
+.experience__row {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  gap: clamp(0.75rem, 1.6vw, 1.5rem);
+  padding-block: clamp(0.5rem, 1.2vh, 0.75rem);
+  border-bottom: 1px solid var(--frame-line);
+}
+
+.experience__row:last-child {
+  border-bottom: 0;
+}
+
+.experience__row__no {
+  font-family: var(--font-meta);
+  font-size: 0.85em;
+  color: color-mix(in srgb, var(--fg) 55%, transparent);
+  font-variant-numeric: tabular-nums;
+  padding-block-start: 0.25rem;
+}
+
+.experience__row__role {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 1.05em;
+  margin: 0 0 0.2em 0;
+  color: var(--fg);
+}
+
+.experience__row__meta {
+  font-family: var(--font-meta);
+  font-size: 0.8em;
+  color: color-mix(in srgb, var(--fg) 55%, transparent);
+  margin: 0 0 0.6em 0;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+}
+
+.experience__row__desc {
+  font-size: 0.95em;
+  line-height: 1.5;
+  color: var(--fg-secondary);
+  margin: 0;
+  max-width: 56ch;
+}
+
+/* móvil: una columna, número arriba del bloque */
+@media (max-width: 767px) {
+  .experience__title-band {
+    margin-left: 0;
+    padding-left: 0;
+  }
+
+  .experience__list {
+    padding-left: 0;
+  }
+
+  .experience__row {
+    grid-template-columns: 1fr;
+  }
+
+  .experience__row__no {
+    padding-block-start: 0;
+  }
+}

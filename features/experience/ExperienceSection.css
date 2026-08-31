@@ -1,25 +1,36 @@
 /* ---------- sección 02 · experiencia ----------
-   Placeholder. Misma sangría que PROYECTOS: el título hereda la sangría
-   al marco vía .projects__title-band. Por ahora no se usan utilities
-   porque el cálculo es puntual; cuando haya más secciones se unifica. */
+   Una pantalla, sin scroll interno. El header cruza el viewport con
+   width: 100vw + margin-left negativo. Debajo, una retícula 38/62
+   dividida por una hairline vertical (position: fixed, fuera del
+   scroll-target) y un wrapper de cursor que "encierra" la tarjeta
+   activa con el color del cursor. */
 
 .experience {
-  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: calc(100svh - var(--title-bottom-y, var(--frame-top-offset)));
 }
 
 .experience__content {
-  position: relative;
-  height: 100%;
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
-/* banda del título: sangra al marco igual que PROYECTOS */
+/* banda del título: cruza el viewport de borde a borde. El bloque se
+   extiende con width: 100vw + margin-left negativo que deshace el
+   padding de main; el título se centra dentro con text-align: center
+   y display: inline-block. */
 .experience__title-band {
-  margin-left: calc(var(--frame-offset) - 1rem - var(--main-pad-x, calc(var(--frame-inset) * 2)));
-  padding-left: calc(var(--frame-inset) / 2);
-  padding-block: clamp(1.25rem, 2.4vh, 2rem);
+  width: 100vw;
+  margin-left: calc(-1rem - var(--main-pad-x, calc(var(--frame-inset) * 2)));
+  padding-block: clamp(1rem, 2vh, 1.5rem);
+  padding-left: var(--main-pad-x, calc(var(--frame-inset) * 2));
+  padding-right: var(--main-pad-x, calc(var(--frame-inset) * 2));
   margin-block-end: clamp(0.75rem, 1.6vh, 1.25rem);
+  text-align: center;
 }
 
 .experience__title {
@@ -30,81 +41,433 @@
   letter-spacing: var(--tracking-caps);
   color: var(--fg);
   margin: 0;
+  display: inline-block;
 }
 
-/* lista de experiencias */
-.experience__list {
+/* fill: fondo que cubre el área DEBAJO de la hairline inferior en su
+   posición final. Mismo lenguaje del navbar: glass pixeleado. */
+.experience__fill {
+  position: fixed;
+  top: calc(var(--title-bottom-y, var(--frame-top-offset)) + 1px);
+  left: calc(var(--frame-offset) + var(--frame-close-x, 4rem));
+  right: calc(var(--frame-offset) + var(--frame-close-x, 4rem));
+  bottom: 0;
+  background-color: color-mix(in srgb, var(--experience-fill) 55%, transparent);
+  background-image: repeating-conic-gradient(
+    color-mix(in srgb, var(--fg) 4%, transparent) 0% 25%,
+    transparent 0% 50%
+  );
+  background-size: 7px 7px;
+  backdrop-filter: blur(8px) saturate(1.25);
+  -webkit-backdrop-filter: blur(8px) saturate(1.25);
+  opacity: 0;
+  transition: opacity 0ms;
+  pointer-events: none;
+}
+
+html.scroll-end .experience__fill {
+  opacity: 1;
+  transition: opacity 600ms var(--ease-out-expo) 1000ms;
+}
+
+/* ---------- retícula 38 / 62 ----------
+   La grid vuelve al flujo normal (no position: fixed). La altura
+   está limitada por .experience__content (que es el scroll-target y
+   tiene la misma altura que el fill). Sangra al borde INTERNO del
+   fill con margin-left/right (mismo cálculo que tenía antes) y los
+   padding dan respiro a las cards contra los costados del fill. */
+.experience__grid {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 38% 1fr;
+  align-items: stretch;
+  margin-left: calc(
+    var(--frame-offset) + var(--frame-close-x, 4rem) - 1rem - var(--main-pad-x, calc(var(--frame-inset) * 2))
+  );
+  margin-right: calc(
+    var(--frame-offset) + var(--frame-close-x, 4rem) - 1rem - var(--main-pad-x, calc(var(--frame-inset) * 2))
+  );
+  padding-top: clamp(0.75rem, 1.6vh, 1.25rem);
+  padding-bottom: clamp(0.75rem, 1.6vh, 1.25rem);
+  padding-left: clamp(1.5rem, 3vw, 2.5rem);
+  padding-right: clamp(1.5rem, 3vw, 2.5rem);
+  box-sizing: border-box;
+}
+
+/* hairline vertical: cruza todo el viewport (position: fixed) pero solo
+   se ve cuando TRAYECTORIA está en pantalla. Se posiciona en el borde
+   derecho de la columna izquierda (38%) del fill. La cuenta parte del
+   borde interno izquierdo del fill (frame-offset + frame-close-x) y suma
+   el 38% del ancho del fill. */
+.experience__vline {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: calc(
+    var(--frame-offset) + var(--frame-close-x, 4rem) +
+    0.38 * (100vw - 2 * (var(--frame-offset) + var(--frame-close-x, 4rem)))
+  );
+  width: 1px;
+  background: var(--frame-line);
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 400ms ease-in-out;
+}
+
+html.scroll-end .experience__vline {
+  opacity: 1;
+}
+
+/* ---------- columna izquierda · tarjetas ----------
+   Lista de 3 tarjetas. flex: 1 en cada .card-wrap reparte la altura
+   de la celda EQUITATIVAMENTE: 1/3 para cada una. Así el espacio es
+   exactamente igual arriba, entre y abajo sin importar el contenido
+   de cada card. */
+.experience__cards {
+  grid-column: 1;
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: clamp(1rem, 2.4vh, 2rem);
-  padding-left: calc(var(--frame-inset) / 2);
-  padding-right: var(--frame-inset);
+  min-height: 0;
+  position: relative;
+  z-index: 2;
+  gap: clamp(0.5rem, 1.2vh, 0.75rem);
+  /* scroll interno: si las cards exceden el alto de la celda, los
+     usuarios pueden desplazarse sin afectar el resto de TRAYECTORIA.
+     Sin scrollbar visible (oculta pero funcional). */
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-.experience__row {
+.experience__cards::-webkit-scrollbar {
+  display: none;
+}
+
+.experience__card-wrap {
+  margin: 0;
+  position: relative;
+  flex: 0 0 auto;
+  min-height: 0;
+  display: flex;
+}
+
+.experience__card-wrap > * {
+  flex: 0 0 auto;
+  width: 100%;
+}
+
+/* tarjeta: borde hairline en reposo, sin fondo. padding interno
+   generoso para que el contenido respire. La card es container de
+   inline-size (cqi) para que font-size escale con el ancho de la
+   card y no del viewport — así el zoom del navegador no rompe el
+   layout. Sin overflow:hidden: si el texto crece, la card se
+   expande hacia abajo. */
+.experience__card {
+  container-type: inline-size;
+  container-name: card;
   display: grid;
-  grid-template-columns: 3rem 1fr;
-  gap: clamp(0.75rem, 1.6vw, 1.5rem);
-  padding-block: clamp(0.5rem, 1.2vh, 0.75rem);
-  border-bottom: 1px solid var(--frame-line);
+  grid-template-areas:
+    "period"
+    "role"
+    "company";
+  grid-template-columns: 1fr;
+  align-items: start;
+  width: 100%;
+  padding: clamp(1.25rem, 3vh, 1.75rem) clamp(1.5rem, 3vw, 2.25rem);
+  border: 1px solid var(--frame-line);
+  background: var(--bg);
+  color: var(--fg);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  /* el wrapper del cursor la cubre: nada de transiciones en su borde,
+     porque el cambio visual ocurre en el wrapper externo */
 }
 
-.experience__row:last-child {
-  border-bottom: 0;
+.experience__card:focus-visible {
+  outline: 1px solid var(--cursor-color);
+  outline-offset: 4px;
 }
 
-.experience__row__no {
+/* periodo: arriba a la DERECHA, en mono, versalitas */
+.experience__card__period {
+  grid-area: period;
+  justify-self: end;
   font-family: var(--font-meta);
-  font-size: 0.85em;
+  font-size: 0.9rem;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
   color: color-mix(in srgb, var(--fg) 55%, transparent);
   font-variant-numeric: tabular-nums;
-  padding-block-start: 0.25rem;
+  margin-block-end: clamp(0.75rem, 1.6vh, 1rem);
 }
 
-.experience__row__role {
+/* puesto/título: cuerpo, tamaño mayor */
+.experience__card__role {
+  grid-area: role;
   font-family: var(--font-body);
-  font-weight: 700;
-  font-size: 1.05em;
-  margin: 0 0 0.2em 0;
+  font-size: clamp(1.25rem, 2.2vw, 1.35rem);
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--fg);
+  margin-block-end: 0.35em;
+  letter-spacing: -0.01em;
+}
+
+/* tarjeta 3 (educación) más tenue: solo el título al 70% */
+.experience__card__role--soft {
+  opacity: 0.7;
+}
+
+/* empresa: en gris al 55% */
+.experience__card__company {
+  grid-area: company;
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 1.5vw, 1.05rem);
+  color: color-mix(in srgb, var(--fg) 55%, transparent);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* ---------- wrapper del cursor ----------
+   Un div un poco más grande que la tarjeta activa (inset: -0.25rem
+   = la envuelve por fuera). Su borde y fill cambian según el estado:
+     hover      → dashed + fill al 6% (transición de entrada)
+     selected   → sólido + fill al 10% (estado final)
+   La tarjeta siempre tiene su propio borde hairline; este wrapper es
+   una "capa" independiente que NO toca la tarjeta, solo la envuelve.
+   pointer-events: none para que el botón siga siendo clickeable. */
+.experience__cursor {
+  position: absolute;
+  /* top/left se calculan por tarjeta con nth-child: cada tarjeta tiene
+     la misma altura, así que basta con multiplicar el índice por
+     (altura + gap). Usamos variables --card-h y --card-gap. */
+  top: calc(
+    var(--card-top, 0rem) - 0.25rem
+  );
+  left: calc(var(--card-left, 0rem) - 0.25rem);
+  right: calc(-1 * var(--card-left, 0rem) - 0.25rem + 100%);
+  bottom: auto;
+  height: calc(var(--card-h, 0rem) + 0.5rem);
+  border: 1px solid var(--cursor-color);
+  background: color-mix(in srgb, var(--cursor-color) 6%, transparent);
+  pointer-events: none;
+  z-index: 1;
+  transition: none;
+}
+
+/* hover: borde dashed. Se aplica cuando la tarjeta con índice dado está
+   siendo hovered, NO seleccionada. Cada índice tiene su propio nth-child. */
+.experience__cursor--hover {
+  border-style: dashed;
+  background: color-mix(in srgb, var(--cursor-color) 6%, transparent);
+}
+
+/* selected: borde sólido, fill al 10%. Se aplica solo al índice 0
+   (primera tarjeta arranca seleccionada). */
+.experience__cursor--selected {
+  border-style: solid;
+  background: color-mix(in srgb, var(--cursor-color) 10%, transparent);
+}
+
+/* ---------- columna derecha · detalle ----------
+   Dos estados visuales:
+   - vacío (sin selección): intro centrada en gris sobre fondo video
+   - con selección: 2 cifras grandes, descripción y módulo terminal
+
+   El video de fondo del estado vacío (.experience__detail__bg) cubre
+   toda la celda. Cuando el src no está seteado, se mantiene hidden
+   (display:none) y solo se ve el intro. */
+
+/* contenedor: position:relative para anclar el video absoluto dentro */
+.experience__detail {
+  grid-column: 2;
+  position: relative;
+  padding: clamp(1rem, 2vh, 1.5rem) clamp(1.5rem, 3vw, 2.5rem);
+  padding-right: calc(var(--frame-offset) + var(--frame-close-x, 4rem) - 1rem);
+  z-index: 2;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* video de fondo (estado vacío). Cubre toda la celda, queda detrás del
+   contenido. Cuando el src no está seteado se aplica [hidden] desde
+   React y el navegador lo oculta (display:none). */
+.experience__detail__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* intro del estado vacío: centrada, en gris, sobre el video. */
+.experience__detail__empty {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 1.5vw, 1.15rem);
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--fg) 55%, transparent);
+  text-align: center;
+  max-width: 40ch;
+  align-self: center;
+  justify-self: center;
+}
+
+/* contenido (con tarjeta seleccionada): apilado vertical sobre el
+   fondo (que queda detrás de todo, oculto por el contenido). */
+.experience__detail__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5rem, 3vh, 2.5rem);
+  min-height: 0;
+}
+
+/* métricas: 2 cifras grandes (valor) + label al lado, en una línea
+   cada una. El valor es grande (cuerpo), el label es sans normal. */
+.experience__detail__metrics {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.5rem, 1.2vh, 0.75rem);
+}
+
+.experience__detail__metric {
+  margin: 0;
+  font-family: var(--font-body);
+  line-height: 1.1;
   color: var(--fg);
 }
 
-.experience__row__meta {
-  font-family: var(--font-meta);
-  font-size: 0.8em;
+.experience__detail__metric__value {
+  font-size: clamp(2.5rem, 6.5vw, 5.5rem);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+}
+
+.experience__detail__metric__label {
+  font-size: clamp(0.85rem, 1.2vw, 1rem);
   color: color-mix(in srgb, var(--fg) 55%, transparent);
-  margin: 0 0 0.6em 0;
-  letter-spacing: var(--tracking-caps);
-  text-transform: uppercase;
 }
 
-.experience__row__desc {
-  font-size: 0.95em;
-  line-height: 1.5;
-  color: var(--fg-secondary);
+/* descripción: párrafo normal */
+.experience__detail__desc {
   margin: 0;
-  max-width: 56ch;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--fg) 75%, transparent);
+  max-width: 60ch;
 }
 
-/* móvil: una columna, número arriba del bloque */
+/* módulo terminal: barra estilo shell con fondo casi negro,
+   borde hairline y un LED cuadrado del color del cursor a la derecha. */
+.experience__detail__terminal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: clamp(0.65rem, 1.2vh, 0.85rem) clamp(0.85rem, 1.5vw, 1.1rem);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  border: 1px solid var(--frame-line);
+  font-family: var(--font-meta);
+  font-size: clamp(0.8rem, 1.1vw, 0.9rem);
+  color: color-mix(in srgb, var(--fg) 80%, transparent);
+}
+
+.experience__detail__terminal__cmd {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.experience__detail__terminal__user {
+  color: var(--cursor-color);
+}
+
+.experience__detail__terminal__path {
+  color: color-mix(in srgb, var(--fg) 75%, transparent);
+}
+
+/* LED: cuadrado del color del cursor */
+.experience__detail__terminal__led {
+  display: inline-block;
+  width: 0.65rem;
+  height: 0.65rem;
+  background: var(--cursor-color);
+  flex-shrink: 0;
+}
+
+/* ---------- líneas de conexión ----------
+   2 hairlines horizontales dashed naranjas que conectan el borde
+   derecho de la card activa con el borde izquierdo del panel. Viven
+   como hijas directas del section (position: fixed → viewport) y
+   JS publica --conn-y-1 / --conn-y-2 con la coordenada Y de cada una.
+   Solo visibles cuando hay tarjeta seleccionada. */
+.experience__conn {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--cursor-color) 0 6px,
+    transparent 6px 12px
+  );
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+}
+
+.experience__conn--1 {
+  top: var(--conn-y-1, 50%);
+}
+
+.experience__conn--2 {
+  top: var(--conn-y-2, 50%);
+}
+
+/* ---------- móvil ----------
+   Una columna, hairline vertical oculta, líneas de conexión ocultas.
+   Tarjetas arriba, panel debajo. Las tarjetas siguen siendo clickeables. */
 @media (max-width: 767px) {
-  .experience__title-band {
-    margin-left: 0;
-    padding-left: 0;
-  }
-
-  .experience__list {
-    padding-left: 0;
-  }
-
-  .experience__row {
+  .experience__grid {
     grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
   }
 
-  .experience__row__no {
-    padding-block-start: 0;
+  .experience__vline {
+    display: none;
+  }
+
+  .experience__conn {
+    display: none;
+  }
+
+  .experience__cards {
+    padding-right: 0;
+    margin-block-end: clamp(1rem, 2vh, 1.5rem);
+  }
+
+  .experience__detail {
+    padding-right: clamp(1.5rem, 3vw, 2.5rem);
   }
 }

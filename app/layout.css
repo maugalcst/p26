@@ -62,7 +62,7 @@ nav {
     color-mix(in srgb, var(--fg) 4%, transparent) 0% 25%,
     transparent 0% 50%
   );
-  background-size: 5px 5px;
+  background-size: 7px 7px;
   backdrop-filter: blur(8px) saturate(1.25);
   -webkit-backdrop-filter: blur(8px) saturate(1.25);
   /* estado base: oculto; al bajar (html.nav-revealed) la línea desciende
@@ -225,17 +225,49 @@ html.nav-revealed nav {
 }
 
 /* transiciones rápidas y suaves para el despegue de las líneas con
-   el nav (top desciende) y con video activo (todas se separan). */
+   el nav (top desciende) y con video activo (todas se separan).
+   El transform de .frame__left/right (en nav-jump + scroll-end) se
+   anima con la misma curva para que el "encogimiento" del marco en
+   TRAYECTORIA se sienta continuo. */
 .frame__top,
 .frame__bottom,
 .frame__left,
 .frame__right {
   transition:
-    top 300ms var(--ease-out-expo),
-    bottom 300ms var(--ease-out-expo),
-    left 300ms var(--ease-out-expo),
-    right 300ms var(--ease-out-expo),
+    top 500ms var(--ease-out-expo),
+    bottom 500ms var(--ease-out-expo),
+    left 500ms var(--ease-out-expo),
+    right 500ms var(--ease-out-expo),
     opacity 400ms ease-in-out;
+}
+
+/* TRAYECTORIA: los costados del marco se cierran hacia el centro.
+   Activado por html.scroll-end (experience visible, p >= 0.9).
+   .frame__left se mueve a la DERECHA (left aumenta);
+   .frame__right se mueve a la IZQUIERDA (right aumenta).
+   Top/bottom no se mueven: solo los costados "respiran". */
+html.scroll-end .frame__left {
+  left: calc(var(--frame-offset) + var(--frame-close-x, 4rem));
+}
+
+html.scroll-end .frame__right {
+  right: calc(var(--frame-offset) + var(--frame-close-x, 4rem));
+}
+
+/* TRAYECTORIA: la línea inferior del marco sube hasta la base del
+   título. La coordenada la publica ExperienceSection como
+   --title-bottom-y en :root. Animamos bottom (no top) porque bottom
+   es numérico e interpolable; cambiar a top requeriría un bottom: auto
+   que no anima. Transición propia: 1000ms (más lenta que los
+   costados, 500ms) para que llegue después, como una "respiración". */
+.frame__bottom {
+  transition:
+    bottom 1000ms var(--ease-out-expo),
+    opacity 400ms ease-in-out;
+}
+
+html.scroll-end .frame__bottom {
+  bottom: calc(100vh - var(--title-bottom-y, var(--frame-top-offset)) - 4px);
 }
 
 html.nav-revealed .frame__top {

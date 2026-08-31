@@ -60,7 +60,32 @@ export default function ScrollProgress() {
       if (!raf) raf = requestAnimationFrame(tick);
     };
 
+    /* Si el target del wheel/touch está dentro de un contenedor con
+       scroll vertical disponible, dejamos pasar el evento para que
+       scrollee ese contenedor en vez de cambiar de sección. */
+    const hasInternalScroll = (target: EventTarget | null): boolean => {
+      let el = target as HTMLElement | null;
+      while (el && el !== document.body) {
+        const style = getComputedStyle(el);
+        const overflows =
+          style.overflowY === "auto" ||
+          style.overflowY === "scroll" ||
+          style.overflowY === "overlay";
+        if (overflows && el.scrollHeight > el.clientHeight + 1) {
+          // hay contenido que no cabe. Si scrollear hacia abajo tiene
+          // espacio, dejamos pasar; igual hacia arriba.
+          const atTop = el.scrollTop <= 0;
+          const atBottom =
+            el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+          return !(atTop && atBottom); // no hay a dónde scrollear
+        }
+        el = el.parentElement;
+      }
+      return false;
+    };
+
     const onWheel = (e: WheelEvent) => {
+      if (hasInternalScroll(e.target)) return; // deja pasar al contenedor
       e.preventDefault();
       // deltaY positivo = scroll hacia abajo. Factor 0.0010: una
       // rueda mecánica (~100px) mueve ~0.10 — 10 ruedas para ir de 0
@@ -75,6 +100,7 @@ export default function ScrollProgress() {
       touchStartY = e.touches[0]?.clientY ?? 0;
     };
     const onTouchMove = (e: TouchEvent) => {
+      if (hasInternalScroll(e.target)) return;
       const y = e.touches[0]?.clientY ?? touchStartY;
       const delta = touchStartY - y;
       touchStartY = y;

@@ -89,6 +89,7 @@
   align-items: center;
   justify-content: center;
   text-align: center;
+  height: calc(100svh - var(--frame-top-offset));
 }
 
 .hero__inner {

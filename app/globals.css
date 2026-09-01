@@ -133,6 +133,10 @@ html[data-theme="dark"] {
   box-sizing: border-box;
 }
 
+main {
+  min-height: 100svh;
+}
+
 html,
 body {
   /* scroll virtual: el navegador no desplaza. ScrollProgress captura

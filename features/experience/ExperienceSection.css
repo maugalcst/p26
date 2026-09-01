@@ -90,7 +90,7 @@ html.scroll-end .experience__fill {
     var(--frame-offset) + var(--frame-close-x, 4rem) - 1rem - var(--main-pad-x, calc(var(--frame-inset) * 2))
   );
   padding-top: clamp(0.75rem, 1.6vh, 1.25rem);
-  padding-bottom: clamp(0.75rem, 1.6vh, 1.25rem);
+  padding-bottom: var(--frame-offset);
   padding-left: clamp(1.5rem, 3vw, 2.5rem);
   padding-right: clamp(1.5rem, 3vw, 2.5rem);
   box-sizing: border-box;
@@ -301,6 +301,7 @@ html.scroll-end .experience__vline {
   overflow: hidden;
   border: 1px solid var(--frame-line);
   margin-left: clamp(1rem, 2vw, 1.75rem);
+  background: var(--bg);
 }
 
 /* video de fondo (estado vacío). Cubre toda la celda, queda detrás del
@@ -314,9 +315,10 @@ html.scroll-end .experience__vline {
   z-index: 0;
   pointer-events: none;
   image-rendering: pixelated;
-  color: var(--frame-line);
-  opacity: 0.55;
+  color: var(--fg);
+  opacity: 0.08;
   transition: opacity 400ms ease-in-out;
+  opacity: 0.05;
 }
 
 .experience__detail:has(.experience__detail__content) .experience__detail__bg {

@@ -1,21 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-
-/* Fondo tramado (dithering Bayer 4x4) para el estado vacío de
-   TRAYECTORIA. Se dibuja en un canvas de baja resolución y se escala
-   con image-rendering: pixelated, así que los "puntos" son píxeles
-   reales del canvas, no una textura.
-
-   El color de los puntos se hereda del CSS: el canvas lee su propio
-   `color` computado, así que basta con poner
-   `.experience__detail__bg { color: var(--frame-line) }` y el fondo
-   se adapta solo al tema claro/oscuro.
-
-   Corre a 12 fps a propósito: se ve más digital que a 60 y consume
-   una fracción. Se detiene cuando `paused` es true (tarjeta
-   seleccionada), cuando la sección sale del viewport, y cuando el
-   usuario pidió menos movimiento. */
+import { useEffect, useRef, useState } from "react";
 
 const BAYER = [
   [0, 8, 2, 10],
@@ -24,63 +9,106 @@ const BAYER = [
   [13, 5, 15, 7],
 ];
 
-/* Resolución interna del canvas. Más chico = puntos más grandes al
-   escalar. 180x130 da un grano parecido a la referencia; bájalo a
-   120x88 si quieres puntos más gordos. */
 const W = 180;
 const H = 130;
 const FPS = 12;
 
+/* Cuántos pulsos pueden estar vivos a la vez. Más = más denso. */
+const MAX_PULSES = 7;
+/* Cada cuántos cuadros nace uno nuevo (rango). */
+const SPAWN_MIN = 9;
+const SPAWN_MAX = 20;
+
+type Pulse = {
+  x: number;
+  y: number;
+  born: number;
+  speed: number;
+  life: number;
+  thick: number;
+  amp: number;
+};
+
 export default function DitherField({ paused = false }: { paused?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [themeTick, setThemeTick] = useState(0);
+
+  useEffect(() => {
+    const mo = new MutationObserver(() => setThemeTick((n) => n + 1));
+    mo.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class", "data-theme"],
+    });
+    return () => mo.disconnect();
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
 
     canvas.width = W;
     canvas.height = H;
 
-    /* color de los puntos, tomado del CSS del propio canvas */
-    const computed = getComputedStyle(canvas).color.match(/\d+/g);
-    const r = computed ? Number(computed[0]) : 255;
-    const g = computed ? Number(computed[1]) : 255;
-    const b = computed ? Number(computed[2]) : 255;
+    /* El color se resuelve pintándolo y leyéndolo de vuelta, así
+       funciona con cualquier formato de CSS (color-mix, oklch...). */
+    ctx.fillStyle = getComputedStyle(canvas).color;
+    ctx.fillRect(0, 0, 1, 1);
+    const px = ctx.getImageData(0, 0, 1, 1).data;
+    const R = px[0];
+    const G = px[1];
+    const B = px[2];
+    ctx.clearRect(0, 0, W, H);
 
     const img = ctx.createImageData(W, H);
     const data = img.data;
 
-    /* El campo de densidad. Aquí es donde vive el diseño: cambia esta
-       función y cambia por completo el carácter del fondo.
-       - solo senos      → ondas suaves
-       - Math.random()   → estática pura
-       - las bandas de abajo → los bloques rectangulares densos que
-         tiene la referencia */
-    const density = (x: number, y: number, t: number) => {
-      let n =
-        Math.sin(x * 0.055 + t * 0.6) * 0.25 +
-        Math.cos(y * 0.07 - t * 0.4) * 0.25 +
-        Math.sin((x + y) * 0.03 + t * 0.25) * 0.15 +
-        0.18;
+    const pulses: Pulse[] = [];
 
-      /* bloques rectangulares: suben la densidad en zonas concretas */
-      if (x > W * 0.62 && y < H * 0.3) n += 0.32;
-      if (x > W * 0.78 && y > H * 0.55) n += 0.28;
-      if (x < W * 0.12) n += 0.18;
-
-      return n;
+    const spawn = (t: number) => {
+      pulses.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        born: t,
+        /* qué tan rápido se expande el anillo */
+        speed: 14 + Math.random() * 32,
+        /* cuánto vive, en unidades de t (≈ segundos) */
+        life: 2.5 + Math.random() * 4,
+        /* grosor del anillo en píxeles de canvas */
+        thick: 2 + Math.random() * 30,
+        amp: 0.55 + Math.random() * 0.45,
+      });
     };
 
     const render = (t: number) => {
       for (let y = 0; y < H; y++) {
         for (let x = 0; x < W; x++) {
+          /* Base casi vacía: solo un granulado muy tenue para que
+             el campo nunca se vea completamente muerto. */
+          let n = (Math.sin(x * 4.7 + y * 3.1) * 0.5 + 0.5) * 0.06;
+
+          for (let p = 0; p < pulses.length; p++) {
+            const pu = pulses[p];
+            const age = t - pu.born;
+            const radius = age * pu.speed;
+
+            /* distancia Chebyshev → anillos cuadrados */
+            const d = Math.max(Math.abs(x - pu.x), Math.abs(y - pu.y));
+
+            const off = Math.abs(d - radius);
+            if (off < pu.thick) {
+              /* el anillo se desvanece conforme envejece */
+              const fade = 1 - age / pu.life;
+              n += pu.amp * (1 - off / pu.thick) * fade * fade;
+            }
+          }
+
           const i = (y * W + x) * 4;
-          if (density(x, y, t) > BAYER[y & 3][x & 3] / 16) {
-            data[i] = r;
-            data[i + 1] = g;
-            data[i + 2] = b;
+          if (n > BAYER[y & 3][x & 3] / 16) {
+            data[i] = R;
+            data[i + 1] = G;
+            data[i + 2] = B;
             data[i + 3] = 255;
           } else {
             data[i + 3] = 0;
@@ -97,15 +125,37 @@ export default function DitherField({ paused = false }: { paused?: boolean }) {
     let raf = 0;
     let last = 0;
     let t = 0;
+    let frame = 0;
+    let nextSpawn = 0;
     let visible = true;
     const interval = 1000 / FPS;
+
+    const step = () => {
+      t += 0.08;
+      frame++;
+
+      /* nace un pulso nuevo cada tantos cuadros */
+      if (frame >= nextSpawn && pulses.length < MAX_PULSES) {
+        spawn(t);
+        nextSpawn =
+          frame +
+          SPAWN_MIN +
+          Math.floor(Math.random() * (SPAWN_MAX - SPAWN_MIN));
+      }
+
+      /* se retiran los que ya cumplieron su vida */
+      for (let i = pulses.length - 1; i >= 0; i--) {
+        if (t - pulses[i].born > pulses[i].life) pulses.splice(i, 1);
+      }
+
+      render(t);
+    };
 
     const loop = (now: number) => {
       raf = requestAnimationFrame(loop);
       if (now - last < interval) return;
       last = now;
-      t += 0.08;
-      render(t);
+      step();
     };
 
     const start = () => {
@@ -117,8 +167,12 @@ export default function DitherField({ paused = false }: { paused?: boolean }) {
       raf = 0;
     };
 
-    /* un cuadro fijo siempre, para que nunca se vea vacío */
-    render(0);
+    /* Estado inicial: unos cuantos pulsos ya en curso, para que la
+       sección nunca aparezca en negro absoluto. */
+    for (let i = 0; i < 3; i++) {
+      spawn(t - Math.random() * 2);
+    }
+    render(t);
 
     const io = new IntersectionObserver(
       ([entry]) => {
@@ -136,7 +190,7 @@ export default function DitherField({ paused = false }: { paused?: boolean }) {
       stop();
       io.disconnect();
     };
-  }, [paused]);
+  }, [paused, themeTick]);
 
   return (
     <canvas

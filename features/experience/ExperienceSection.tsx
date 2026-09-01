@@ -185,6 +185,7 @@ export default function ExperienceSection() {
             (fuera del scroll-target) por la misma razón que el fill:
             su position: fixed debe anclarse al viewport. */}
         <div className="experience__grid">
+          <span className="experience__vline" aria-hidden="true" />
           <ol className="experience__cards">
             {EXPERIENCE.map((e) => {
               const isActive = e.id === activeId;

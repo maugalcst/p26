@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import "./ExperienceSection.css";
+import DitherField from "./DitherField";
 
 /* Datos de TRAYECTORIA. Hardcoded por ahora — la fuente de verdad es el
    usuario. id sirve para identificar la tarjeta seleccionada.
@@ -251,16 +252,7 @@ export default function ExperienceSection() {
             {/* Slot para el video de fondo del estado vacío. Por ahora
                 el src es null; cuando el usuario lo pase, se actualiza
                 y se quita hidden. */}
-            <video
-              className="experience__detail__bg"
-              src={null}
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              hidden
-              aria-hidden="true"
-            />
+            <DitherField paused={!!selected} />
 
             {selected ? (
               <div className="experience__detail__content">

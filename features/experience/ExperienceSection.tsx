@@ -243,7 +243,6 @@ export default function ExperienceSection() {
               con coordenadas absolutas calculadas en runtime (top/left
               via variables) — la tarjeta activa publica su posición
               relativa al grid, y el wrapper se monta como hijo del grid. */}
-          <ExperienceCursor activeId={activeId} cards={EXPERIENCE} />
 
           {/* Detail (columna derecha):
               - Sin selección: intro centrada en gris sobre fondo video.
@@ -298,30 +297,5 @@ export default function ExperienceSection() {
         </div>
       </div>
     </section>
-  );
-}
-
-/* El wrapper de cursor vive aparte para que su position: absolute
-   pueda calcular su top/left a partir de la tarjeta activa. Recibe
-   la lista para encontrar el índice y traducirlo a coordenadas. */
-function ExperienceCursor({
-  activeId,
-  cards,
-}: {
-  activeId: string;
-  cards: { id: string }[];
-}) {
-  const idx = cards.findIndex((c) => c.id === activeId);
-  if (idx < 0) return null;
-  return (
-    <span
-      className={
-        idx === 0
-          ? "experience__cursor experience__cursor--selected"
-          : "experience__cursor experience__cursor--hover"
-      }
-      aria-hidden="true"
-      data-card-index={idx}
-    />
   );
 }

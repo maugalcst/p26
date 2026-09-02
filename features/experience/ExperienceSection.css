@@ -159,7 +159,7 @@ html.scroll-end .experience__vline {
   display: flex;
 }
 
-.experience__card-wrap > * {
+.experience__card-wrap > *:not(.experience__card-frame) {
   flex: 0 0 auto;
   width: 100%;
 }
@@ -235,10 +235,6 @@ html.scroll-end .experience__vline {
   color: color-mix(in srgb, var(--fg) 55%, transparent);
   line-height: 1.4;
   margin: 0;
-}
-
-.experience__card-wrap {
-  position: relative;
 }
 
 .experience__card-frame {

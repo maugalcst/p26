@@ -60,7 +60,7 @@ const EXPERIENCE = [
 ];
 
 const EMPTY_INTRO =
-  "Frase de introduccion a Trayectoria, o instrucciones cortas de la sección.";
+  "Selecciona una entrada";
 
 export default function ExperienceSection() {
   const bandRef = useRef<HTMLElement>(null);
@@ -215,7 +215,7 @@ export default function ExperienceSection() {
                     }}
                     onFocus={() => setHoveredId(e.id)}
                     onBlur={() => setHoveredId((h) => (h === e.id ? null : h))}
-                    onClick={() => setSelectedId(e.id)}
+                    onClick={() => setSelectedId((s) => (s === e.id ? null : e.id))}
                     aria-pressed={isSelected}
                   >
                     <span className="experience__card__period">{e.period}</span>

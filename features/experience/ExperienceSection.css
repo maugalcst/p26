@@ -81,7 +81,7 @@ html.scroll-end .experience__fill {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: 38% 1fr;
+  grid-template-columns: 43% 1fr;
   align-items: stretch;
   margin-left: calc(
     var(--frame-offset) + var(--frame-close-x, 4rem) - 1rem - var(--main-pad-x, calc(var(--frame-inset) * 2))
@@ -107,7 +107,7 @@ html.scroll-end .experience__fill {
   bottom: calc(-1 * var(--frame-offset));
   left: calc(
     clamp(1.5rem, 3vw, 2.5rem) +
-    0.38 * (100% - 2 * clamp(1.5rem, 3vw, 2.5rem))
+    0.43 * (100% - 2 * clamp(1.5rem, 3vw, 2.5rem))
   );
   width: 1px;
   background: var(--frame-line);
@@ -129,22 +129,15 @@ html.scroll-end .experience__vline {
 .experience__cards {
   grid-column: 1;
   list-style: none;
-  margin: 0;
-  padding: 0;
-  padding-right: clamp(1rem, 2vw, 1.75rem);
+  padding: 8px calc(clamp(1rem, 2vw, 1.75rem) + 8px) 8px 8px;
+  margin: -8px;
   display: flex;
   flex-direction: column;
   min-height: 0;
   position: relative;
   z-index: 2;
-  gap: clamp(0.5rem, 1.2vh, 0.75rem);
-  /* scroll interno: si las cards exceden el alto de la celda, los
-     usuarios pueden desplazarse sin afectar el resto de TRAYECTORIA.
-     Sin scrollbar visible (oculta pero funcional). */
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  gap: clamp(0.75rem, 2vh, 1.25rem);
+  overflow: visible;
 }
 
 .experience__cards::-webkit-scrollbar {
@@ -240,7 +233,7 @@ html.scroll-end .experience__vline {
 .experience__card-frame {
   position: absolute;
   /* más grande que la tarjeta: aquí se ajusta cuánto */
-  inset: -7px;
+  inset: -4px;
   border: 1px solid transparent;
   pointer-events: none;
   opacity: 0;
@@ -255,7 +248,7 @@ html.scroll-end .experience__vline {
   transform: scale(1);
   border-style: dashed;
   border-color: var(--cursor-color);
-  background: color-mix(in srgb, var(--cursor-color) 7%, transparent);
+  background: color-mix(in srgb, var(--cursor-color) 4%, transparent);
 }
 
 /* va DESPUÉS del hover a propósito: si una tarjeta está
@@ -265,7 +258,7 @@ html.scroll-end .experience__vline {
   transform: scale(1);
   border-style: solid;
   border-color: var(--cursor-color);
-  background: color-mix(in srgb, var(--cursor-color) 12%, transparent);
+  background: color-mix(in srgb, var(--cursor-color) 7%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -289,7 +282,8 @@ html.scroll-end .experience__vline {
   grid-column: 2;
   position: relative;
   padding: clamp(1rem, 2vh, 1.5rem) clamp(1.5rem, 3vw, 2.5rem);
-  padding-right: calc(var(--frame-offset) + var(--frame-close-x, 4rem) - 1rem);
+  --detail-pad-r: calc(var(--frame-offset) + var(--frame-close-x, 4rem) - 1rem);
+  padding-right: var(--detail-pad-r);
   z-index: 2;
   min-height: 0;
   display: flex;
@@ -318,7 +312,7 @@ html.scroll-end .experience__vline {
 }
 
 .experience__detail:has(.experience__detail__content) .experience__detail__bg {
-  opacity: 0.2;
+  opacity: 0;
 }
 
 /* intro del estado vacío: centrada, en gris, sobre el video. */
@@ -336,8 +330,7 @@ html.scroll-end .experience__vline {
   line-height: 1.5;
   color: color-mix(in srgb, var(--fg) 55%, transparent);
   text-align: center;
-  max-width: 40ch;
-  text-shadow: 0 0 24px rgba(14, 12, 10, 0.85);
+  text-shadow: 0 0 34px rgba(14, 12, 10, 0.85);
 }
 
 /* contenido (con tarjeta seleccionada): apilado vertical sobre el

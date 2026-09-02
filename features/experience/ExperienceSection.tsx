@@ -189,31 +189,36 @@ export default function ExperienceSection() {
           <span className="experience__vline" aria-hidden="true" />
           <ol className="experience__cards">
             {EXPERIENCE.map((e) => {
-              const isActive = e.id === activeId;
+              const isHovered = e.id === hoveredId;
               const isSelected = e.id === selectedId;
               return (
-                <li key={e.id} className="experience__card-wrap">
+                <li
+                  key={e.id}
+                  className={[
+                    "experience__card-wrap",
+                    isHovered && "experience__card-wrap--hovered",
+                    isSelected && "experience__card-wrap--selected",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
                   <button
                     type="button"
-                    className={
-                      isActive
-                        ? "experience__card experience__card--active"
-                        : "experience__card"
-                    }
-                    onMouseEnter={() => setHoveredId(e.id)}
-                    onMouseLeave={() =>
-                      setHoveredId((h) => (h === e.id ? null : h))
-                    }
+                    className="experience__card"
+                    onMouseEnter={() => {
+                      setHoveredId(e.id);
+                      document.documentElement.classList.add("cursor-dim");
+                    }}
+                    onMouseLeave={() => {
+                      setHoveredId((h) => (h === e.id ? null : h));
+                      document.documentElement.classList.remove("cursor-dim");
+                    }}
                     onFocus={() => setHoveredId(e.id)}
-                    onBlur={() =>
-                      setHoveredId((h) => (h === e.id ? null : h))
-                    }
+                    onBlur={() => setHoveredId((h) => (h === e.id ? null : h))}
                     onClick={() => setSelectedId(e.id)}
                     aria-pressed={isSelected}
                   >
-                    <span className="experience__card__period">
-                      {e.period}
-                    </span>
+                    <span className="experience__card__period">{e.period}</span>
                     <span
                       className={
                         e.id === "uanl-fime"
@@ -223,10 +228,10 @@ export default function ExperienceSection() {
                     >
                       {e.role}
                     </span>
-                    <span className="experience__card__company">
-                      {e.company}
-                    </span>
+                    <span className="experience__card__company">{e.company}</span>
                   </button>
+
+                  <span className="experience__card-frame" aria-hidden="true" />
                 </li>
               );
             })}

@@ -102,6 +102,16 @@ html.cursor-tracking .cursor-coord-layer .cursor-coord {
   opacity: 0.45; /* muy tenue */
 }
 
+/* Atenuación sobre elementos que "absorben" el cursor (tarjetas de
+   TRAYECTORIA). No se toca el transform: el JS lo reescribe en cada
+   mousemove para posicionar la cruz, y sobreescribirlo aquí la
+   mandaría a la esquina. Se atenúa con opacity y --cursor-size, que
+   ya tienen transición en la regla base. */
+html.cursor-dim .cursor-cross {
+  opacity: 0.18;
+  --cursor-size: 7px;
+}
+
 /* Touch: se restaura el cursor nativo y se oculta el custom */
 @media (hover: none) and (pointer: coarse) {
   html,

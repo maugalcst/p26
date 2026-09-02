@@ -104,7 +104,7 @@ html.scroll-end .experience__fill {
 .experience__vline {
   position: absolute;
   top: calc(-1 * clamp(0.75rem, 1.6vh, 1.25rem) + 0.2rem);
-  bottom: calc(-1 * clamp(0.75rem, 1.6vh, 1.25rem));
+  bottom: calc(-1 * var(--frame-offset));
   left: calc(
     clamp(1.5rem, 3vw, 2.5rem) +
     0.38 * (100% - 2 * clamp(1.5rem, 3vw, 2.5rem))
@@ -237,45 +237,46 @@ html.scroll-end .experience__vline {
   margin: 0;
 }
 
-/* ---------- wrapper del cursor ----------
-   Un div un poco más grande que la tarjeta activa (inset: -0.25rem
-   = la envuelve por fuera). Su borde y fill cambian según el estado:
-     hover      → dashed + fill al 6% (transición de entrada)
-     selected   → sólido + fill al 10% (estado final)
-   La tarjeta siempre tiene su propio borde hairline; este wrapper es
-   una "capa" independiente que NO toca la tarjeta, solo la envuelve.
-   pointer-events: none para que el botón siga siendo clickeable. */
-.experience__cursor {
+.experience__card-wrap {
+  position: relative;
+}
+
+.experience__card-frame {
   position: absolute;
-  /* top/left se calculan por tarjeta con nth-child: cada tarjeta tiene
-     la misma altura, así que basta con multiplicar el índice por
-     (altura + gap). Usamos variables --card-h y --card-gap. */
-  top: calc(
-    var(--card-top, 0rem) - 0.25rem
-  );
-  left: calc(var(--card-left, 0rem) - 0.25rem);
-  right: calc(-1 * var(--card-left, 0rem) - 0.25rem + 100%);
-  bottom: auto;
-  height: calc(var(--card-h, 0rem) + 0.5rem);
-  border: 1px solid var(--cursor-color);
-  background: color-mix(in srgb, var(--cursor-color) 6%, transparent);
+  /* más grande que la tarjeta: aquí se ajusta cuánto */
+  inset: -7px;
+  border: 1px solid transparent;
   pointer-events: none;
-  z-index: 1;
-  transition: none;
+  opacity: 0;
+  transform: scale(0.96);
+  transition:
+    opacity 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* hover: borde dashed. Se aplica cuando la tarjeta con índice dado está
-   siendo hovered, NO seleccionada. Cada índice tiene su propio nth-child. */
-.experience__cursor--hover {
+.experience__card-wrap--hovered .experience__card-frame {
+  opacity: 1;
+  transform: scale(1);
   border-style: dashed;
-  background: color-mix(in srgb, var(--cursor-color) 6%, transparent);
+  border-color: var(--cursor-color);
+  background: color-mix(in srgb, var(--cursor-color) 7%, transparent);
 }
 
-/* selected: borde sólido, fill al 10%. Se aplica solo al índice 0
-   (primera tarjeta arranca seleccionada). */
-.experience__cursor--selected {
+/* va DESPUÉS del hover a propósito: si una tarjeta está
+   seleccionada y además con hover, gana el sólido */
+.experience__card-wrap--selected .experience__card-frame {
+  opacity: 1;
+  transform: scale(1);
   border-style: solid;
-  background: color-mix(in srgb, var(--cursor-color) 10%, transparent);
+  border-color: var(--cursor-color);
+  background: color-mix(in srgb, var(--cursor-color) 12%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .experience__card-frame {
+    transition: none;
+    transform: none;
+  }
 }
 
 /* ---------- columna derecha · detalle ----------
@@ -316,7 +317,6 @@ html.scroll-end .experience__vline {
   pointer-events: none;
   image-rendering: pixelated;
   color: var(--fg);
-  opacity: 0.08;
   transition: opacity 400ms ease-in-out;
   opacity: 0.05;
 }
@@ -327,7 +327,12 @@ html.scroll-end .experience__vline {
 
 /* intro del estado vacío: centrada, en gris, sobre el video. */
 .experience__detail__empty {
-  position: relative;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: clamp(1.5rem, 3vw, 2.5rem);
   z-index: 1;
   margin: 0;
   font-family: var(--font-body);
@@ -336,8 +341,6 @@ html.scroll-end .experience__vline {
   color: color-mix(in srgb, var(--fg) 55%, transparent);
   text-align: center;
   max-width: 40ch;
-  align-self: center;
-  justify-self: center;
   text-shadow: 0 0 24px rgba(14, 12, 10, 0.85);
 }
 

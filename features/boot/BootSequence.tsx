@@ -45,10 +45,20 @@ export default function BootSequence() {
     window.setTimeout(() => setDone(true), FADE_MS);
   }, []);
 
+  /* html.booting mientras el overlay vive (incluido el fundido de
+     salida). ScrollProgress lo lee para ignorar wheel/touch/teclado
+     durante la intro: el hint dice "pulse cualquier tecla para entrar",
+     y sin esta marca esa misma tecla (espacio, flechas) caía también en
+     el scroll-virtual y el sitio arrancaba ya desplazado. */
   useEffect(() => {
+    const root = document.documentElement;
     if (done) {
+      root.classList.remove("booting");
       window.dispatchEvent(new CustomEvent("boot:complete"));
+    } else {
+      root.classList.add("booting");
     }
+    return () => root.classList.remove("booting");
   }, [done]);
 
   useEffect(() => {

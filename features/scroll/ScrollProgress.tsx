@@ -60,6 +60,42 @@ export default function ScrollProgress() {
       if (!raf) raf = requestAnimationFrame(tick);
     };
 
+    /* Mientras la intro de terminal está en pantalla no se scrollea.
+       BootSequence marca html.booting mientras el overlay vive (incluido
+       su fundido de salida). Sin esto, la tecla que el usuario pulsa
+       para SALTAR el boot ("pulse cualquier tecla para entrar") cae
+       también en onKey y arranca el sitio ya desplazado ~0.12. */
+    const isBooting = () => root.classList.contains("booting");
+
+    /* Salto instantáneo a un punto del recorrido. Es el ÚNICO camino
+       para mover el progreso de golpe: cancela el lerp en curso y deja
+       current y target sincronizados con lo que se pintó. Cualquier
+       feature que quiera saltar (nav, teclado) despacha "scroll:goto"
+       en vez de escribir --scroll-progress por su cuenta; si lo
+       escribiera directo, este closure conservaría el valor viejo y el
+       siguiente wheel daría un brinco. */
+    let jumpTimer = 0;
+    const jumpTo = (value: number) => {
+      cancelAnimationFrame(raf);
+      raf = 0;
+      current = Math.max(0, Math.min(1, value));
+      target = current;
+      setProgress(current);
+      // marca la transición de nav: las CSS rules de los wrappers
+      // usan transition para hacer fade in/out entre secciones.
+      root.classList.add("nav-jump");
+      window.clearTimeout(jumpTimer);
+      jumpTimer = window.setTimeout(() => root.classList.remove("nav-jump"), 700);
+    };
+
+    /* to: destino absoluto 0..1 · by: desplazamiento relativo al target
+       interno (no al valor pintado, que va con lag por el lerp). */
+    const onGoto = (e: Event) => {
+      const d = (e as CustomEvent<{ to?: number; by?: number }>).detail ?? {};
+      if (typeof d.to === "number") jumpTo(d.to);
+      else if (typeof d.by === "number") jumpTo(target + d.by);
+    };
+
     /* Si el target del wheel/touch está dentro de un contenedor con
        scroll vertical disponible, dejamos pasar el evento para que
        scrollee ese contenedor en vez de cambiar de sección. */
@@ -85,6 +121,7 @@ export default function ScrollProgress() {
     };
 
     const onWheel = (e: WheelEvent) => {
+      if (isBooting()) return;
       if (hasInternalScroll(e.target)) return; // deja pasar al contenedor
       e.preventDefault();
       // deltaY positivo = scroll hacia abajo. Factor 0.0010: una
@@ -100,6 +137,7 @@ export default function ScrollProgress() {
       touchStartY = e.touches[0]?.clientY ?? 0;
     };
     const onTouchMove = (e: TouchEvent) => {
+      if (isBooting()) return;
       if (hasInternalScroll(e.target)) return;
       const y = e.touches[0]?.clientY ?? touchStartY;
       const delta = touchStartY - y;
@@ -109,6 +147,7 @@ export default function ScrollProgress() {
     };
 
     const onKey = (e: KeyboardEvent) => {
+      if (isBooting()) return; // la tecla es para saltar el boot, no para scrollear
       const step = 0.12;
       if (["ArrowDown", "PageDown", " "].includes(e.key)) {
         e.preventDefault();
@@ -149,17 +188,7 @@ export default function ScrollProgress() {
       );
       const idx = sections.indexOf(targetEl);
       if (idx < 0) return;
-      // cancela cualquier lerp en curso y aplica target instantáneo.
-      // La transición CSS (html.nav-jump) se encarga del fade visual.
-      cancelAnimationFrame(raf);
-      raf = 0;
-      current = idx / Math.max(1, sections.length - 1);
-      target = current;
-      setProgress(current);
-      // marca la transición de nav: las CSS rules de los wrappers
-      // usan transition para hacer fade in/out entre secciones.
-      root.classList.add("nav-jump");
-      window.setTimeout(() => root.classList.remove("nav-jump"), 700);
+      jumpTo(idx / Math.max(1, sections.length - 1));
     };
 
     window.addEventListener("wheel", onWheel, { passive: false, capture: true });
@@ -167,6 +196,7 @@ export default function ScrollProgress() {
     window.addEventListener("touchmove", onTouchMove, { passive: false, capture: true });
     window.addEventListener("keydown", onKey, { capture: true });
     document.addEventListener("click", onAnchorClick, { capture: true });
+    window.addEventListener("scroll:goto", onGoto);
 
     setProgress(0);
 
@@ -177,6 +207,8 @@ export default function ScrollProgress() {
       window.removeEventListener("touchmove", onTouchMove, opts);
       window.removeEventListener("keydown", onKey, opts);
       document.removeEventListener("click", onAnchorClick, opts);
+      window.removeEventListener("scroll:goto", onGoto);
+      window.clearTimeout(jumpTimer);
       cancelAnimationFrame(raf);
     };
   }, []);

@@ -26,10 +26,25 @@
 }
 
 .boot-window {
-  /* terminal clara en light: blanco cálido, tinta y azul del sistema */
-  --boot-bg: #f8f5f0;
-  --boot-fg: #39312c;
-  --boot-accent: #0137bf;
+  /* Colores derivados de los tokens del proyecto: la terminal hereda
+     --fg del tema y el acento es --cursor-color (azul en light, naranja
+     en dark). --boot-dim se recalcula solo.
+
+     El fondo NO puede ser var(--bg) a secas: el overlay detrás también
+     lo es, y la ventana desaparece — queda un contorno sin cuerpo.
+     Metiendo un 6% de tinta dentro del fondo, la misma línea resuelve
+     los dos temas por la naturaleza de --fg:
+
+       light  --fg oscuro  → oscurece un punto  (papel → panel)
+       dark   --fg crema   → aclara un punto    (panel elevado sobre negro)
+
+     Que es justo como se ve una ventana de terminal sobre un escritorio
+     en cada caso. Suficiente para leerse como superficie propia, poco
+     para hacer ruido. Cero hex hardcodeado, y el tema oscuro no necesita
+     redefinir nada. */
+  --boot-bg: color-mix(in srgb, var(--bg) 94%, var(--fg) 6%);
+  --boot-fg: var(--fg);
+  --boot-accent: var(--cursor-color);
   --boot-dim: color-mix(in srgb, var(--boot-fg) 52%, transparent);
 
   width: min(92vw, 56ch);
@@ -46,13 +61,8 @@
   transition: transform 420ms ease, opacity 420ms ease;
 }
 
-/* en modo oscuro la terminal es la oscura original; --boot-dim se
-   recalcula solo porque deriva de --boot-fg vía color-mix */
-html[data-theme="dark"] .boot-window {
-  --boot-bg: #171410;
-  --boot-fg: #eae6df;
-  --boot-accent: #6f8bff;
-}
+/* en modo oscuro los tokens del proyecto ya cambian --bg/--fg/--cursor-color
+   automáticamente. No hace falta redefinir nada aquí. */
 
 @keyframes boot-in {
   from {

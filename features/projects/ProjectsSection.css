@@ -3,8 +3,9 @@
     width: 0.5px;
   }
 
-  .projects__row::after {
-    height: 0.5px;
+  .projects__row::after,
+  .projects__row__rule {
+    height: 1px;
   }
 }
 
@@ -38,12 +39,18 @@
   margin-block-end: clamp(0.75rem, 1.6vh, 1.25rem);
 }
 
+/* Títulos de sección en Redaction, la misma familia serif que el título
+   del proyecto seleccionado (.projects__detail__title) y que el efecto del
+   hero: una sola voz serif en el sitio, con la jerarquía por tamaño y
+   peso (sección: step-3 regular · proyecto: step-1 bold). Se probaron en
+   contexto Bagnard, Gambarino, Sentient, Newsreader e Instrument Serif;
+   cualquiera de las nuevas sumaba una tercera serif distinta. */
 .projects__title {
-  font-family: var(--font-body);
+  font-family: "Redaction", serif;
   font-weight: 400;
-  font-size: var(--step-2);
+  font-size: var(--step-3);
   line-height: 1.1;
-  letter-spacing: var(--tracking-caps);
+  letter-spacing: -0.01em;
   color: var(--fg);
   margin: 0;
 }
@@ -213,7 +220,12 @@ html.scroll-mid.cursor-motion .projects__vline::after {
   position: relative;
   display: flex;
   align-items: baseline;
-  gap: 0.55em;
+  /* 0.55em de este hueco se los come el bloque de acento del número, que
+     sobresale del texto para darle aire por la derecha. El
+     resto es el aire real entre el bloque y el nombre. Con 1.1em el
+     bloque respira 0.55em a la derecha del número y deja otros 0.55em
+     hasta el nombre — el mismo valor que arriba y abajo. */
+  gap: 1.1em;
   width: 100%;
   padding: 0.55em 0.75em;
   border: 0;
@@ -226,8 +238,15 @@ html.scroll-mid.cursor-motion .projects__vline::after {
   cursor: pointer;
 }
 
+/* El bloque de acento del renglón seleccionado se pinta en un pseudo
+   absoluto (ver .projects__row__no::before más abajo), no en el padding
+   de este elemento: el renglón alinea por baseline, y cambiar el padding
+   de un flex item con align-items: baseline mueve su caja respecto del
+   nombre. Con el pseudo, el texto no se entera — solo pintamos detrás. */
 .projects__row__no {
   font-variant-numeric: tabular-nums;
+  position: relative; /* ancla del bloque */
+  transition: color 220ms var(--ease-out-expo);
 }
 
 /* hairline divisoria bajo cada renglón: delimita solo la lista del
@@ -312,16 +331,98 @@ html.scroll-mid.cursor-motion .projects__row__top-hairline::after {
   opacity: 0;
 }
 
-.projects__row:hover {
-  background: color-mix(in srgb, var(--cursor-color) 8%, transparent);
+/* Hover y foco: solo sube la tinta. El acento no pinta fondos — lo
+   llevan la regla inferior y el bloque del número. */
+.projects__row:hover,
+.projects__row:focus-visible {
   color: var(--fg);
 }
 
-/* seleccionado: azul sólido con texto --bg, alineado al borde de su
-   columna (la hairline vertical), sin sangrar a la izquierda */
+/* Seleccionado: el acento cubre SOLO la celda del número, no el renglón.
+   Una marca chica y densa en vez de una banda — el nombre se queda en
+   tinta normal y la sección recupera el reposo. Los márgenes negativos
+   compensan el padding para que el bloque crezca sin mover el texto ni
+   descuadrar la retícula mono. */
 .projects__row.projects__row--selected {
+  background: transparent;
+  color: var(--fg);
+}
+
+/* Bloque de acento: llena el alto completo del renglón y llega hasta su
+   borde izquierdo; a la derecha corta justo donde termina el número
+   (right: 0), así se lee como banda de folio y no como etiqueta.
+
+   PROPORCIONES ACOPLADAS: los 0.55em y 0.75em son el padding de
+   .projects__row. Si cambias el padding del renglón, cambia también
+   estos dos o el bloque dejará de tocar los bordes. Medido: la caja de
+   texto del número coincide con la caja de contenido del renglón, así
+   que extenderlo justo el padding lo lleva al borde exacto.
+
+   Se pinta siempre y se enciende con opacity para poder animarlo: un
+   pseudo que solo existe en el estado seleccionado no puede transicionar. */
+.projects__row__no::before {
+  content: "";
+  position: absolute;
+  top: -0.55em;
+  bottom: -0.55em;
+  left: -0.75em;
+  right: -0.55em; /* mismo aire que arriba/abajo — sin esto el número topa
+                     con el filo del bloque */
+  z-index: -1; /* detrás de los dígitos, delante del fondo del renglón */
   background: var(--cursor-color);
+  opacity: 0;
+  transition: opacity 220ms var(--ease-out-expo);
+}
+
+.projects__row--selected .projects__row__no::before {
+  opacity: 1;
+}
+
+.projects__row--selected .projects__row__no {
   color: var(--bg);
+}
+
+/* Regla que se extiende: hairline del color del acento que crece de
+   izquierda a derecha bajo el renglón. Solo transform y opacity, y
+   scaleX desde el borde izquierdo para que se lea como un trazo que
+   avanza, no como una barra que aparece. Se dibuja encima de la
+   hairline divisoria del ::after. */
+.projects__row__rule {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  z-index: 1;
+  background: var(--cursor-color);
+  transform: scaleX(0);
+  transform-origin: left;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 420ms var(--ease-out-expo),
+    opacity 220ms ease;
+}
+
+/* hover/foco: la regla recorre pero se queda tenue — es una pista */
+.projects__row:hover .projects__row__rule,
+.projects__row:focus-visible .projects__row__rule {
+  transform: scaleX(1);
+  opacity: 0.4;
+}
+
+/* seleccionado: llena y a opacidad completa */
+.projects__row--selected .projects__row__rule {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .projects__row__rule,
+  .projects__row__no,
+  .projects__row__no::before {
+    transition: none;
+  }
 }
 
 .projects__row:focus-visible {

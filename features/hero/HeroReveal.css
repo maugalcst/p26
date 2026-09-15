@@ -14,6 +14,21 @@
   padding: clamp(1rem, 2vh, 1.75rem) clamp(2rem, 6vw, 5rem);
 }
 
+/* Tinta de la sombra del nombre sobre video. Es el único color de esta
+   feature que NO deriva de --fg, y a propósito: el fondo ahí no es el
+   del tema sino un fotograma, así que en oscuro un --fg crema daría una
+   sombra clara sobre la imagen. Café muy oscuro en vez de negro, para
+   no ensuciar el crema de la letra. */
+.hero {
+  --hero-video-ink: #17120f;
+}
+
+/* El nombre en reposo no lleva sombra: la transición la funde con la
+   entrada del video en lugar de aparecer de golpe. */
+.hero__name {
+  transition: text-shadow 320ms var(--ease-out-expo);
+}
+
 .name-block__videos {
   position: absolute;
   inset: 0;
@@ -54,6 +69,21 @@
 /* negativo: con video activo, el nombre intercambia bg/fg */
 .hero[data-active] .hero__name {
   color: var(--bg);
+  /* Contraste local sobre el video (único caso donde AGENTS.md permite
+     sombra de texto). Dos capas, y cada una tiene un trabajo distinto:
+
+       0 1px 2px / 34%  — pegada al trazo. Es la que hace la legibilidad
+                          real: define el borde de la letra contra un
+                          fotograma claro (la lava de landscape.mp4).
+       0 4px 18px / 20% — ancha y muy tenue. No aporta contraste; evita
+                          que la letra se vea recortada y pegada encima,
+                          que es lo que delata una sombra amateur.
+
+     Sin desplazamiento lateral y con la vertical mínima: la luz cae de
+     frente, no en diagonal. */
+  text-shadow:
+    0 1px 2px color-mix(in srgb, var(--hero-video-ink) 34%, transparent),
+    0 4px 18px color-mix(in srgb, var(--hero-video-ink) 20%, transparent);
 }
 
 /* las letras ambient se mantienen en azul */
@@ -249,5 +279,11 @@ html.nav-revealed .hero__scroll {
 @media (prefers-reduced-motion: reduce) {
   .hero__scroll__gear {
     animation: none;
+  }
+
+  /* la sombra se sigue aplicando (es contraste, no movimiento);
+     lo que se quita es el fundido. */
+  .hero__name {
+    transition: none;
   }
 }

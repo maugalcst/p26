@@ -60,13 +60,13 @@ const EXPERIENCE = [
 ];
 
 const EMPTY_INTRO =
-  "Selecciona una entrada";
+  "sin entrada activa";
 
 export default function ExperienceSection() {
   const bandRef = useRef<HTMLElement>(null);
   /* null = estado vacío (intro centrada en gris). El usuario entra a
      TRAYECTORIA y ve la invitación a seleccionar. */
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(EXPERIENCE[0].id);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const selected = selectedId
     ? (EXPERIENCE.find((e) => e.id === selectedId) ?? null)
@@ -80,10 +80,10 @@ export default function ExperienceSection() {
      subir su línea inferior hasta la base del título cuando TRAYECTORIA
      está visible (html.scroll-end).
 
-     Además, cuando hay tarjeta seleccionada, publica --conn-y-1 y
-     --conn-y-2 con las Y de las 2 líneas de conexión (a 1/4 y 3/4 de
-     la altura de la card activa). Eso las mantiene alineadas cuando
-     el usuario hace click en una card más grande o cambia el zoom.
+     Además, cuando hay tarjeta seleccionada, publica --conn-y (centro
+     vertical de la card activa) y --conn-x-1 / --conn-x-2 (extremos) para
+     el bus de conexión. Eso lo mantiene alineado cuando el usuario hace
+     click en una card más grande o cambia el zoom.
 
      La primera medición se retrasa 2 RAF: cuando el componente monta,
      el scroll-virtual puede tener el .scroll-target con transform en
@@ -103,23 +103,44 @@ export default function ExperienceSection() {
         "--title-bottom-y",
         `${Math.round(r.bottom)}px`,
       );
-      /* Líneas de conexión: se posicionan a 1/4 y 3/4 de la card
-         activa. Buscamos el botón con [aria-pressed=true] dentro de
-         la grid. Si no hay selección, no publicamos nada (las líneas
-         se desmontan en el JSX). */
+      /* Bus de conexión: una sola línea al centro vertical de la card
+         activa. Buscamos el botón con [aria-pressed=true] dentro de la
+         grid. Si no hay selección, no publicamos nada (el bus se
+         desmonta en el JSX). */
       const activeCard = document.querySelector<HTMLElement>(
         ".experience__card[aria-pressed=true]",
       );
       if (activeCard) {
         const cr = activeCard.getBoundingClientRect();
         root.style.setProperty(
-          "--conn-y-1",
-          `${Math.round(cr.top + cr.height * 0.25)}px`,
+          "--conn-y",
+          `${Math.round(cr.top + cr.height / 2)}px`,
         );
-        root.style.setProperty(
-          "--conn-y-2",
-          `${Math.round(cr.top + cr.height * 0.75)}px`,
+
+        /* X: el bus arranca donde termina el trazo del marco (que
+           sobresale de la card por su inset negativo) y terminan en el
+           borde izquierdo del panel. El marco se mide a partir de su
+           wrapper + su inset calculado, NO con su propio
+           getBoundingClientRect: anima transform: scale(0.96 → 1) al
+           activarse y a media transición devolvería una X encogida. */
+        const wrap = activeCard.parentElement;
+        const frame = wrap?.querySelector<HTMLElement>(
+          ".experience__card-frame",
         );
+        const panel = document.querySelector<HTMLElement>(
+          ".experience__detail",
+        );
+        if (wrap && frame && panel) {
+          const inset = parseFloat(getComputedStyle(frame).right) || 0;
+          root.style.setProperty(
+            "--conn-x-1",
+            `${Math.round(wrap.getBoundingClientRect().right - inset)}px`,
+          );
+          root.style.setProperty(
+            "--conn-x-2",
+            `${Math.round(panel.getBoundingClientRect().left)}px`,
+          );
+        }
       }
     };
     const measureAfter = () => {
@@ -163,22 +184,28 @@ export default function ExperienceSection() {
           posición incorrecta. Al estar aquí arriba, se ancla al viewport. */}
       <div className="experience__fill" aria-hidden="true" />
 
-      {/* Líneas de conexión: 2 hairlines horizontales dashed naranjas
-          que conectan el borde derecho de la tarjeta activa con el
-          borde izquierdo del panel. Viven fuera del scroll-target
-          (position: fixed → viewport). El JS publica --conn-y-1 y
-          --conn-y-2 con la coordenada Y de cada línea. Solo visibles
-          cuando hay tarjeta seleccionada. */}
+      {/* Bus de conexión: la card activa (fuente) le manda datos al panel
+          (destino). Vive fuera del scroll-target (position: fixed →
+          viewport); el JS publica --conn-y y --conn-x-1/2.
+
+          key={selected.id}: al cambiar de card el bus se REMONTA, y así
+          sus @keyframes (tenderse, el bit viajando) arrancan de cero
+          sincronizados con el LED del terminal, que también se remonta
+          con la misma key (ver .experience__detail__content). */}
       {selected && (
-        <>
-          <span className="experience__conn experience__conn--1" aria-hidden="true" />
-          <span className="experience__conn experience__conn--2" aria-hidden="true" />
-        </>
+        <span key={selected.id} className="experience__conn" aria-hidden="true">
+          <span className="experience__conn__track" />
+          <span className="experience__conn__lane">
+            <span className="experience__conn__bit" />
+          </span>
+          <span className="experience__conn__node experience__conn__node--out" />
+          <span className="experience__conn__node experience__conn__node--in" />
+        </span>
       )}
 
       <div className="experience__content scroll-target">
         <header className="experience__title-band" ref={bandRef}>
-          <h2 className="experience__title">TRAYECTORIA</h2>
+          <h2 className="experience__title">Trayectoria</h2>
         </header>
 
         {/* Retícula 38/62 dividida por hairline vertical. La hairline
@@ -253,13 +280,15 @@ export default function ExperienceSection() {
               - Con selección: 2 cifras grandes, descripción y módulo
                 terminal (path dinámico + LED del cursor-color). */}
           <article className="experience__detail">
-            {/* Slot para el video de fondo del estado vacío. Por ahora
-                el src es null; cuando el usuario lo pase, se actualiza
-                y se quita hidden. */}
-            <DitherField paused={!!selected} />
+            {/* Luz tramada de fondo; se atenúa cuando hay card
+                seleccionada (texto encima). */}
+            <DitherField connected={selected !== null} />
 
             {selected ? (
-              <div className="experience__detail__content">
+              /* key: se remonta junto con el bus al cambiar de card, para
+                 que el parpadeo del LED quede sincronizado con la llegada
+                 del bit. */
+              <div key={selected.id} className="experience__detail__content">
                 <div className="experience__detail__metrics">
                   {selected.metrics.map((m, i) => (
                     <p key={i} className="experience__detail__metric">

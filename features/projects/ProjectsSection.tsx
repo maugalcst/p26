@@ -64,7 +64,7 @@ export default function ProjectsSection() {
 
       <div className="projects__content scroll-target">
         <header className="projects__title-band">
-          <h2 className="projects__title">PROYECTOS</h2>
+          <h2 className="projects__title">Proyectos</h2>
         </header>
 
         <div className="projects__grid">
@@ -102,8 +102,11 @@ export default function ProjectsSection() {
                     />
                   )}
                   <span className="projects__row__no">{p.no}</span>
-                  <span className="projects__row__sep">-</span>
                   <span className="projects__row__name">{p.title}</span>
+                  {/* regla que se extiende: elemento propio porque los
+                      ::before/::after del row ya dibujan las hairlines
+                      divisorias (sólido ↔ trazos con cursor-motion). */}
+                  <span className="projects__row__rule" aria-hidden="true" />
                 </button>
               </li>
             ))}

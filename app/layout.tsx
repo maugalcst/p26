@@ -6,6 +6,7 @@ import "./layout.css";
 import "./utilities.css";
 import Nav from "@/features/nav/Nav";
 import ScrollNav from "@/features/nav/ScrollNav";
+import NavKeyboard from "@/features/nav/NavKeyboard";
 import ScrollProgress from "@/features/scroll/ScrollProgress";
 import RotatingCursor from "@/features/cursor/RotatingCursor";
 import BootSequence from "@/features/boot/BootSequence";
@@ -50,6 +51,7 @@ export default function RootLayout({
         <BootSequence />
         <ScrollProgress />
         <ScrollNav />
+        <NavKeyboard />
         <RotatingCursor>
           <Nav />
           {children}

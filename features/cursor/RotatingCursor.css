@@ -27,7 +27,9 @@ body {
   user-select: none;
   transform: translate(-50%, -50%) rotate(0deg);
   opacity: 0; /* se activa al primer mousemove */
-  transition: width 180ms ease, height 180ms ease, opacity 120ms ease, background 120ms ease;
+  /* opacity 40ms: gobierna el fade in/out al entrar y salir de las cards
+     de TRAYECTORIA (html.cursor-dim) — corto para que se sienta inmediato */
+  transition: width 180ms ease, height 180ms ease, opacity 40ms ease, background 120ms ease;
 }
 
 /* Cruz giratoria — 2 barras (horizontal + vertical) */
@@ -102,14 +104,27 @@ html.cursor-tracking .cursor-coord-layer .cursor-coord {
   opacity: 0.45; /* muy tenue */
 }
 
-/* Atenuación sobre elementos que "absorben" el cursor (tarjetas de
-   TRAYECTORIA). No se toca el transform: el JS lo reescribe en cada
-   mousemove para posicionar la cruz, y sobreescribirlo aquí la
-   mandaría a la esquina. Se atenúa con opacity y --cursor-size, que
-   ya tienen transición en la regla base. */
+/* Sobre las tarjetas de TRAYECTORIA el cursor desaparece: cruz y
+   coordenadas. ExperienceSection pone html.cursor-dim en el mouseenter de
+   la card y la quita en el mouseleave, así que sigue la posición física
+   del mouse y no el estado hover/active (tras el click el hover se apaga,
+   pero el mouse sigue dentro y el cursor sigue oculto).
+
+   !important a propósito: useRotatingCursor escribe style.opacity = "1"
+   inline en cada mousemove, y un estilo inline le gana a cualquier
+   selector. Sin él esta regla no aplica — la versión anterior (opacity
+   0.18 y --cursor-size, también inline) nunca llegó a verse. La
+   transición de 120ms de la regla base sigue funcionando.
+
+   No se toca el transform: el JS lo reescribe en cada frame para
+   posicionar la cruz, así que al salir reaparece ya en su sitio. */
 html.cursor-dim .cursor-cross {
-  opacity: 0.18;
-  --cursor-size: 7px;
+  opacity: 0 !important;
+}
+
+/* misma especificidad que html.cursor-tracking ... y va después: gana */
+html.cursor-dim .cursor-coord-layer .cursor-coord {
+  opacity: 0;
 }
 
 /* Touch: se restaura el cursor nativo y se oculta el custom */

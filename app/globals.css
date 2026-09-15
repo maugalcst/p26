@@ -201,7 +201,6 @@ h6 {
 
 p {
   font-family: var(--font-body);
-  max-width: 34em;
   margin: 0;
   text-wrap: pretty;
   hanging-punctuation: first;
@@ -209,6 +208,10 @@ p {
 
 p + p {
   margin-block-start: var(--space-1);
+}
+
+p:not([class]) {
+  max-width: 34em;
 }
 
 /* links y texto clickeable — Departure Mono (terminal), inversión al hover */

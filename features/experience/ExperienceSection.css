@@ -338,12 +338,13 @@ html.scroll-end .experience__vline {
   background: var(--bg);
 }
 
-/* DitherField: luz tramada detrás del contenido del panel (ver
+/* DitherField: luz tramada en capas detrás del contenido del panel (ver
    DitherField.tsx). Anclada arriba a la izquierda y SIN width/height
    aquí: el JS la dimensiona a un múltiplo exacto de su celda (3px) para
    que cada píxel del buffer sea un cuadrado perfecto, y el panel recorta
    el sobrante con su overflow: hidden. Estirarla con inset: 0 deformaba
-   las celdas. `color` es la tinta que lee el JS. */
+   las celdas. `color` es la tinta que lee el JS. La atenuación con texto
+   la hace el JS por capa, no la opacidad del elemento. */
 .experience__detail__bg {
   position: absolute;
   top: 0;
@@ -352,20 +353,6 @@ html.scroll-end .experience__vline {
   pointer-events: none;
   image-rendering: pixelated;
   color: var(--fg);
-  opacity: 1;
-  transition: opacity 900ms ease;
-}
-
-/* con una card seleccionada hay texto encima: el campo se retira a un
-   fondo apenas perceptible, como un todo y con un fundido largo */
-.experience__detail__bg--quiet {
-  opacity: 0.4;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .experience__detail__bg {
-    transition: none;
-  }
 }
 
 /* intro del estado vacío: centrada, en gris, sobre el video. */

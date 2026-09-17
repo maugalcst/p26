@@ -3,6 +3,8 @@ import ThemeToggle from "@/features/theme/ThemeToggle";
 const sections = [
   { href: "#proyectos", label: "PROYECTOS" },
   { href: "#experiencia", label: "TRAYECTORIA" },
+  { href: "#stack", label: "STACK" },
+  { href: "#sobre-mi", label: "SOBRE MÍ" },
 ];
 
 export default function Nav() {
@@ -15,9 +17,7 @@ export default function Nav() {
           </li>
         ))}
       </ul>
-      <ul className="nav-aside">
-        <ThemeToggle />
-      </ul>
+      <ThemeToggle />
     </nav>
   );
 }

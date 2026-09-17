@@ -48,9 +48,13 @@ nav {
   left: 0;
   right: 0;
   height: var(--frame-top-offset);
-  display: flex;
+  /* Tres columnas: los tabs van en la del medio, que queda centrada en
+     el viewport pase lo que pase, y el toggle de tema en la tercera. Con
+     un flex centrado, el ancho del toggle empujaba los tabs fuera del
+     centro. */
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: center;
   z-index: 900; /* bajo el overlay de boot (950) y el marco (999) */
   font-family: var(--font-meta);
   font-size: 0.85em;
@@ -89,7 +93,23 @@ html.nav-revealed nav {
     visibility 0s;
 }
 
+/* SOBRE MÍ: el nav se va con el marco para no contaminar la sección.
+   No se oculta del todo: conserva pointer-events y visibility, así que
+   vuelve a aparecer si el cursor lo busca o si se llega con Tab — sin
+   eso, quien no conozca las flechas se quedaría sin salida. */
+html.scroll-about.nav-revealed nav {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+html.scroll-about.nav-revealed nav:hover,
+html.scroll-about.nav-revealed nav:focus-within {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .nav-items {
+  grid-column: 2;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -98,20 +118,115 @@ html.nav-revealed nav {
   padding: 0;
 }
 
+/* El toggle arranca en la tercera columna, o sea justo donde terminan
+   los tabs, y se separa de ellos con este margen: ni pegado a los tabs
+   ni tirado contra el borde del marco. Escala con el viewport. */
+.nav-aside {
+  grid-column: 3;
+  justify-self: start;
+  margin-left: clamp(3rem, 8vw, 8rem);
+}
+
 /* el margen global li + li empujaría los tabs 2-5 hacia abajo */
 .nav-items li + li {
   margin-block-start: 0;
 }
 
-/* grupo separado del nav: toggle de tema anclado a una distancia del marco */
-.nav-aside {
-  position: absolute;
-  right: var(--frame-inset);
+/* Links del nav: sin subrayado y sin la inversión de fondo de los links
+   del cuerpo. La jerarquía la da la opacidad — la sección en pantalla al
+   100%, las demás atenuadas — que es el mismo recurso del texto
+   secundario del sitio (mismo color, menos opacidad). */
+.nav-items a {
+  text-decoration: none;
+  opacity: 0.45;
+  transition: opacity 300ms var(--ease-out-expo);
+}
+
+.nav-items a:hover,
+.nav-items a:focus-visible {
+  opacity: 1;
+  background: none;
+  color: var(--fg);
+}
+
+/* ---------- toggle de tema: nombre + riel ----------
+   El nombre del tema en mono y, a su lado, una hairline con el nodo
+   cuadrado del bus de TRAYECTORIA y STACK deslizándose entre tres
+   posiciones. Mismo trato de opacidad que los links del nav: atenuado en
+   reposo, entero al pasar el cursor. El acento solo aparece en hover.
+
+   El nombre lleva min-width: sin él, pasar de CLARO a TERCERO cambiaría
+   el ancho del botón y el riel daría un brinco lateral (el grupo está
+   anclado a la derecha). 8ch cubre la palabra más larga en mono. */
+.theme-toggle {
   display: flex;
   align-items: center;
-  list-style: none;
-  padding: 0;
-  margin: 0;
+  gap: 0.75em;
+  text-decoration: none;
+  opacity: 0.45;
+  transition: opacity 300ms var(--ease-out-expo);
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+  opacity: 1;
+  background: none;
+  color: var(--fg);
+}
+
+.theme-toggle__name {
+  min-width: 8ch;
+  text-align: left;
+}
+
+.theme-toggle__rail {
+  --rail-w: 2.25rem;
+  --rail-node: 5px;
+  position: relative;
+  display: block;
+  width: var(--rail-w);
+  height: var(--rail-node);
+  /* la hairline, centrada en el alto del nodo */
+  background: linear-gradient(
+    var(--frame-line) 0 0
+  ) 0 50% / 100% 1px no-repeat;
+}
+
+/* el nodo viaja entre tres paradas: inicio, centro y final del riel */
+.theme-toggle__node {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--rail-node);
+  height: var(--rail-node);
+  background: color-mix(in srgb, var(--fg) 55%, transparent);
+  transform: translateX(
+    calc(var(--pos, 0) * (var(--rail-w) - var(--rail-node)) / 2)
+  );
+  transition:
+    transform 420ms var(--ease-out-expo),
+    background-color 300ms var(--ease-out-expo);
+}
+
+.theme-toggle:hover .theme-toggle__node,
+.theme-toggle:focus-visible .theme-toggle__node {
+  background: var(--cursor-color);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle__node {
+    transition: none;
+  }
+}
+
+/* la sección en pantalla. Durante el cambio de sección no hay ninguna
+   clase scroll-* de sección puesta, así que todas quedan atenuadas y el
+   nav no compite con el marco en movimiento. */
+html.scroll-mid .nav-items a[href="#proyectos"],
+html.scroll-end .nav-items a[href="#experiencia"],
+html.scroll-stack .nav-items a[href="#stack"],
+html.scroll-about .nav-items a[href="#sobre-mi"] {
+  opacity: 1;
 }
 
 /* botones del nav — mismo lenguaje que los links (mono, caps, inversión al hover) */
@@ -128,7 +243,6 @@ html.nav-revealed nav {
   cursor: pointer;
 }
 
-.theme-toggle:hover,
 .menu-toggle:hover {
   background: var(--fg);
   color: var(--bg);
@@ -270,8 +384,83 @@ html.scroll-end .frame__bottom {
   bottom: calc(100vh - var(--title-bottom-y, var(--frame-top-offset)) - 4px);
 }
 
+/* STACK: los costados se juntan en medio y se funden en una sola
+   vertical — la columna del bus de StackSection. Se mueven con
+   transform (no con left/right) para no disparar layout; si vienen de
+   TRAYECTORIA, su left/right regresa a la vez con la misma curva y los
+   dos movimientos se suman sin brinco.
+
+   Geometría: la izquierda ocupa [offset, offset+1] y la derecha
+   [100vw-offset-1, 100vw-offset]. Las dos terminan en [50vw, 50vw+1],
+   que es exactamente el borde entre las dos columnas de .stack__lists
+   (una retícula 1fr/1fr centrada en main, cuyo centro es 50vw).
+
+   Unidas, las dos quedan encimadas y, como --frame-line es
+   semitransparente, la columna se vería al doble de oscura: StackSection
+   apaga la derecha en el cuadro exacto en que coinciden (las mide cada
+   frame; el momento depende del ancho del viewport).
+
+   La inferior baja hasta salir del viewport con su transición de
+   siempre (bottom, 1000ms): en STACK solo quedan la superior (bajo el
+   nav) y la columna. */
+.frame__left,
+.frame__right {
+  transition:
+    top 500ms var(--ease-out-expo),
+    bottom 500ms var(--ease-out-expo),
+    left 500ms var(--ease-out-expo),
+    right 500ms var(--ease-out-expo),
+    transform 700ms var(--ease-out-expo),
+    opacity 400ms ease-in-out;
+}
+
+html.scroll-stack .frame__left {
+  transform: translateX(calc(50vw - var(--frame-offset)));
+}
+
+html.scroll-stack .frame__right {
+  transform: translateX(calc(var(--frame-offset) + 1px - 50vw));
+}
+
+/* justo debajo del borde del viewport: la caja de 1px queda en
+   [100vh + 1, 100vh + 2], sin asomar ni con redondeo de subpixel */
+html.scroll-stack .frame__bottom {
+  bottom: -2px;
+}
+
+/* SOBRE MÍ: el marco se retira. Cada hairline sale del viewport por su
+   lado y la sección queda sin encuadre — el único momento del sitio sin
+   marco. Al salir de la sección vuelven todas desde sus cuatro lados.
+
+   Las cajas de 1px quedan justo fuera ([-2, -1] y [100% + 1, 100% + 2]),
+   sin asomar ni con redondeo de subpixel. Viniendo de STACK, los
+   costados combinan este cambio con el regreso de su transform a 0: los
+   dos movimientos van en la misma dirección, así que la salida es
+   continua. */
+html.scroll-about .frame__top {
+  top: -2px;
+}
+
+html.scroll-about .frame__bottom {
+  bottom: -2px;
+}
+
+html.scroll-about .frame__left {
+  left: -2px;
+}
+
+html.scroll-about .frame__right {
+  right: -2px;
+}
+
 html.nav-revealed .frame__top {
   top: var(--frame-top-offset); /* desciende junto con la aparición del nav */
+}
+
+/* … salvo en SOBRE MÍ, donde también se retira (regla de arriba, pero
+   con la especificidad suficiente para ganarle a nav-revealed) */
+html.scroll-about.nav-revealed .frame__top {
+  top: -2px;
 }
 
 /* video activo: el marco cede protagonismo a las cotas (se funde a 35%) */
@@ -370,6 +559,18 @@ html.scroll-hero.cursor-motion .frame__right::after {
   .frame__top {
     transition: none;
   }
+
+  /* la unión de los costados en STACK es instantánea; el resto de sus
+     transiciones queda como estaba */
+  .frame__left,
+  .frame__right {
+    transition:
+      top 500ms var(--ease-out-expo),
+      bottom 500ms var(--ease-out-expo),
+      left 500ms var(--ease-out-expo),
+      right 500ms var(--ease-out-expo),
+      opacity 400ms ease-in-out;
+  }
 }
 
 @media print {
@@ -388,15 +589,25 @@ html.scroll-hero.cursor-motion .frame__right::after {
    `position: fixed` se anclan a la sección (containing block) en vez
    del viewport. Por eso la transform va en el wrapper.
 
-   Distribución del recorrido con 3 secciones. Mesetas de 0.2 y crossfades
-   largos de 0.3 entre ellas (smooth). La sección N se desvanece
-   completamente antes de que la N+1 llegue a su meseta.
+   Distribución del recorrido con 5 secciones, una por cuarto (hero 0,
+   projects 0.25, experience 0.5, stack 0.75, about 1). Es la
+   distribución original de 3 secciones escalada; ScrollProgress escala
+   igual el factor del wheel, así que la sensación hero↔projects no
+   cambia. La sección N se desvanece completamente antes de que la N+1
+   llegue a su meseta.
 
-     [0.0, 0.2]   hero al 100% (meseta)
-     [0.2, 0.5]   hero fade out + projects fade in (crossfade 0.3)
-     [0.5, 0.7]   projects al 100% (meseta)
-     [0.7, 0.9]   projects fade out + experience fade in (crossfade 0.2)
-     [0.9, 1.0]   experience al 100% (meseta) */
+     [0.00, 0.10]   hero al 100% (meseta)
+     [0.10, 0.25]   hero fade out + projects fade in
+     [0.25, 0.35]   projects al 100% (meseta)
+     [0.35, 0.45]   projects fade out + experience fade in
+     [0.45, 0.55]   experience al 100% (meseta)
+     [0.55, 0.65]   experience fade out + stack fade in
+     [0.65, 0.75]   stack al 100% (meseta)
+     [0.75, 0.85]   stack fade out + about fade in
+     [0.85, 1.00]   about al 100% (meseta)
+
+   Los umbrales de las clases scroll-* viven en ScrollProgress.tsx y
+   están ACOPLADOS a estas curvas. */
 
 /* por defecto todas las secciones del grid 1/1 son invisibles y no
    ocupan interacción. Cada rol las activa con su ventana. */
@@ -414,7 +625,7 @@ main > .scroll-section > .scroll-target {
   transition: opacity 400ms ease, visibility 0s linear 400ms;
 }
 
-/* HERO: ventana [0, 0.5]. Meseta 1 en [0, 0.2], fade out [0.2, 0.5].
+/* HERO: ventana [0, 0.25]. Meseta 1 en [0, 0.1], fade out hasta 0.25.
    pointer-events:none por defecto: el hero está en la celda 1/1 del grid
    junto con projects y experience. Si no se corta, sus hovers caen sobre
    el hero invisible desde otras secciones y disparan el video-active
@@ -429,15 +640,15 @@ html.scroll-hero main > .scroll-section.scroll-section--hero {
 }
 
 main > .scroll-section.scroll-section--hero > .scroll-target {
-  opacity: max(0, min(1, calc((0.5 - var(--scroll-progress)) * 3.333)));
+  opacity: max(0, min(1, calc((0.25 - var(--scroll-progress)) * 6.667)));
   visibility: visible;
-  transform: translateY(calc(var(--scroll-progress) * -2rem));
+  transform: translateY(calc(var(--scroll-progress) * -4rem));
 }
 
-/* PROJECTS: ventana [0.2, 0.9]. Fade in [0.2, 0.5], meseta [0.5, 0.7],
-   fade out [0.7, 0.9]. visibility:visible cuando scroll-mid (p >= 0.5).
-   El CONTENIDO INTERNO tiene su propio fade con delay: aparece tarde en
-   la meseta [0.55, 0.7] y desaparece temprano al salir [0.7, 0.78].
+/* PROJECTS: ventana [0.1, 0.45]. Fade in hasta 0.25, meseta
+   [0.25, 0.35], fade out hasta 0.45. visibility:visible cuando
+   scroll-mid. El CONTENIDO INTERNO tiene su propio fade con delay:
+   aparece ya plantada la meseta y desaparece temprano al salir.
    Eso da la sensación de que la info "se revela" cuando la sección
    ya está bien plantada, no durante el crossfade. */
 html.scroll-mid main > .scroll-section.scroll-section--after > .scroll-target {
@@ -452,11 +663,11 @@ main > .scroll-section.scroll-section--after > .scroll-target {
   opacity: max(
     0,
     min(
-      calc((var(--scroll-progress) - 0.2) * 3.333),
-      calc((0.9 - var(--scroll-progress)) * 5),
+      calc((var(--scroll-progress) - 0.1) * 6.667),
+      calc((0.45 - var(--scroll-progress)) * 10),
     ),
   );
-  transform: translateY(calc((0.5 - var(--scroll-progress)) * 2rem));
+  transform: translateY(calc((0.25 - var(--scroll-progress)) * 4rem));
 }
 
 html.scroll-mid main > .scroll-section.scroll-section--after {
@@ -485,8 +696,9 @@ html.scroll-mid main > .scroll-section.scroll-section--after > .scroll-target > 
                               planta, dando la sensación de "revelar" */
 }
 
-/* EXPERIENCE: ventana [0.7, 1]. Fade in [0.7, 0.9], meseta [0.9, 1].
-   visibility:visible cuando scroll-end (p >= 0.9). */
+/* EXPERIENCE: ventana [0.35, 0.65]. Fade in hasta 0.45, meseta
+   [0.45, 0.55], fade out hasta 0.65. visibility:visible cuando
+   scroll-end. */
 html.scroll-end main > .scroll-section.scroll-section--after-2 > .scroll-target {
   visibility: visible;
 }
@@ -500,8 +712,87 @@ html.scroll-end main > .scroll-section.scroll-section--after-2 {
 }
 
 main > .scroll-section.scroll-section--after-2 > .scroll-target {
-  opacity: max(0, min(1, calc((var(--scroll-progress) - 0.7) * 5)));
-  transform: translateY(calc((1 - var(--scroll-progress)) * 2rem));
+  opacity: max(
+    0,
+    min(
+      calc((var(--scroll-progress) - 0.35) * 10),
+      calc((0.65 - var(--scroll-progress)) * 10),
+    ),
+  );
+  transform: translateY(calc((0.5 - var(--scroll-progress)) * 4rem));
+}
+
+/* STACK: ventana [0.55, 0.85]. Fade in hasta 0.65, meseta
+   [0.65, 0.75], fade out hasta 0.85. visibility:visible cuando
+   scroll-stack. Mismo patrón de
+   pointer-events que las demás (ver AGENTS.md, "Trampa: pointer-events"). */
+html.scroll-stack main > .scroll-section.scroll-section--after-3 > .scroll-target {
+  visibility: visible;
+}
+
+main > .scroll-section.scroll-section--after-3 {
+  pointer-events: none;
+}
+
+html.scroll-stack main > .scroll-section.scroll-section--after-3 {
+  pointer-events: auto;
+}
+
+main > .scroll-section.scroll-section--after-3 > .scroll-target {
+  opacity: max(
+    0,
+    min(
+      calc((var(--scroll-progress) - 0.55) * 10),
+      calc((0.85 - var(--scroll-progress)) * 10),
+    ),
+  );
+  transform: translateY(calc((0.75 - var(--scroll-progress)) * 4rem));
+}
+
+/* ABOUT: ventana [0.75, 1]. Fade in hasta 0.85, meseta hasta 1.
+   visibility:visible cuando scroll-about. */
+html.scroll-about main > .scroll-section.scroll-section--after-4 > .scroll-target {
+  visibility: visible;
+}
+
+main > .scroll-section.scroll-section--after-4 {
+  pointer-events: none;
+}
+
+html.scroll-about main > .scroll-section.scroll-section--after-4 {
+  pointer-events: auto;
+}
+
+main > .scroll-section.scroll-section--after-4 > .scroll-target {
+  opacity: max(0, min(1, calc((var(--scroll-progress) - 0.75) * 10)));
+  transform: translateY(calc((1 - var(--scroll-progress)) * 4rem));
+}
+
+/* ---------- 4b. Coreografía de cambio de sección -------------------------
+   ScrollProgress pone html.section-hold al saltar entre PROYECTOS,
+   TRAYECTORIA, STACK y SOBRE MÍ: toda la sección actual se desvanece, el marco se
+   mueve con las secciones ocultas y al quitar la clase aparece la nueva.
+   Se atenúa la SECCIÓN completa y no su .scroll-target porque varias
+   piezas viven fuera del wrapper (fill, hairlines internas, bus de
+   conexión) y también deben irse. opacity no crea containing block, así
+   que esos hijos position: fixed siguen anclados al viewport.
+
+   Salida más corta que la entrada: la sección se aparta rápido para
+   ceder la escena al marco y llega con calma cuando ya está quieto.
+   ScrollProgress espera a que ESTAS transiciones terminen, no a una
+   duración copiada en JS. */
+main > .scroll-section {
+  transition: opacity 460ms var(--ease-out-expo);
+}
+
+html.section-hold main > .scroll-section {
+  opacity: 0;
+  transition: opacity 260ms ease-in;
+}
+
+/* sin clics sobre una sección invisible a media secuencia */
+html.section-hold main > .scroll-section.scroll-section {
+  pointer-events: none !important;
 }
 
 /* ---------- 5. Nav jump transitions ---------------------------------------

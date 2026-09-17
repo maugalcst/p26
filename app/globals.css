@@ -128,6 +128,20 @@ html[data-theme="dark"] {
   --cursor-color: #ff8f63; /* azul eléctrico legible sobre oscuro */
 }
 
+/* ---------- tercer tema ----------
+   PLACEHOLDER: los tres colores los define Mau. Todo lo derivado
+   (--fg-secondary, --frame-line, los color-mix de cada feature) se
+   recalcula solo, así que basta con cambiar estas tres líneas.
+
+   color-scheme le dice al navegador cómo pintar scrollbars y controles
+   nativos: "light" si el fondo es claro, "dark" si es oscuro. */
+html[data-theme="alt"] {
+  color-scheme: light;
+  --bg: #010101;
+  --fg: #a2acb7;
+  --cursor-color: #57be80;
+}
+
 /* ---------- 3. Reset mínimo ----------------------------------------------- */
 * {
   box-sizing: border-box;

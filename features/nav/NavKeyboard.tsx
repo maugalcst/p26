@@ -13,9 +13,9 @@ import { useEffect } from "react";
    Un solo dueño del estado, un solo lugar donde viven los umbrales.
 
    No depende de ids: el progreso 0..1 ya codifica la posición
-   (hero=0, proyectos=0.5, experiencia=1). */
+   (hero=0, proyectos=0.25, trayectoria=0.5, stack=0.75,
+   sobre mí=1). */
 
-const STEP = 0.5; // salto entre secciones (hero → proyectos → experiencia)
 
 export default function NavKeyboard() {
   useEffect(() => {
@@ -46,7 +46,9 @@ export default function NavKeyboard() {
 
       window.dispatchEvent(
         new CustomEvent("scroll:goto", {
-          detail: { by: e.key === "ArrowLeft" ? -STEP : STEP },
+          /* una sección hacia atrás/adelante; ScrollProgress resuelve
+             el destino contra la sección más cercana */
+          detail: { section: e.key === "ArrowLeft" ? -1 : 1 },
         }),
       );
     };

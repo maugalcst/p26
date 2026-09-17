@@ -1,0 +1,88 @@
+/* ---------- sección 04 · sobre mí ----------
+   El marco se retira (app/layout.css, html.scroll-about) y el nav con
+   él: aquí no hay encuadre ni cotas, solo el texto y, al cierre, el
+   contacto. Por eso la composición no se cuelga de ninguna hairline —
+   se sostiene sola con el sangrado de main.
+
+   PLACEHOLDER de contenido: falta el texto real. */
+
+.about {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  /* main tiene min-height: 100svh (globals.css); la sección se acota
+     sola, igual que .experience y .stack */
+  height: calc(100svh - var(--frame-top-offset) - 1rem);
+}
+
+.about__content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* mismo tratamiento que .projects__title, .experience__title y
+   .stack__title */
+.about__title-band {
+  padding-block: clamp(1.25rem, 2.4vh, 2rem);
+  margin-block-end: clamp(0.5rem, 1.2vh, 1rem);
+}
+
+.about__title {
+  font-family: "Redaction", serif;
+  font-weight: 400;
+  font-size: var(--step-3);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+  margin: 0;
+}
+
+.about__body {
+  flex: 1;
+  min-height: 0;
+}
+
+/* columna angosta: 34em como el resto del texto corrido del sitio */
+.about__line {
+  max-width: 34em;
+  color: var(--fg-secondary);
+}
+
+.about__line + .about__line {
+  margin-block-start: var(--space-1);
+}
+
+/* ---------- cierre · contacto ----------
+   Mono, atenuado, alineado a la izquierda como todo el sitio. Se
+   despega del borde inferior con el mismo margen que usaba el marco,
+   para que la ausencia de la línea no se sienta como un descuido. */
+.about__contact {
+  padding-bottom: calc(var(--frame-offset) - 1rem);
+}
+
+.about__contact__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6em 2.5em;
+}
+
+.about__contact__item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75em;
+  margin-block-start: 0;
+  font-family: var(--font-meta);
+  font-size: 0.85em;
+}
+
+.about__contact__label {
+  color: var(--fg-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+}
+
+.about__contact__pending {
+  color: var(--fg-secondary);
+}

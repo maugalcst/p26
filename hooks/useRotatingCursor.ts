@@ -1,39 +1,28 @@
 import { useEffect, type RefObject } from "react";
 
-/* ====== Tunables — ajustar directo en VS Code ====== */
+const SPRING_STIFFNESS = 0.001;
+const SPRING_FRICTION = 0.05;
+const SETTLE_DIST = 0.4;
+const SETTLE_VEL = 0.15;
+const MAX_DT = 32;
 
-// Chase con spring (lag elástico sutil). Verificado por simulación:
-// ζ≈0.79 → salto de 200px llega a ±2px en ~112ms, pause 208ms, overshoot 1.5px.
-const SPRING_STIFFNESS = 0.001; // px/ms² por px de offset
-const SPRING_FRICTION = 0.05; // amortiguación (por ms) — bajar = más rebote
-const SETTLE_DIST = 0.4; // px — umbral para pausar el loop
-const SETTLE_VEL = 0.15; // px/ms — umbral de velocidad para pausar
-const MAX_DT = 32; // ms — clamp del delta entre frames
+const BAR_THICKNESS = 3.3;
+const BAR_THICKNESS_PEAK = 3.1;
 
-// Geometría de la cruz
-const BAR_THICKNESS = 3.3; // grosor normal de cada barra
-const BAR_THICKNESS_PEAK = 3.1; // mínimo durante el giro (adelgazamiento sutil)
+const CURSOR_SIZE_IDLE = 15;
+const CURSOR_SIZE_MOVING = 15;
 
-// Compresión mientras el cursor está en movimiento
-const CURSOR_SIZE_IDLE = 15; // px — tamaño "brazo a brazo" en reposo
-const CURSOR_SIZE_MOVING = 15; // px — comprimido mientras se mueve
+const TWIST_STEP = -180;
+const TWIST_MS = 230;
 
-// Click izquierdo — giro 180° a la izquierda (acumulativo, se queda ahí)
-const TWIST_STEP = -180; // grados por click
-const TWIST_MS = 230; // duración total — casi instantáneo pero suave
+const SPIN_REVOLUTION_MS = 1000;
 
-// Click derecho — giro infinito
-const SPIN_REVOLUTION_MS = 1000; // ~1.1s por vuelta completa
-
-// Aburrimiento — cuando el cursor está quieto, juguetea solo
-const BORED_IDLE_MS = 2000; // ms quieto antes de empezar a moverse
-const BORED_TURN_MIN = 450; // duración mínima de cada giro juguetón
-const BORED_TURN_MAX = 1200; // duración máxima
-const BORED_PAUSE_MS = 350; // pausa entre giros
-const BORED_ARC = 200; // grados máximos por giro (se elige aleatorio dentro de ±)
-const BORED_RETURN_MS = 500; // al despertar, vuelve suave a la orientación "+"
-
-/* ====== Math ====== */
+const BORED_IDLE_MS = 2000;
+const BORED_TURN_MIN = 450;
+const BORED_TURN_MAX = 1200;
+const BORED_PAUSE_MS = 350;
+const BORED_ARC = 200;
+const BORED_RETURN_MS = 500;
 
 const clamp = (v: number, min: number, max: number) => Math.min(Math.max(v, min), max);
 
@@ -61,7 +50,6 @@ export function useRotatingCursor(
     if (window.matchMedia("(hover: none) and (pointer: coarse)").matches) return;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    /* Estado de la simulación (fuera del árbol de React) */
     const target = { x: 0, y: 0 };
     const pos = { x: 0, y: 0 };
     const vel = { x: 0, y: 0 };
@@ -72,12 +60,11 @@ export function useRotatingCursor(
     let rafId = 0;
     let running = false;
 
-    /* Aburrimiento + coordenadas */
-    let lastActivity = performance.now(); // último movimiento (para aburrirse)
+    let lastActivity = performance.now();
     let hasMoved = false;
     let bored: Bored = null;
     let trackingTimer = 0;
-    let boredTimer = 0; // despierta el loop tras el rato de inactividad
+    let boredTimer = 0;
 
     const startLoop = () => {
       if (running) return;
@@ -108,7 +95,6 @@ export function useRotatingCursor(
       cross.style.setProperty("--cursor-bar-thickness", `${th}px`);
     };
 
-    /* Mientras el cursor está en movimiento: se comprime y el marco deja de estar cortado */
     const applyMotionState = (inMotion: boolean) => {
       cross.style.setProperty(
         "--cursor-size",
@@ -117,8 +103,6 @@ export function useRotatingCursor(
       document.documentElement.classList.toggle("cursor-motion", inMotion);
     };
 
-    /* Coordenadas — capa fija que NO rota: X siempre a la derecha, Y abajo.
-       Visibles solo mientras la cruz está persiguiendo al mouse. */
     const coordLayer = area.querySelector<HTMLElement>(".cursor-coord-layer");
     const coordXEl = coordLayer?.querySelector<HTMLElement>(".cursor-coord--x") ?? null;
     const coordYEl = coordLayer?.querySelector<HTMLElement>(".cursor-coord--y") ?? null;
@@ -150,9 +134,6 @@ export function useRotatingCursor(
       }
     };
 
-    /* Aburrimiento — función aparte: cuando lleva un rato quieto, el cursor
-       gira a un ángulo aleatorio con easing suave, pausa, y vuelve a girar.
-       Devuelve true mientras está jugueteando (para mantener el loop vivo). */
     const updateBoredom = (ts: number): boolean => {
       if (!hasMoved || mode !== "idle") {
         bored = null;
@@ -182,7 +163,7 @@ export function useRotatingCursor(
           bored = { state: "pause", t0: ts, from: angle, to: angle, dur: BORED_PAUSE_MS };
         }
       } else if (ts - bored.t0 >= bored.dur) {
-        bored = null; // en el próximo frame arranca un giro nuevo
+        bored = null;
       }
       return true;
     };
@@ -205,7 +186,6 @@ export function useRotatingCursor(
 
       const boredActive = updateBoredom(ts);
 
-      /* Spring de posición */
       if (target.x !== pos.x || target.y !== pos.y) {
         const ax = (target.x - pos.x) * SPRING_STIFFNESS - vel.x * SPRING_FRICTION;
         const ay = (target.y - pos.y) * SPRING_STIFFNESS - vel.y * SPRING_FRICTION;
@@ -234,15 +214,13 @@ export function useRotatingCursor(
 
       const chaseAlive =
         Math.abs(target.x - pos.x) >= SETTLE_DIST || Math.abs(target.y - pos.y) >= SETTLE_DIST;
-      // El marco solo reacciona a cambios de coordenadas reales del mouse,
-      // no a giros por aburrimiento ni clicks (spin/twist).
+
       const inMotion = chaseAlive;
       applyMotionState(inMotion);
       setTracking(chaseAlive);
 
       if (mode === "idle" && !chaseAlive && !boredActive) {
-        // El cursor se asentó: el loop se apaga, pero programamos el despertar
-        // para que el "aburrimiento" pueda arrancar tras BORED_IDLE_MS quieto.
+
         if (hasMoved && !boredTimer) {
           boredTimer = window.setTimeout(() => {
             boredTimer = 0;
@@ -255,7 +233,6 @@ export function useRotatingCursor(
       }
     };
 
-    /* Feedback de click simplificado (solo prefers-reduced-motion) */
     let flashTimer = 0;
     const flashClick = () => {
       cross.classList.add("cursor-click-flash");
@@ -266,12 +243,11 @@ export function useRotatingCursor(
     const onMove = (e: MouseEvent) => {
       target.x = e.clientX;
       target.y = e.clientY;
-      cross.style.opacity = "1"; // visible desde el primer movimiento
+      cross.style.opacity = "1";
       lastActivity = performance.now();
       hasMoved = true;
       cancelBoredTimer();
 
-      // Si estaba jugueteando, despertarlo: volver suave a la orientación "+"
       if (bored && mode === "idle") {
         twist = { t0: performance.now(), from: angle, to: Math.round(angle / 90) * 90, dur: BORED_RETURN_MS };
         mode = "twist";
@@ -279,7 +255,7 @@ export function useRotatingCursor(
       }
 
       if (reduceMotion) {
-        // Seguimiento directo, sin lag de spring ni loop
+
         pos.x = target.x;
         pos.y = target.y;
         vel.x = 0;
@@ -289,7 +265,7 @@ export function useRotatingCursor(
         updateCoords(pos.x, pos.y);
         setTracking(true);
       } else {
-        startLoop(); // reaviva el loop apenas el mouse se mueve
+        startLoop();
       }
     };
 
@@ -305,11 +281,10 @@ export function useRotatingCursor(
         return;
       }
       if (mode === "spin") {
-        // Frenar el giro infinito y volver a la orientación default (+):
-        // aterrizar en el múltiplo de 90° más cercano (la cruz + se ve igual cada 90°).
+
         twist = { t0: performance.now(), from: angle, to: Math.round(angle / 90) * 90, dur: TWIST_MS };
       } else {
-        // Giro normal: 180° a la izquierda, acumulativo, se queda ahí.
+
         twist = { t0: performance.now(), from: angle, to: angle + TWIST_STEP, dur: TWIST_MS };
       }
       mode = "twist";
@@ -319,7 +294,7 @@ export function useRotatingCursor(
     const onContextMenu = () => {
       lastActivity = performance.now();
       cancelBoredTimer();
-      if (reduceMotion) return; // giro infinito desactivado con reduced-motion
+      if (reduceMotion) return;
       if (mode !== "twist") {
         angle = angle % 360;
         mode = "spin";
@@ -327,9 +302,6 @@ export function useRotatingCursor(
       }
     };
 
-    /* Los listeners van en window, no en el área: el custom cursor debe
-       cubrir TODO el viewport (incluidas las bandas de padding del body
-       y las líneas del marco), no solo la caja de contenido. */
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mousedown", onMouseDown);
     window.addEventListener("contextmenu", onContextMenu);

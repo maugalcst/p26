@@ -12,15 +12,11 @@ const LEVELS = [
   "Redaction100",
 ];
 
-/* Opacidad variable por nivel: cuanto más redactado, más tenue. El último
-   font (el asentado) siempre llega a opacidad total. */
 const OPACITY = [0.95, 0.85, 0.72, 0.6, 0.45, 0.3, 0.18];
 
-/* Duración del barrido por letra y desfase entre letras consecutivas. */
 const DURATION = 1200;
 const STAGGER = 80;
 
-/* Estado de reposo: el menos redactado de la familia Redaction, en bold. */
 const SETTLED_FAMILY = "Redaction";
 const SETTLED_WEIGHT = "700";
 
@@ -30,13 +26,6 @@ interface RevealTitleProps {
   className?: string;
 }
 
-/* Título que se revela: cada vez que cambia revealKey (o el texto), las
-   letras arrancan totalmente redactadas (Redaction100, el mismo look
-   pixeleado del hero) y descienden por los niveles hasta el menos redactado
-   de Redaction, en bold. La transición ocurre letra por letra: cada letra
-   espera su turno (STAGGER) y luego barre los niveles por su cuenta, de modo
-   que la ola recorre el título hasta que todas quedan normales. Nunca llega
-   a Bagnard. */
 export default function RevealTitle({
   text,
   revealKey,

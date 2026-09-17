@@ -1,10 +1,3 @@
-/* ---------- sección 02 · experiencia ----------
-   Una pantalla, sin scroll interno. El header cruza el viewport con
-   width: 100vw + margin-left negativo. Debajo, una retícula 38/62
-   dividida por una hairline vertical (position: fixed, fuera del
-   scroll-target) y un wrapper de cursor que "encierra" la tarjeta
-   activa con el color del cursor. */
-
 .experience {
   display: flex;
   flex-direction: column;
@@ -19,22 +12,11 @@
   min-height: 100%;
 }
 
-/* banda del título: cruza el viewport de borde a borde. El bloque se
-   extiende con width: 100vw + margin-left negativo que deshace el
-   padding de main; el título va a la izquierda, alineado con las cards
-   (ver padding-left). */
 .experience__title-band {
   width: 100vw;
   margin-left: calc(-1rem - var(--main-pad-x, calc(var(--frame-inset) * 2)));
   padding-block: clamp(1rem, 2vh, 1.5rem);
-  /* Alineado con el borde izquierdo de las cards, no centrado (AGENTS.md:
-     text-align left siempre). Dos sumandos:
-       frame-offset + frame-close-x   donde queda la línea izquierda del
-                                      marco cerrado y arranca la retícula
-       clamp(1.5rem, 3vw, 2.5rem)     el padding-left de .experience__grid
-                                      — PROPORCIÓN ACOPLADA: si cambias ese
-                                      padding, cambia este también
-     Medido a 1440 de ancho: 150px + 40px = 190px, el borde de las cards. */
+
   padding-left: calc(
     var(--frame-offset) + var(--frame-close-x, 4rem) + clamp(1.5rem, 3vw, 2.5rem)
   );
@@ -42,7 +24,6 @@
   margin-block-end: clamp(0.75rem, 1.6vh, 1.25rem);
 }
 
-/* mismo tratamiento que .projects__title (ver el porqué ahí) */
 .experience__title {
   font-family: "Redaction", serif;
   font-weight: 400;
@@ -54,8 +35,6 @@
   display: inline-block;
 }
 
-/* fill: fondo que cubre el área DEBAJO de la hairline inferior en su
-   posición final. Mismo lenguaje del navbar: glass pixeleado. */
 .experience__fill {
   position: fixed;
   top: calc(var(--title-bottom-y, var(--frame-top-offset)) + 1px);
@@ -80,17 +59,12 @@ html.scroll-end .experience__fill {
   transition: opacity 600ms var(--ease-out-expo) 1000ms;
 }
 
-/* ---------- retícula 38 / 62 ----------
-   La grid vuelve al flujo normal (no position: fixed). La altura
-   está limitada por .experience__content (que es el scroll-target y
-   tiene la misma altura que el fill). Sangra al borde INTERNO del
-   fill con margin-left/right (mismo cálculo que tenía antes) y los
-   padding dan respiro a las cards contra los costados del fill. */
 .experience__grid {
   position: relative;
   flex: 1;
   min-height: 0;
   display: grid;
+  /* si cambio este 43%, cambiar también el left de .experience__vline */
   grid-template-columns: 43% 1fr;
   align-items: stretch;
   margin-left: calc(
@@ -106,11 +80,6 @@ html.scroll-end .experience__fill {
   box-sizing: border-box;
 }
 
-/* hairline vertical: cruza todo el viewport (position: fixed) pero solo
-   se ve cuando TRAYECTORIA está en pantalla. Se posiciona en el borde
-   derecho de la columna izquierda (38%) del fill. La cuenta parte del
-   borde interno izquierdo del fill (frame-offset + frame-close-x) y suma
-   el 38% del ancho del fill. */
 .experience__vline {
   position: absolute;
   top: calc(-1 * clamp(0.75rem, 1.6vh, 1.25rem) + 0.2rem);
@@ -131,11 +100,6 @@ html.scroll-end .experience__vline {
   opacity: 1;
 }
 
-/* ---------- columna izquierda · tarjetas ----------
-   Lista de 3 tarjetas. flex: 1 en cada .card-wrap reparte la altura
-   de la celda EQUITATIVAMENTE: 1/3 para cada una. Así el espacio es
-   exactamente igual arriba, entre y abajo sin importar el contenido
-   de cada card. */
 .experience__cards {
   grid-column: 1;
   list-style: none;
@@ -167,12 +131,6 @@ html.scroll-end .experience__vline {
   width: 100%;
 }
 
-/* tarjeta: borde hairline en reposo, sin fondo. padding interno
-   generoso para que el contenido respire. La card es container de
-   inline-size (cqi) para que font-size escale con el ancho de la
-   card y no del viewport — así el zoom del navegador no rompe el
-   layout. Sin overflow:hidden: si el texto crece, la card se
-   expande hacia abajo. */
 .experience__card {
   container-type: inline-size;
   container-name: card;
@@ -191,8 +149,7 @@ html.scroll-end .experience__vline {
   text-align: left;
   font: inherit;
   cursor: pointer;
-  /* el wrapper del cursor la cubre: nada de transiciones en su borde,
-     porque el cambio visual ocurre en el wrapper externo */
+
 }
 
 .experience__card:focus-visible {
@@ -200,7 +157,6 @@ html.scroll-end .experience__vline {
   outline-offset: 4px;
 }
 
-/* periodo: arriba a la DERECHA, en mono, versalitas */
 .experience__card__period {
   grid-area: period;
   justify-self: end;
@@ -213,7 +169,6 @@ html.scroll-end .experience__vline {
   margin-block-end: clamp(0.75rem, 1.6vh, 1rem);
 }
 
-/* puesto/título: cuerpo, tamaño mayor */
 .experience__card__role {
   grid-area: role;
   font-family: var(--font-body);
@@ -225,12 +180,10 @@ html.scroll-end .experience__vline {
   letter-spacing: -0.01em;
 }
 
-/* tarjeta 3 (educación) más tenue: solo el título al 70% */
 .experience__card__role--soft {
   opacity: 0.7;
 }
 
-/* empresa: en gris al 55% */
 .experience__card__company {
   grid-area: company;
   font-family: var(--font-body);
@@ -242,7 +195,7 @@ html.scroll-end .experience__vline {
 
 .experience__card-frame {
   position: absolute;
-  /* más grande que la tarjeta: aquí se ajusta cuánto */
+
   inset: -4px;
   border: 1px solid transparent;
   pointer-events: none;
@@ -253,20 +206,6 @@ html.scroll-end .experience__vline {
     transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Hover y active comparten marco: trazo sólido y relleno del color del
-   cursor al 7%. La diferencia es la ENERGÍA del trazo:
-
-     hover   trazo al 100% — la card está cargada
-     active  trazo al 45%  — le pasó su energía al bus de conexión, que
-                             usa ese mismo 45% en su línea
-
-   El borde del propio marco se queda siempre en 45%, y encima una capa
-   (::before) dibuja el trazo al 100%. Atenuar = apagar esa capa con
-   opacity, que sí se puede animar (border-color no, y AGENTS.md pide
-   animar solo transform y opacity).
-
-   Ojo: el marco es un hermano absoluto que se pinta ENCIMA de la card,
-   así que el relleno también tiñe el texto. */
 .experience__card-wrap--hovered .experience__card-frame,
 .experience__card-wrap--selected .experience__card-frame {
   opacity: 1;
@@ -276,8 +215,6 @@ html.scroll-end .experience__vline {
   background: color-mix(in srgb, var(--cursor-color) 7%, transparent);
 }
 
-/* capa del trazo a potencia completa: cubre exactamente el borde del
-   marco (inset -1px desde su padding box) */
 .experience__card-frame::before {
   content: "";
   position: absolute;
@@ -291,14 +228,6 @@ html.scroll-end .experience__vline {
   opacity: 1;
 }
 
-/* Active: la capa se apaga con la misma curva, duración y retraso con
-   que el bus se tiende (--conn-draw / --conn-wait), así la card se
-   descarga mientras la línea avanza hacia el panel.
-
-   Va DESPUÉS del hover y con la misma especificidad a propósito: si la
-   card está activa y además con hover (el cursor sigue encima tras el
-   click), gana la activa. Sin esto el trazo se quedaba al 100% hasta
-   sacar el mouse. */
 .experience__card-wrap--selected .experience__card-frame::before {
   opacity: 0;
   transition: opacity var(--conn-draw) var(--ease-out-expo) var(--conn-wait);
@@ -313,16 +242,6 @@ html.scroll-end .experience__vline {
   }
 }
 
-/* ---------- columna derecha · detalle ----------
-   Dos estados visuales:
-   - vacío (sin selección): intro centrada en gris sobre fondo video
-   - con selección: 2 cifras grandes, descripción y módulo terminal
-
-   El video de fondo del estado vacío (.experience__detail__bg) cubre
-   toda la celda. Cuando el src no está seteado, se mantiene hidden
-   (display:none) y solo se ve el intro. */
-
-/* contenedor: position:relative para anclar el video absoluto dentro */
 .experience__detail {
   grid-column: 2;
   position: relative;
@@ -338,13 +257,6 @@ html.scroll-end .experience__vline {
   background: var(--bg);
 }
 
-/* DitherField: luz tramada en capas detrás del contenido del panel (ver
-   DitherField.tsx). Anclada arriba a la izquierda y SIN width/height
-   aquí: el JS la dimensiona a un múltiplo exacto de su celda (3px) para
-   que cada píxel del buffer sea un cuadrado perfecto, y el panel recorta
-   el sobrante con su overflow: hidden. Estirarla con inset: 0 deformaba
-   las celdas. `color` es la tinta que lee el JS. La atenuación con texto
-   la hace el JS por capa, no la opacidad del elemento. */
 .experience__detail__bg {
   position: absolute;
   top: 0;
@@ -355,7 +267,6 @@ html.scroll-end .experience__vline {
   color: var(--fg);
 }
 
-/* intro del estado vacío: centrada, en gris, sobre el video. */
 .experience__detail__empty {
   position: absolute;
   inset: 0;
@@ -370,15 +281,10 @@ html.scroll-end .experience__vline {
   line-height: 1.5;
   color: color-mix(in srgb, var(--fg) 55%, transparent);
   text-align: center;
-  /* sin text-shadow: el halo oscuro existía para separar el texto de un
-     video de fondo que nunca llegó; sobre el DitherField (tenue y del
-     color del tema) solo ensuciaba, y AGENTS.md reserva las sombras de
-     texto para fondos de video */
+
   max-width: none;
 }
 
-/* contenido (con tarjeta seleccionada): apilado vertical sobre el
-   fondo (que queda detrás de todo, oculto por el contenido). */
 .experience__detail__content {
   position: relative;
   z-index: 1;
@@ -395,8 +301,6 @@ html.scroll-end .experience__vline {
   width: 100%;
 }
 
-/* métricas: 2 cifras grandes (valor) + label al lado, en una línea
-   cada una. El valor es grande (cuerpo), el label es sans normal. */
 .experience__detail__metrics {
   display: flex;
   flex-direction: column;
@@ -423,7 +327,6 @@ html.scroll-end .experience__vline {
   color: color-mix(in srgb, var(--fg) 55%, transparent);
 }
 
-/* descripción: párrafo normal */
 .experience__detail__desc {
   margin: 0;
   font-family: var(--font-body);
@@ -434,8 +337,6 @@ html.scroll-end .experience__vline {
   margin-bottom: auto;
 }
 
-/* módulo terminal: barra estilo shell con fondo casi negro,
-   borde hairline y un LED cuadrado del color del cursor a la derecha. */
 .experience__detail__terminal {
   display: flex;
   align-items: center;
@@ -465,50 +366,19 @@ html.scroll-end .experience__vline {
   color: color-mix(in srgb, var(--fg) 75%, transparent);
 }
 
-/* LED: cuadrado del color del cursor */
 .experience__detail__terminal__led {
   display: inline-block;
-  /* 0.375rem = 6px exactos (sin medio píxel): entre el pin de salida del
-     bus (5px) y el puerto de entrada (7px), la misma familia de cuadros */
+
   width: 0.375rem;
   height: 0.375rem;
   background: var(--cursor-color);
   flex-shrink: 0;
 }
 
-/* ---------- bus de conexión ----------
-   La card activa (fuente) le manda datos al panel (destino). Una sola
-   línea al centro vertical de la card, con el lenguaje de terminal del
-   sitio: un pin sólido soldado al trazo del marco (salida), un puerto
-   hueco soldado al borde del panel (entrada), y un bit — un bloque de
-   píxeles del color del cursor — que recorre el bus cada ciclo. Al
-   llegar, el puerto destella y el LED del terminal parpadea: acuse de
-   recibo.
-
-   Coreografía al seleccionar una card (o al entrar a TRAYECTORIA):
-     1. --conn-wait   espera a que el JS mida (mide 2 RAF después)
-     2. el pin de salida aparece y la línea se tiende hacia el panel
-     3. el puerto de entrada aparece cuando la línea casi llega
-     4. arranca el ciclo del bit, en bucle
-
-   Vive como hijo directo del section (position: fixed → viewport) y
-   ExperienceSection publica en :root:
-     --conn-y     centro vertical de la card activa
-     --conn-x-1   X donde termina el trazo del marco
-     --conn-x-2   X donde empieza el borde del panel
-
-   Se REMONTA con key={selected.id} al cambiar de card: así los
-   @keyframes arrancan de cero. Las animaciones solo se declaran bajo
-   html.scroll-end, de modo que también arrancan al entrar a la sección
-   y no corren mientras está oculta. Solo transform y opacity.
-
-   Geometría en píxeles enteros para que los trazos de 1px caigan nítidos:
-   el eje del bus está en y = 0.5px dentro del contenedor (la línea ocupa
-   [0, 1]) y cada nodo se centra sobre el trazo que suelda. */
 .experience {
   --conn-wait: 120ms;
   --conn-draw: 560ms;
-  --conn-cycle: 3200ms; /* el bit viaja en el 30% del ciclo (~960ms) */
+  --conn-cycle: 3200ms;
 }
 
 .experience__conn {
@@ -523,13 +393,10 @@ html.scroll-end .experience__vline {
   transition: opacity 200ms ease-out;
 }
 
-/* Fuera del .scroll-target no se desvanece con la sección: sin esta
-   condición quedaría flotando encima de PROYECTOS. */
 html.scroll-end .experience__conn {
   opacity: 1;
 }
 
-/* el bus: hairline tenue, para que el bit a color completo resalte */
 .experience__conn__track {
   position: absolute;
   inset: 0;
@@ -542,7 +409,6 @@ html.scroll-end .experience__conn__track {
     both;
 }
 
-/* carril del bit: recorta el bloque para que no asome fuera del bus */
 .experience__conn__lane {
   position: absolute;
   left: 0;
@@ -552,11 +418,6 @@ html.scroll-end .experience__conn__track {
   overflow: hidden;
 }
 
-/* El bit se mueve con un truco de transform: este elemento mide lo mismo
-   que el carril y lleva el bloque pegado a su borde derecho. De
-   translateX(-100%) a 0 el bloque va de justo antes del pin a justo
-   dentro del puerto — un translateX en % se resuelve contra el propio
-   elemento, no contra el bus, por eso se mueve el carril completo. */
 .experience__conn__bit {
   position: absolute;
   inset: 0;
@@ -579,13 +440,10 @@ html.scroll-end .experience__conn__bit {
     calc(var(--conn-wait) + var(--conn-draw)) infinite backwards;
 }
 
-/* nodos: cuadrados, como el LED del terminal (nada de border-radius) */
 .experience__conn__node {
   position: absolute;
 }
 
-/* salida: 5px sólido, centrado sobre el trazo del marco (que ocupa el
-   pixel [-1, 0] del bus) → caja [-3, 2] × [-2, 3] */
 .experience__conn__node--out {
   left: -3px;
   top: -2px;
@@ -594,9 +452,6 @@ html.scroll-end .experience__conn__bit {
   background: var(--cursor-color);
 }
 
-/* entrada: 7px hueco, centrado sobre el borde del panel (pixel [W, W+1])
-   → caja [W-3, W+4] × [-3, 4]. El fondo tapa el borde del panel ahí
-   mismo, así se lee como un conector montado encima. */
 .experience__conn__node--in {
   right: -4px;
   top: -3px;
@@ -606,7 +461,6 @@ html.scroll-end .experience__conn__bit {
   background: var(--bg);
 }
 
-/* destello del puerto al recibir el bit */
 .experience__conn__node--in::after {
   content: "";
   position: absolute;
@@ -629,9 +483,6 @@ html.scroll-end .experience__conn__node--in::after {
     calc(var(--conn-wait) + var(--conn-draw)) infinite backwards;
 }
 
-/* LED del terminal: doble parpadeo al llegar el bit. Mismo ciclo y mismo
-   retraso que el bit, y el panel se remonta con la misma key que el bus,
-   así que van en fase. */
 html.scroll-end .experience__detail__terminal__led {
   animation: conn-led var(--conn-cycle) linear
     calc(var(--conn-wait) + var(--conn-draw)) infinite;
@@ -655,8 +506,6 @@ html.scroll-end .experience__detail__terminal__led {
   }
 }
 
-/* 0–30% viaja (ease in-out: arranca y frena como un paquete) · 30–34% se
-   funde dentro del puerto · resto del ciclo: silencio */
 @keyframes conn-bit {
   0% {
     transform: translateX(-100%);
@@ -715,7 +564,6 @@ html.scroll-end .experience__detail__terminal__led {
   }
 }
 
-/* reduced-motion: el bus queda tendido y quieto, sin bit ni parpadeos */
 @media (prefers-reduced-motion: reduce) {
   html.scroll-end .experience__conn__track,
   html.scroll-end .experience__conn__node,
@@ -726,9 +574,6 @@ html.scroll-end .experience__detail__terminal__led {
   }
 }
 
-/* ---------- móvil ----------
-   Una columna, hairline vertical oculta, líneas de conexión ocultas.
-   Tarjetas arriba, panel debajo. Las tarjetas siguen siendo clickeables. */
 @media (max-width: 767px) {
   .experience__grid {
     grid-template-columns: 1fr;
@@ -743,9 +588,6 @@ html.scroll-end .experience__detail__terminal__led {
     display: none;
   }
 
-  /* en móvil el marco no se cierra, así que la expresión de arriba
-     dejaría el título con una sangría enorme en 390px. Vuelve al
-     padding de main — sigue a la izquierda, alineado con el contenido. */
   .experience__title-band {
     padding-left: var(--main-pad-x, calc(var(--frame-inset) * 2));
   }

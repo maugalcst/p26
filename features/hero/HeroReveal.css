@@ -1,11 +1,6 @@
-/* ---------- hero reveal: los 4 videos se muestran sobre el bloque del nombre ---------- */
-
 .hero__name-wrap {
   position: relative;
-  /* ajuste manual del bloque completo (ciudad + nombre + rol).
-     Vive en .hero__name-wrap y no en .hero__inner porque .hero__inner
-     es el .scroll-target y su transform lo sobrescribe scroll-virtual
-     (ver app/layout.css). Negativo = sube, positivo = baja. */
+
   transform: translateY(-2.5rem);
 }
 
@@ -14,17 +9,10 @@
   padding: clamp(1rem, 2vh, 1.75rem) clamp(2rem, 6vw, 5rem);
 }
 
-/* Tinta de la sombra del nombre sobre video. Es el único color de esta
-   feature que NO deriva de --fg, y a propósito: el fondo ahí no es el
-   del tema sino un fotograma, así que en oscuro un --fg crema daría una
-   sombra clara sobre la imagen. Café muy oscuro en vez de negro, para
-   no ensuciar el crema de la letra. */
 .hero {
   --hero-video-ink: #17120f;
 }
 
-/* El nombre en reposo no lleva sombra: la transición la funde con la
-   entrada del video en lugar de aparecer de golpe. */
 .hero__name {
   transition: text-shadow 320ms var(--ease-out-expo);
 }
@@ -44,54 +32,31 @@
   object-fit: cover;
 }
 
-/* [hidden] del UA es (0,1,0); .name-block__videos video es (0,2,0) y
-   ganaría, dejando los videos visibles siempre. Forzamos display:none
-   con una regla más específica para que el atributo hidden de React
-   (hidden={active !== key}) oculte los videos inactivos. */
 .name-block__videos video[hidden] {
   display: none;
 }
 
-/* ---------- líneas de cota (DESACTIVADAS) ----------
-   Las 4 cotas están ocultas. Los <span.cota> siguen en el JSX; si se
-   quieren reactivar, basta con borrar este bloque display:none y
-   restaurar el CSS de las cotas (ver historial de git). */
 .name-block__videos .cota {
   display: none;
 }
 
-/* el texto del nombre queda por encima del video */
 .hero__name-block > .hero__name {
   position: relative;
   z-index: 1;
 }
 
-/* negativo: con video activo, el nombre intercambia bg/fg */
 .hero[data-active] .hero__name {
   color: var(--bg);
-  /* Contraste local sobre el video (único caso donde AGENTS.md permite
-     sombra de texto). Dos capas, y cada una tiene un trabajo distinto:
 
-       0 1px 2px / 34%  — pegada al trazo. Es la que hace la legibilidad
-                          real: define el borde de la letra contra un
-                          fotograma claro (la lava de landscape.mp4).
-       0 4px 18px / 20% — ancha y muy tenue. No aporta contraste; evita
-                          que la letra se vea recortada y pegada encima,
-                          que es lo que delata una sombra amateur.
-
-     Sin desplazamiento lateral y con la vertical mínima: la luz cae de
-     frente, no en diagonal. */
   text-shadow:
     0 1px 2px color-mix(in srgb, var(--hero-video-ink) 34%, transparent),
     0 4px 18px color-mix(in srgb, var(--hero-video-ink) 20%, transparent);
 }
 
-/* las letras ambient se mantienen en azul */
 .hero[data-active] .decoder-char--ambient {
   color: var(--cursor-color);
 }
 
-/* feedback en el disparador */
 .hero__meta--top,
 .hero__meta--role {
   transition: color 200ms ease;
@@ -104,13 +69,6 @@
 .hero[data-active="terminal"] .hero__meta--role {
   color: var(--cursor-color);
 }
-
-/* ---------- layout del hero ----------
-   Restaurado de globals.css tras la restructuración. El header .hero
-   ocupa la celda del grid de main; .hero__inner es el wrapper que
-   recibe la animación del scroll virtual (transform/opacity). El
-   contenido se centra dentro de .hero (no de .hero__inner) para que
-   el centrado vertical no se afecte por el translateY del scroll. */
 
 .hero {
   position: relative;
@@ -158,11 +116,6 @@
   margin-block-start: var(--space-2);
 }
 
-/* el role ya no es absolute: vive en el flow del flex del hero__inner,
-   debajo del name-wrap. El flex column con justify-content: center
-   lo centra junto con el name-wrap como bloque único. Así el name
-   queda siempre verticalmente centrado y el role nunca se solapa con
-   el scroll-hint (que es absolute al bottom del hero). */
 .hero__meta--top,
 .hero__meta--role {
   width: max-content;
@@ -170,9 +123,6 @@
   white-space: nowrap;
 }
 
-/* el meta top sigue siendo absolute para colgar encima del name-block.
-   Su bottom = 100% + gap respecto al name-block (que es position:
-   relative) — el mismo cálculo de antes, sin cambio de semántica. */
 .hero__meta--top {
   position: absolute;
   left: 50%;
@@ -180,9 +130,6 @@
   transform: translate(-50%, 0);
 }
 
-/* el role vive en el flow del flex (sin position), hereda el centrado
-   horizontal del .hero__inner. Necesita position: relative para
-   mantener la referencia del data-key (hover del video). */
 .hero__meta--role {
   position: relative;
   margin-block-start: 20;
@@ -223,7 +170,6 @@
   background: color-mix(in srgb, var(--fg) 30%, transparent);
 }
 
-/* "+" que baja por la línea girando como engranaje — mismo lenguaje de la cruz */
 .hero__scroll__gear {
   position: absolute;
   left: 50%;
@@ -281,8 +227,6 @@ html.nav-revealed .hero__scroll {
     animation: none;
   }
 
-  /* la sombra se sigue aplicando (es contraste, no movimiento);
-     lo que se quita es el fundido. */
   .hero__name {
     transition: none;
   }

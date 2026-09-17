@@ -1,18 +1,3 @@
-/* =============================================================================
-   globals.css — solo lo que afecta a TODO el documento:
-   1. @font-face de Redaction (7 niveles, animación DecoderText)
-   2. Tokens (--bg, --fg, --step-*, --frame-*, --scroll-progress, etc.)
-   3. Reset mínimo (box-sizing, margins base de tipografía, etc.)
-   4. Tipografía global (h1..h6, p, a, ul/ol, .meta)
-   5. Tema oscuro (html[data-theme="dark"])
-
-   NO contiene:
-   - Layout de main, nav, frame, scroll-virtual (→ app/layout.css)
-   - Utilities de sangría (→ app/utilities.css)
-   - Estilos de features (→ cada feature/*.css)
-   ========================================================================== */
-
-/* ---------- 1. Redaction: familia de redacción progresiva (7 niveles) ----- */
 @font-face {
   font-family: "Redaction";
   src: url("/assets/fonts/Redaction-Regular.woff2") format("woff2");
@@ -62,25 +47,22 @@
   font-display: swap;
 }
 
-/* ---------- 2. Tokens ----------------------------------------------------- */
+/* Tema claro — IVORY. Cambiando estos tres colores se recalcula todo
+   lo demás (texto secundario, tinta del marco, mezclas de cada sección). */
 :root {
-  /* color — nunca #000/#fff puros */
+
   --bg: #efedea;
   --fg: #2c2726;
   --fg-secondary: color-mix(in srgb, var(--fg) 62%, transparent);
   --cursor-color: #0137bf;
 
-  /* tipografía (Bagnard vía @fontsource + Satoshi/Departure locales, self-hosted) */
-  --font-display: 'Bagnard', serif; /* headings display — un solo peso (400) */
-  /* --font-body = Satoshi (400/700), --font-meta = Departure Mono (400) vía next/font */
+  --font-display: 'Bagnard', serif;
 
-  /* escala — 4 escalones, razón 1.25 (1.5625 = 1.25², 1.953 = 1.25³) */
-  --step-0: clamp(1rem, 0.875rem + 0.25vw, 1.125rem); /* cuerpo 16–18px, techo 19px */
-  --step-1: calc(var(--step-0) * 1.25); /* subtítulos */
-  --step-2: calc(var(--step-0) * 1.5625); /* títulos de página */
-  --step-3: calc(var(--step-0) * 1.953); /* display */
+  --step-0: clamp(1rem, 0.875rem + 0.25vw, 1.125rem);
+  --step-1: calc(var(--step-0) * 1.25);
+  --step-2: calc(var(--step-0) * 1.5625);
+  --step-3: calc(var(--step-0) * 1.953);
 
-  /* ritmo vertical — se deriva de la interlínea del cuerpo (font × 1.7) */
   --rhythm: calc(var(--step-0) * 1.7);
   --space-05: calc(var(--rhythm) * 0.5);
   --space-1: var(--rhythm);
@@ -90,51 +72,30 @@
 
   --tracking-caps: 0.09em;
 
-  /* easing — exponencial suave para los movimientos del nav/marco */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* marco de hairlines — separación del contenido y color de la línea.
-     Estos son los ÚNICOS tokens de margen; todos los cálculos de sangría
-     se derivan de aquí vía app/utilities.css. Si cambias uno, todo se
-     reajusta automáticamente. */
   --frame-inset: clamp(56px, 8vw, 120px);
   --frame-line: color-mix(in srgb, var(--fg) 20%, transparent);
   --frame-offset: clamp(40px, 6vw, 96px);
-  --frame-top-offset: clamp(64px, 9vw, 128px); /* línea superior más separada — cabecera del nav */
-  --frame-grow: clamp(1.25rem, 3vw, 3rem); /* cuanto se despegan las líneas con video activo */
+  --frame-top-offset: clamp(64px, 9vw, 128px);
+  --frame-grow: clamp(1.25rem, 3vw, 3rem);
 
-  /* scroll virtual 0..1 — escrito por features/scroll/ScrollProgress.
-     Único estado global de scroll; las features lo leen con var(--scroll-progress). */
   --scroll-progress: 0;
 
-  /* tinte del rectángulo interior del marco en TRAYECTORIA. Mismo
-     lenguaje que el navbar: 55% del fondo sobre transparente. En
-     dark el fondo es oscuro (rellena con negro), en light es crema
-     (rellena con crema) — coherente con la barra superior. */
   --experience-fill: var(--bg);
 
   color-scheme: light;
 }
 
-/* ---------- tema oscuro ----------
-   No es un swap literal de bg/fg: la tinta cálida (#39312c) abre paso a un
-   fondo café-casi-negro y el crema pasa a texto. El azul del sistema se
-   clarifica para no perderse sobre fondo oscuro. Los tokens derivados
-   (--fg-secondary, --frame-line) se recalculan solos vía color-mix. */
+/* Tema oscuro */
 html[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0f0e0e; /* tinta profunda, cálida — no #000 puro */
-  --fg: #eadac8; /* hueso crema, heredero del --bg claro */
-  --cursor-color: #ff8f63; /* azul eléctrico legible sobre oscuro */
+  --bg: #0f0e0e;
+  --fg: #eadac8;
+  --cursor-color: #ff8f63;
 }
 
-/* ---------- tercer tema ----------
-   PLACEHOLDER: los tres colores los define Mau. Todo lo derivado
-   (--fg-secondary, --frame-line, los color-mix de cada feature) se
-   recalcula solo, así que basta con cambiar estas tres líneas.
-
-   color-scheme le dice al navegador cómo pintar scrollbars y controles
-   nativos: "light" si el fondo es claro, "dark" si es oscuro. */
+/* VELVET. Ojo: con fondo oscuro, color-scheme debería ser dark */
 html[data-theme="alt"] {
   color-scheme: light;
   --bg: #010101;
@@ -142,7 +103,6 @@ html[data-theme="alt"] {
   --cursor-color: #57be80;
 }
 
-/* ---------- 3. Reset mínimo ----------------------------------------------- */
 * {
   box-sizing: border-box;
 }
@@ -153,16 +113,14 @@ main {
 
 html,
 body {
-  /* scroll virtual: el navegador no desplaza. ScrollProgress captura
-     wheel/touch y publica --scroll-progress en :root. El height:100% se
-     mantiene para que la altura del documento no genere scrollbar nativa. */
+
   overflow: hidden;
   height: 100%;
 }
 
 body {
   margin: 0;
-  padding: 1rem; /* margen externo (sangrado) del marco */
+  padding: 1rem;
   font-family: var(--font-body);
   font-size: var(--step-0);
   line-height: 1.7;
@@ -178,7 +136,6 @@ body {
   color: var(--bg);
 }
 
-/* ---------- 4. Tipografía global ------------------------------------------ */
 h1,
 h2,
 h3,
@@ -228,7 +185,6 @@ p:not([class]) {
   max-width: 34em;
 }
 
-/* links y texto clickeable — Departure Mono (terminal), inversión al hover */
 a {
   font-family: var(--font-meta);
   color: var(--fg);
@@ -253,7 +209,6 @@ li + li {
   margin-block-start: var(--space-05);
 }
 
-/* ---------- 5. Utilidades tipográficas ------------------------------------ */
 .meta {
   font-family: var(--font-meta);
   font-size: 0.85em;

@@ -3,94 +3,113 @@
 import { useEffect, useRef, useState } from "react";
 import "./ExperienceSection.css";
 import DitherField from "./DitherField";
+import { useT } from "@/features/i18n/useLang";
 
-/* Datos de TRAYECTORIA. Hardcoded por ahora — la fuente de verdad es el
-   usuario. id sirve para identificar la tarjeta seleccionada.
-
-   Modelo del detail (columna derecha):
-   - state vacío (sin tarjeta): una frase intro corta centrada en gris.
-     El fondo del detail es un video (lo pasa el usuario después).
-   - state con tarjeta:
-     * metrics: 2 cifras grandes con valor + label. Por ahora placeholder
-       genérico (mismas cifras para las 3). Cuando lleguen datos reales
-       se mueven al objeto de cada tarjeta.
-     * description: párrafo de 2-3 líneas.
-     * terminal: barra estilo shell con mau@port y path dinámico según
-       la tarjeta. LED cuadrado del color del cursor a la derecha. */
+// Mi trayectoria. TODO: cambiar las métricas de ejemplo por cifras reales
 const EXPERIENCE = [
   {
     id: "epicor-qa",
-    period: "2026 — Present",
-    role: "QA Automation Developer",
+    period: { es: "2026 — Presente", en: "2026 — Present" },
+    role: { es: "QA Automation Developer", en: "QA Automation Developer" },
     company: "@Epicor Software",
     metrics: [
-      { value: "6h", label: "ciclo de regresión [cifra de ejemplo]" },
-      { value: "120", label: "casos automatizados cada PR" },
+      {
+        value: "6h",
+        label: {
+          es: "ciclo de regresión [cifra de ejemplo]",
+          en: "regression cycle [sample figure]",
+        },
+      },
+      {
+        value: "120",
+        label: {
+          es: "casos automatizados cada PR",
+          en: "automated cases per PR",
+        },
+      },
     ],
-    description:
-      "El equipo corría la regresión a mano antes de cada release. Construí la suite automatizada que hoy se ejecuta en cada pull request, y documenté el proceso para que el resto del equipo pudiera extenderla.",
+    description: {
+      es: "El equipo corría la regresión a mano antes de cada release. Construí la suite automatizada que hoy se ejecuta en cada pull request, y documenté el proceso para que el resto del equipo pudiera extenderla.",
+      en: "The team ran regression by hand before every release. I built the automated suite that now runs on each pull request, and documented the process so the rest of the team could extend it.",
+    },
     terminalPath: "~/trayectoria/epicor-qa",
   },
   {
     id: "epicor-intern",
-    period: "2025 — 2026",
-    role: "QA Automation Developer Intern",
+    period: { es: "2025 — 2026", en: "2025 — 2026" },
+    role: {
+      es: "QA Automation Developer Intern",
+      en: "QA Automation Developer Intern",
+    },
     company: "@Epicor Software",
     metrics: [
-      { value: "6h", label: "ciclo de regresión [cifra de ejemplo]" },
-      { value: "120", label: "casos automatizados cada PR" },
+      {
+        value: "6h",
+        label: {
+          es: "ciclo de regresión [cifra de ejemplo]",
+          en: "regression cycle [sample figure]",
+        },
+      },
+      {
+        value: "120",
+        label: {
+          es: "casos automatizados cada PR",
+          en: "automated cases per PR",
+        },
+      },
     ],
-    description:
-      "Comencé como becario automatizando regresiones manuales del equipo de plataforma.",
+    description: {
+      es: "Comencé como becario automatizando regresiones manuales del equipo de plataforma.",
+      en: "I started as an intern automating the platform team's manual regressions.",
+    },
     terminalPath: "~/trayectoria/epicor-intern",
   },
   {
     id: "uanl-fime",
-    period: "2022 — 2026",
-    role: "Ingeniería de Software",
+    period: { es: "2022 — 2026", en: "2022 — 2026" },
+    role: { es: "Ingeniería de Software", en: "Software Engineering" },
     company: "@UANL FIME",
     metrics: [
-      { value: "6h", label: "ciclo de regresión [cifra de ejemplo]" },
-      { value: "120", label: "casos automatizados cada PR" },
+      {
+        value: "6h",
+        label: {
+          es: "ciclo de regresión [cifra de ejemplo]",
+          en: "regression cycle [sample figure]",
+        },
+      },
+      {
+        value: "120",
+        label: {
+          es: "casos automatizados cada PR",
+          en: "automated cases per PR",
+        },
+      },
     ],
-    description:
-      "Carrera profesional en la Facultad de Ingeniería Mecánica y Eléctrica. Graduación diciembre 2026.",
+    description: {
+      es: "Carrera profesional en la Facultad de Ingeniería Mecánica y Eléctrica. Graduación diciembre 2026.",
+      en: "Degree at the Faculty of Mechanical and Electrical Engineering. Graduating December 2026.",
+    },
     terminalPath: "~/trayectoria/uanl-fime",
   },
 ];
 
-const EMPTY_INTRO =
-  "sin entrada activa";
+const UI = {
+  titulo: { es: "Trayectoria", en: "Experience" },
+  vacio: { es: "sin entrada activa", en: "no entry selected" },
+};
 
 export default function ExperienceSection() {
+  const t = useT();
   const bandRef = useRef<HTMLElement>(null);
-  /* null = estado vacío (intro centrada en gris). El usuario entra a
-     TRAYECTORIA y ve la invitación a seleccionar. */
+
   const [selectedId, setSelectedId] = useState<string | null>(EXPERIENCE[0].id);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const selected = selectedId
     ? (EXPERIENCE.find((e) => e.id === selectedId) ?? null)
     : null;
-  /* El wrapper de cursor se muestra en la tarjeta hovered o, si no hay
-     hover ni selección, NO se muestra (estado vacío). */
+
   const activeId = hoveredId ?? selectedId;
 
-  /* Publica la coordenada Y del borde inferior del title-band (en el
-     viewport) como --title-bottom-y en :root. La usa el marco para
-     subir su línea inferior hasta la base del título cuando TRAYECTORIA
-     está visible (html.scroll-end).
-
-     Además, cuando hay tarjeta seleccionada, publica --conn-y (centro
-     vertical de la card activa) y --conn-x-1 / --conn-x-2 (extremos) para
-     el bus de conexión. Eso lo mantiene alineado cuando el usuario hace
-     click en una card más grande o cambia el zoom.
-
-     La primera medición se retrasa 2 RAF: cuando el componente monta,
-     el scroll-virtual puede tener el .scroll-target con transform en
-     pleno fade-in, así que getBoundingClientRect devuelve una posición
-     stale (más arriba de la real). Esperar 2 frames garantiza que CSS
-     haya aplicado el estado final. Además re-mide cuando html.scroll-end
-     se activa/desactiva, por si el cambio de sección mueve el bloque. */
   useEffect(() => {
     let raf1 = 0;
     let raf2 = 0;
@@ -103,10 +122,7 @@ export default function ExperienceSection() {
         "--title-bottom-y",
         `${Math.round(r.bottom)}px`,
       );
-      /* Bus de conexión: una sola línea al centro vertical de la card
-         activa. Buscamos el botón con [aria-pressed=true] dentro de la
-         grid. Si no hay selección, no publicamos nada (el bus se
-         desmonta en el JSX). */
+
       const activeCard = document.querySelector<HTMLElement>(
         ".experience__card[aria-pressed=true]",
       );
@@ -117,12 +133,6 @@ export default function ExperienceSection() {
           `${Math.round(cr.top + cr.height / 2)}px`,
         );
 
-        /* X: el bus arranca donde termina el trazo del marco (que
-           sobresale de la card por su inset negativo) y terminan en el
-           borde izquierdo del panel. El marco se mide a partir de su
-           wrapper + su inset calculado, NO con su propio
-           getBoundingClientRect: anima transform: scale(0.96 → 1) al
-           activarse y a media transición devolvería una X encogida. */
         const wrap = activeCard.parentElement;
         const frame = wrap?.querySelector<HTMLElement>(
           ".experience__card-frame",
@@ -153,9 +163,7 @@ export default function ExperienceSection() {
     if (bandRef.current) ro.observe(bandRef.current);
     window.addEventListener("resize", measureAfter);
     window.addEventListener("scroll", measureAfter, { passive: true });
-    /* re-medir cuando TRAYECTORIA entra o sale del viewport, porque el
-       scroll-virtual reposiciona el wrapper. observer se desuscribe
-       en cleanup. */
+
     const htmlObserver = new MutationObserver(measureAfter);
     htmlObserver.observe(document.documentElement, {
       attributes: true,
@@ -178,20 +186,8 @@ export default function ExperienceSection() {
       id="experiencia"
       className="experience scroll-section scroll-section--after-2"
     >
-      {/* El fill vive como hijo directo del section, NO del scroll-target.
-          Si estuviera dentro del .scroll-target, su position: fixed se
-          anclaría al scroll-target transformado y se vería en una
-          posición incorrecta. Al estar aquí arriba, se ancla al viewport. */}
       <div className="experience__fill" aria-hidden="true" />
 
-      {/* Bus de conexión: la card activa (fuente) le manda datos al panel
-          (destino). Vive fuera del scroll-target (position: fixed →
-          viewport); el JS publica --conn-y y --conn-x-1/2.
-
-          key={selected.id}: al cambiar de card el bus se REMONTA, y así
-          sus @keyframes (tenderse, el bit viajando) arrancan de cero
-          sincronizados con el LED del terminal, que también se remonta
-          con la misma key (ver .experience__detail__content). */}
       {selected && (
         <span key={selected.id} className="experience__conn" aria-hidden="true">
           <span className="experience__conn__track" />
@@ -205,13 +201,9 @@ export default function ExperienceSection() {
 
       <div className="experience__content scroll-target">
         <header className="experience__title-band" ref={bandRef}>
-          <h2 className="experience__title">Trayectoria</h2>
+          <h2 className="experience__title">{t(UI.titulo)}</h2>
         </header>
 
-        {/* Retícula 38/62 dividida por hairline vertical. La hairline
-            (.experience__vline) vive como hija directa del section
-            (fuera del scroll-target) por la misma razón que el fill:
-            su position: fixed debe anclarse al viewport. */}
         <div className="experience__grid">
           <span className="experience__vline" aria-hidden="true" />
           <ol className="experience__cards">
@@ -245,7 +237,7 @@ export default function ExperienceSection() {
                     onClick={() => setSelectedId((s) => (s === e.id ? null : e.id))}
                     aria-pressed={isSelected}
                   >
-                    <span className="experience__card__period">{e.period}</span>
+                    <span className="experience__card__period">{t(e.period)}</span>
                     <span
                       className={
                         e.id === "uanl-fime"
@@ -253,7 +245,7 @@ export default function ExperienceSection() {
                           : "experience__card__role"
                       }
                     >
-                      {e.role}
+                      {t(e.role)}
                     </span>
                     <span className="experience__card__company">{e.company}</span>
                   </button>
@@ -264,30 +256,11 @@ export default function ExperienceSection() {
             })}
           </ol>
 
-          {/* Wrapper del cursor: un div un poco más grande que la tarjeta
-              activa (inset: -0.25rem), con borde y fill del cursor-color.
-              pointer-events: none para no robar el click. Se posiciona
-              con coordenadas absolutas calculadas en runtime (top/left
-              via variables) — la tarjeta activa publica su posición
-              relativa al grid, y el wrapper se monta como hijo del grid. */}
-
-          {/* Detail (columna derecha):
-              - Sin selección: intro centrada en gris sobre fondo video.
-                El <video> está marcado hidden (display:none por CSS)
-                mientras no haya src; el contenedor sigue mostrando el
-                intro. Cuando el usuario pase el video, se quita el
-                hidden.
-              - Con selección: 2 cifras grandes, descripción y módulo
-                terminal (path dinámico + LED del cursor-color). */}
           <article className="experience__detail">
-            {/* Luz tramada de fondo; se atenúa cuando hay card
-                seleccionada (texto encima). */}
             <DitherField connected={selected !== null} />
 
             {selected ? (
-              /* key: se remonta junto con el bus al cambiar de card, para
-                 que el parpadeo del LED quede sincronizado con la llegada
-                 del bit. */
+
               <div key={selected.id} className="experience__detail__content">
                 <div className="experience__detail__metrics">
                   {selected.metrics.map((m, i) => (
@@ -296,13 +269,13 @@ export default function ExperienceSection() {
                         {m.value}
                       </span>{" "}
                       <span className="experience__detail__metric__label">
-                        {m.label}
+                        {t(m.label)}
                       </span>
                     </p>
                   ))}
                 </div>
                 <p className="experience__detail__desc">
-                  {selected.description}
+                  {t(selected.description)}
                 </p>
                 <div className="experience__detail__terminal">
                   <span className="experience__detail__terminal__cmd">
@@ -320,7 +293,7 @@ export default function ExperienceSection() {
                 </div>
               </div>
             ) : (
-              <p className="experience__detail__empty">{EMPTY_INTRO}</p>
+              <p className="experience__detail__empty">{t(UI.vacio)}</p>
             )}
           </article>
         </div>

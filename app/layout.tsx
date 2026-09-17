@@ -43,7 +43,7 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var s=localStorage.getItem("theme");if(["light","dark","alt"].indexOf(s)<0){s=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}document.documentElement.setAttribute("data-theme",s);}catch(e){}})();`,
+            __html: `(function(){try{var s=localStorage.getItem("theme");if(["light","dark","alt"].indexOf(s)<0){s=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}document.documentElement.setAttribute("data-theme",s);var l=localStorage.getItem("lang");if(l!=="es"&&l!=="en"){l=(navigator.language||"es").toLowerCase().indexOf("es")===0?"es":"en";}document.documentElement.lang=l;}catch(e){}})();`,
           }}
         />
       </head>

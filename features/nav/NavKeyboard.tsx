@@ -2,21 +2,6 @@
 
 import { useEffect } from "react";
 
-/* Nav keyboard: navega entre secciones con las teclas de flecha.
-   Solo actúa cuando el nav está visible (html.nav-revealed).
-
-   NO escribe --scroll-progress. El dueño del progreso es
-   features/scroll/ScrollProgress: aquí solo se despacha "scroll:goto"
-   y él hace el salto. Cuando este archivo escribía la variable por su
-   cuenta, el closure de ScrollProgress conservaba su target viejo y el
-   siguiente wheel brincaba (medido: 0.36 → ← → 0.00 → un wheel → 0.46).
-   Un solo dueño del estado, un solo lugar donde viven los umbrales.
-
-   No depende de ids: el progreso 0..1 ya codifica la posición
-   (hero=0, proyectos=0.25, trayectoria=0.5, stack=0.75,
-   sobre mí=1). */
-
-
 export default function NavKeyboard() {
   useEffect(() => {
     const root = document.documentElement;
@@ -33,7 +18,7 @@ export default function NavKeyboard() {
     const onKey = (e: KeyboardEvent) => {
       if (!visible) return;
       if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
-      // No interferir si el foco está en un input/textarea/contenteditable
+
       const tag = (document.activeElement as HTMLElement)?.tagName?.toLowerCase();
       if (
         tag === "input" ||
@@ -46,8 +31,7 @@ export default function NavKeyboard() {
 
       window.dispatchEvent(
         new CustomEvent("scroll:goto", {
-          /* una sección hacia atrás/adelante; ScrollProgress resuelve
-             el destino contra la sección más cercana */
+
           detail: { section: e.key === "ArrowLeft" ? -1 : 1 },
         }),
       );

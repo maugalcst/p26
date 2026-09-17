@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import "./BootSequence.css";
+import { useT } from "@/features/i18n/useLang";
 
-/* Líneas de arranque — cmd se escribe letra por letra, ok aparecen de golpe */
 const CMD_CHAR_MS = 9;
 const OUT_DELAY_MS = 140;
 const HOLD_MS = 350;
@@ -15,8 +15,7 @@ interface Line {
   text: string;
 }
 
-/* Log de arranque systemd real + comando final. ok = líneas del boot
-   (el renderer añade el prefijo [ OK ]), cmd se escribe, out es salida cruda. */
+// Las líneas de la intro
 const LINES: Line[] = [
   { kind: "ok", text: "Started Load Kernel Modules." },
   { kind: "ok", text: "Mounted /dev/nvme0n1p2 on /." },
@@ -31,12 +30,12 @@ const PROMPT = "mau@port2026:~$ ";
 const wait = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
 
 export default function BootSequence() {
+  const t = useT();
   const [visible, setVisible] = useState<Line[]>([]);
   const [leaving, setLeaving] = useState(false);
   const [done, setDone] = useState(false);
   const finishedRef = useRef(false);
 
-  /* Mostrar el log completo y cerrar la ventana (zoom-out + fundido) */
   const finish = useCallback(() => {
     if (finishedRef.current) return;
     finishedRef.current = true;
@@ -45,11 +44,6 @@ export default function BootSequence() {
     window.setTimeout(() => setDone(true), FADE_MS);
   }, []);
 
-  /* html.booting mientras el overlay vive (incluido el fundido de
-     salida). ScrollProgress lo lee para ignorar wheel/touch/teclado
-     durante la intro: el hint dice "pulse cualquier tecla para entrar",
-     y sin esta marca esa misma tecla (espacio, flechas) caía también en
-     el scroll-virtual y el sitio arrancaba ya desplazado. */
   useEffect(() => {
     const root = document.documentElement;
     if (done) {
@@ -69,7 +63,6 @@ export default function BootSequence() {
       finish();
     };
 
-    /* reduced-motion: sin escritura, cierra directo */
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setVisible(LINES);
       const t = window.setTimeout(() => setLeaving(true), 200);
@@ -116,7 +109,7 @@ export default function BootSequence() {
   return (
     <div
       className={`boot-overlay${leaving ? " boot-overlay--leaving" : ""}`}
-      aria-label="Arrancando portafolio"
+      aria-label={t({ es: "Arrancando portafolio", en: "Booting portfolio" })}
       role="presentation"
     >
       <div className="boot-window">
@@ -145,7 +138,12 @@ export default function BootSequence() {
         </div>
 
         <div className="boot-footer">
-          <span className="boot-hint">pulse cualquier tecla para entrar</span>
+          <span className="boot-hint">
+            {t({
+              es: "pulse cualquier tecla para entrar",
+              en: "press any key to enter",
+            })}
+          </span>
           <button type="button" className="boot-skip" onClick={finish} tabIndex={0}>
             Saltar
           </button>

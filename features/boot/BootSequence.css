@@ -1,11 +1,7 @@
-/* Intro de arranque — ventana de terminal centrada sobre la página.
-   Mismo lenguaje del sitio (Departure Mono, hairlines, tracking) con la
-   metáfora de una ventana que se abre sobre el escritorio y se cierra
-   (zoom-out) para revelar el landing. */
 .boot-overlay {
   position: fixed;
   inset: 0;
-  z-index: 950; /* bajo el marco (999) y el cursor (1000) */
+  z-index: 950;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -26,22 +22,7 @@
 }
 
 .boot-window {
-  /* Colores derivados de los tokens del proyecto: la terminal hereda
-     --fg del tema y el acento es --cursor-color (azul en light, naranja
-     en dark). --boot-dim se recalcula solo.
 
-     El fondo NO puede ser var(--bg) a secas: el overlay detrás también
-     lo es, y la ventana desaparece — queda un contorno sin cuerpo.
-     Metiendo un 6% de tinta dentro del fondo, la misma línea resuelve
-     los dos temas por la naturaleza de --fg:
-
-       light  --fg oscuro  → oscurece un punto  (papel → panel)
-       dark   --fg crema   → aclara un punto    (panel elevado sobre negro)
-
-     Que es justo como se ve una ventana de terminal sobre un escritorio
-     en cada caso. Suficiente para leerse como superficie propia, poco
-     para hacer ruido. Cero hex hardcodeado, y el tema oscuro no necesita
-     redefinir nada. */
   --boot-bg: color-mix(in srgb, var(--bg) 94%, var(--fg) 6%);
   --boot-fg: var(--fg);
   --boot-accent: var(--cursor-color);
@@ -61,9 +42,6 @@
   transition: transform 420ms ease, opacity 420ms ease;
 }
 
-/* en modo oscuro los tokens del proyecto ya cambian --bg/--fg/--cursor-color
-   automáticamente. No hace falta redefinir nada aquí. */
-
 @keyframes boot-in {
   from {
     transform: scale(0.96);
@@ -71,7 +49,6 @@
   }
 }
 
-/* Barra de título — solo el handle, sin chrome */
 .boot-titlebar {
   display: flex;
   align-items: center;
@@ -110,7 +87,6 @@
   color: var(--boot-dim);
 }
 
-/* Cursor de bloque parpadeante — terminal real */
 .boot-caret {
   display: inline-block;
   width: 0.6em;

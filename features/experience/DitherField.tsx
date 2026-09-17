@@ -2,55 +2,29 @@
 
 import { useEffect, useRef } from "react";
 
-/* =============================================================================
-   DitherField — luz tramada en capas detrás del contenido del panel.
-
-   Varias capas de nube, cada una con su tamaño, deriva, densidad y tono,
-   tramadas en 1 bit (Bayer 8×8) con la tinta del tema. Todas comparten la
-   misma matriz: los puntos de una capa clara caen sobre los de las más
-   densas, así donde se enciman el mismo punto sale más oscuro, como tinta
-   sobre tinta. (Con matrices desplazadas por capa aparecía moiré en
-   diagonal.) Es un fondo para leer encima:
-   sin acento, sin eventos, sin sobresaltos.
-
-   Con una card seleccionada (connected) cada capa se retira según su
-   `conTexto`: las más oscuras desaparecen, queda un rastro de neblina. La
-   transición es por alfa (no por densidad), así se desvanece continua en
-   vez de apagar puntos de golpe.
-
-   Presupuesto: solo dibuja con TRAYECTORIA en pantalla (html.scroll-end) y
-   la pestaña visible, a 12fps. El ruido se calcula en una retícula gruesa
-   e interpola por celda; los bloques que ninguna capa alcanza se saltan y
-   una capa con alfa 0 no se calcula. Nunca se
-   reinicia: tema, tamaño y cambios de clase en <html> ajustan el estado
-   existente. Con prefers-reduced-motion queda un único fotograma quieto.
-   ========================================================================== */
-
 type Layer = {
-  /* solo para leer el código */
+
   nombre: string;
-  /* tamaño de las formas, en celdas (grande = formas amplias y calmas) */
+
   escala: number;
-  /* deriva en celdas/segundo [x, y] — direcciones distintas por capa hacen
-     que las formas se crucen en vez de moverse en bloque */
+
   deriva: [number, number];
-  /* 0..1: si > 0 la forma también se deforma sola, mezclando una segunda
-     muestra que deriva en sentido contrario */
+
   deformacion: number;
-  /* rango de la nube que se trama: bajo `desde` no hay nada, sobre `hasta`
-     llega a la densidad máxima (borde suave entre ambos). Subir `desde` =
-     formas más escasas y compactas */
+
   desde: number;
   hasta: number;
-  /* densidad máxima de puntos (0..1) en el centro de la forma */
+
   densidad: number;
-  /* qué tan oscuro es cada punto (0..1) */
+
   tono: number;
-  /* multiplicador del tono con una card seleccionada (0 = desaparece) */
+
   conTexto: number;
   semilla: number;
 };
 
+// Las capas de la luz tramada: escala = tamaño de las manchas,
+// densidad y tono = qué tan marcadas, conTexto = cuánto se ven con una card abierta
 const LAYERS: Layer[] = [
   {
     nombre: "nubes",
@@ -65,8 +39,7 @@ const LAYERS: Layer[] = [
     semilla: 57,
   },
   {
-    /* grandes y de borde muy abierto (desde→hasta amplio): se leen como
-       sombras suaves. Chicas y de borde corto parecían camuflaje */
+
     nombre: "manchas",
     escala: 60,
     deriva: [0.18, -0.1],
@@ -80,24 +53,16 @@ const LAYERS: Layer[] = [
   },
 ];
 
-/* lado de cada celda en px CSS — entero para que el escalado sea exacto */
 const CELL = 3;
 const FPS = 12;
 
-/* El ruido se calcula en una retícula gruesa (cada GRID celdas) y se
-   interpola por celda. Las formas miden decenas de celdas, así que la
-   diferencia es invisible y el costo baja ~16×. Potencia de 2 (se usa >>). */
 const GRID = 4;
 const GRID_SHIFT = 2;
 
-/* luz: las capas pesan LIGHT_MIN arriba a la izquierda y 1 abajo a la
-   derecha, lejos de donde empieza a leerse el panel */
 const LIGHT_MIN = 0.55;
 
-/* segundos que tarda en retirarse (o volver) al cambiar de estado */
 const QUIET_SECONDS = 0.9;
 
-/* Bayer 8×8 como umbrales (i + 0.5) / 64, construido por recursión */
 const BAYER8 = (() => {
   let m = [[0]];
   for (let n = 1; n < 8; n *= 2) {
@@ -118,7 +83,6 @@ const BAYER8 = (() => {
 
 type RGB = [number, number, number];
 
-/* hash entero → [0, 1): barato y sin patrones visibles a esta escala */
 function hash(ix: number, iy: number, seed: number) {
   let h = Math.imul(ix, 374761393) + Math.imul(iy, 668265263) + Math.imul(seed, 1442695041);
   h = Math.imul(h ^ (h >>> 13), 1274126177);
@@ -139,14 +103,9 @@ function valueNoise(x: number, y: number, seed: number) {
   return (a + (b - a) * sx) * (1 - sy) + (c + (d - c) * sx) * sy;
 }
 
-/* dominio rotado ~27°: alineado a los ejes, el ruido de valor deja rombos
-   y cruces siguiendo la retícula del hash */
 const ROT_C = Math.cos(0.47);
 const ROT_S = Math.sin(0.47);
 
-/* Resuelve cualquier color CSS (hex, color-mix, oklch…) pintándolo en un
-   canvas de 1×1 y leyéndolo de vuelta. Canvas aparte para que el principal
-   no necesite willReadFrequently (que le quita la aceleración). */
 function toRGB(css: string): RGB {
   const probe = document
     .createElement("canvas")
@@ -160,7 +119,7 @@ function toRGB(css: string): RGB {
 
 export default function DitherField({ connected }: { connected: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  /* el efecto principal no depende de props (no se reinicia); lee esto */
+
   const connectedRef = useRef(connected);
   connectedRef.current = connected;
 
@@ -177,25 +136,22 @@ export default function DitherField({ connected }: { connected: boolean }) {
     let rows = 0;
     let img: ImageData | null = null;
     let ink: RGB = [0, 0, 0];
-    /* retícula gruesa: una por capa, (gw × gh) muestras de ruido */
+
     let gw = 0;
     let gh = 0;
     let fields: Float32Array[] = [];
-    /* luz por celda y posición en la retícula gruesa, precalculadas */
+
     let lightMap = new Float32Array(0);
     let raf = 0;
     let lastDraw = 0;
     let lastTick = 0;
-    /* 0 = panel vacío, 1 = card seleccionada; se acerca al objetivo en el
-       tiempo de QUIET_SECONDS */
+
     let quiet = connectedRef.current ? 1 : 0;
 
     const readInk = () => {
       ink = toRGB(getComputedStyle(canvas).color);
     };
 
-    /* retícula = panel entero en celdas cuadradas; el canvas mide exactamente
-       cols×CELL por rows×CELL y el panel recorta el sobrante (overflow) */
     const resize = () => {
       const r = host.getBoundingClientRect();
       const c = Math.max(1, Math.ceil(r.width / CELL));
@@ -226,8 +182,6 @@ export default function DitherField({ connected }: { connected: boolean }) {
       const t = now / 1000;
       const [r, g, b] = ink;
 
-      /* capas activas de este frame (alfa 0 = no se calcula) y su ruido en
-         la retícula gruesa */
       const active: {
         L: Layer;
         field: Float32Array;
@@ -250,8 +204,7 @@ export default function DitherField({ connected }: { connected: boolean }) {
             const v = px * ROT_S + py * ROT_C;
             let n = valueNoise(u, v, L.semilla);
             if (L.deformacion > 0) {
-              /* segunda muestra que deriva al revés: al cruzarse, la forma
-                 cambia en vez de solo desplazarse */
+
               const m = valueNoise(
                 v * 1.3 - ox * inv * 2,
                 u * 1.3 - oy * inv * 2,
@@ -278,15 +231,13 @@ export default function DitherField({ connected }: { connected: boolean }) {
           const x1 = Math.min(cols, x0 + GRID);
           const o = gy * gw + gx;
 
-          /* la interpolación nunca supera la esquina más alta del bloque:
-             si ninguna esquina pasa `desde`, esa capa no pinta aquí */
           blockLayers.length = 0;
           for (let k = 0; k < active.length; k++) {
             const f = active[k].field;
             const peak = Math.max(f[o], f[o + 1], f[o + gw], f[o + gw + 1]);
             if (peak > active[k].L.desde) blockLayers.push(active[k]);
           }
-          if (!blockLayers.length) continue; // bloque vacío (ya en 0)
+          if (!blockLayers.length) continue;
 
           for (let y = y0; y < y1; y++) {
             const ty = (y - y0) * inv;
@@ -295,8 +246,7 @@ export default function DitherField({ connected }: { connected: boolean }) {
               const tx = (x - x0) * inv;
               const threshold = BAYER8[by | (x & 7)];
               const light = lightMap[y * cols + x];
-              /* composición "over" de las capas encendidas: donde se
-                 enciman, la tinta se acumula y el punto sale más oscuro */
+
               let clear = 1;
               for (let k = 0; k < blockLayers.length; k++) {
                 const a = blockLayers[k];
@@ -351,9 +301,6 @@ export default function DitherField({ connected }: { connected: boolean }) {
       raf = requestAnimationFrame(frame);
     };
 
-    /* Cambios de clase en <html> (el cursor cambia varias por segundo) solo
-       ARRANCAN el loop si hace falta; nunca tiran el estado. El tema sí
-       vuelve a leer la tinta y redibuja. */
     const mo = new MutationObserver((records) => {
       if (records.some((rec) => rec.attributeName === "data-theme")) {
         readInk();
@@ -364,7 +311,7 @@ export default function DitherField({ connected }: { connected: boolean }) {
 
     readInk();
     resize();
-    draw(performance.now()); // visible desde el primer momento, aunque no corra
+    draw(performance.now());
 
     mo.observe(root, {
       attributes: true,
@@ -382,8 +329,7 @@ export default function DitherField({ connected }: { connected: boolean }) {
       kick();
     };
     reduced.addEventListener("change", onReduced);
-    /* sin loop (reduced-motion), el cambio de card llega por este evento y
-       se aplica de inmediato, sin fundido */
+
     canvas.addEventListener("dither:redraw", onReduced);
 
     kick();
@@ -398,8 +344,6 @@ export default function DitherField({ connected }: { connected: boolean }) {
     };
   }, []);
 
-  /* con reduced-motion el loop no corre: avisa al efecto de arriba para que
-     aplique el nuevo estado y redibuje */
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       canvasRef.current?.dispatchEvent(new Event("dither:redraw"));

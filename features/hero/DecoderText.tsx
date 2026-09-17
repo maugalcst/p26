@@ -13,14 +13,10 @@ const LEVELS = [
 ];
 const TICK = 110;
 
-/* Guía post-boot: oleaje rápido que recorre las letras M→o y luego G→s */
 const GUIDE_TICK_MS = 75;
 const GUIDE_STAGGER_MS = 60;
 const GUIDE_HOLD_MS = 70;
 
-/* Ambiente: cada ~1s una letra random del nombre completo hace un ciclo de
-   redacción (ida y vuelta) tiñéndose del color del cursor. Se detiene al
-   hacer scroll. */
 const AMBIENT_INTERVAL_MS = 2700;
 const AMBIENT_TICK_MS = 115;
 const AMBIENT_HOLD_MS = 270;
@@ -34,8 +30,6 @@ interface DecoderTextProps {
   ambientDriver?: boolean;
 }
 
-/* Registro compartido de letras de todos los DecoderText ambient (el nombre
-   completo vive en varias instancias: Mauricio + Gallegos). */
 const ambientLetters: HTMLSpanElement[] = [];
 
 export default function DecoderText({
@@ -96,7 +90,6 @@ export default function DecoderText({
     }
   }, []);
 
-  /* Registrar esta instancia en el pool ambiental */
   useEffect(() => {
     if (!ambient) return;
     const spans = letterRefs.current.filter(Boolean) as HTMLSpanElement[];
@@ -179,7 +172,6 @@ export default function DecoderText({
     return () => window.removeEventListener("boot:complete", onBoot);
   }, [guide, guideDelay, redact, restore]);
 
-  /* Driver ambiental: arranca tras el guide (post-boot) y se apaga al scrollear */
   useEffect(() => {
     if (!ambientDriver || reduceMotion()) return;
 
@@ -246,7 +238,6 @@ export default function DecoderText({
       }, AMBIENT_INTERVAL_MS);
     };
 
-    /* Arranca al terminar el boot (igual que el guide) */
     window.addEventListener("boot:complete", startLoop, { once: true });
     window.addEventListener("scroll", onScroll, { passive: true });
 

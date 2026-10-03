@@ -294,6 +294,7 @@ html.scroll-end .experience__vline {
   min-height: 0;
   height: 100%;
   width: 100%;
+  padding-top: clamp(1.25rem, 4vh, 3rem);
 }
 
 .experience__detail__content > * {
@@ -301,40 +302,75 @@ html.scroll-end .experience__vline {
   width: 100%;
 }
 
-.experience__detail__metrics {
+/* El verso de entrada. Redaction trae sus versiones "erosionadas"
+   (100 → 10): al abrir una entrada la frase se revela de pixelada a
+   nítida, igual que el dither del fondo. */
+.experience__detail__lede {
+  margin: 0;
+  max-width: 22em;
+  font-family: "Redaction", var(--font-display);
+  font-size: clamp(1.35rem, 2.3vw, 1.95rem);
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+  color: var(--fg);
+  text-wrap: balance;
+  animation: experience-lede 900ms steps(1, end) both;
+}
+
+@keyframes experience-lede {
+  0%   { font-family: "Redaction100", serif; opacity: 0.35; }
+  15%  { font-family: "Redaction70", serif; opacity: 0.6; }
+  30%  { font-family: "Redaction50", serif; opacity: 0.8; }
+  45%  { font-family: "Redaction35", serif; opacity: 1; }
+  60%  { font-family: "Redaction20", serif; }
+  78%  { font-family: "Redaction10", serif; }
+  100% { font-family: "Redaction", serif; }
+}
+
+.experience__detail__body {
   display: flex;
   flex-direction: column;
-  gap: clamp(0.5rem, 1.2vh, 0.75rem);
+  gap: 0.85em;
+  max-width: 34em;
+  margin-bottom: auto;
+  padding-left: clamp(0.85rem, 1.5vw, 1.25rem);
+  border-left: 1px solid var(--frame-line);
 }
 
-.experience__detail__metric {
-  margin: 0;
-  font-family: var(--font-body);
-  line-height: 1.1;
-  color: var(--fg);
-}
-
-.experience__detail__metric__value {
-  font-size: clamp(2.5rem, 6.5vw, 5.5rem);
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  color: var(--fg);
-  font-variant-numeric: tabular-nums;
-}
-
-.experience__detail__metric__label {
-  font-size: clamp(0.85rem, 1.2vw, 1rem);
-  color: color-mix(in srgb, var(--fg) 55%, transparent);
-}
-
-.experience__detail__desc {
+.experience__detail__body p {
   margin: 0;
   font-family: var(--font-body);
   font-size: 0.95rem;
+  line-height: 1.65;
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
+  text-wrap: pretty;
+  animation: experience-rise 700ms var(--ease-out-expo) both;
+}
+
+.experience__detail__body p:nth-child(1) { animation-delay: 380ms; }
+.experience__detail__body p:nth-child(2) { animation-delay: 500ms; }
+.experience__detail__body p:nth-child(3) { animation-delay: 620ms; }
+
+.experience__detail__body .experience__detail__tools {
+  margin-top: 0.35em;
+  font-family: var(--font-meta);
+  font-size: 0.72rem;
   line-height: 1.6;
-  color: color-mix(in srgb, var(--fg) 75%, transparent);
-  max-width: 34em;
-  margin-bottom: auto;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--fg) 48%, transparent);
+}
+
+@keyframes experience-rise {
+  from { opacity: 0; transform: translateY(0.4rem); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .experience__detail__lede,
+  .experience__detail__body p {
+    animation: none;
+  }
 }
 
 .experience__detail__terminal {
@@ -601,8 +637,4 @@ html.scroll-end .experience__detail__terminal__led {
     padding: clamp(1rem, 2vh, 1.5rem) clamp(1.5rem, 3vw, 2.5rem);
   }
 
-  .experience__detail__metric {
-    max-width: none;
-    width: 100%;
-  }
 }

@@ -11,6 +11,10 @@
 
 .hero {
   --hero-video-ink: #17120f;
+  /* Tinta del nombre sobre el video: la misma en los tres temas. El
+     fondo ahí es el video, no la página, así que seguir a --bg dejaba
+     las letras casi negras en los temas oscuros. */
+  --hero-video-text: #f4f1ec;
 }
 
 .hero__name {
@@ -46,11 +50,14 @@
 }
 
 .hero[data-active] .hero__name {
-  color: var(--bg);
+  color: var(--hero-video-text);
 
+  /* tres capas: un contorno corto que despega la letra de cualquier
+     zona clara del video, y dos difusas que la asientan */
   text-shadow:
-    0 1px 2px color-mix(in srgb, var(--hero-video-ink) 34%, transparent),
-    0 4px 18px color-mix(in srgb, var(--hero-video-ink) 20%, transparent);
+    0 0 2px color-mix(in srgb, var(--hero-video-ink) 25%, transparent),
+    0 1px 3px color-mix(in srgb, var(--hero-video-ink) 20%, transparent),
+    0 4px 18px color-mix(in srgb, var(--hero-video-ink) 12%, transparent);
 }
 
 .hero[data-active] .decoder-char--ambient {
@@ -148,7 +155,12 @@
 .hero__scroll {
   position: absolute;
   inset-inline: 0;
-  bottom: calc(var(--frame-offset) + 1.75rem);
+  /* Por encima de donde llega la línea inferior del marco cuando se
+     contrae con un video activo (--frame-grow), para que no lo cruce.
+     El 1rem extra compensa que el hero termina un rem por debajo del
+     borde del viewport (el padding del body), mientras que la línea va
+     fija al viewport; el otro rem es el aire que queda entre ambos. */
+  bottom: calc(var(--frame-offset) + var(--frame-grow) + 2rem);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -159,7 +171,23 @@
   text-transform: uppercase;
   color: color-mix(in srgb, var(--fg) 45%, transparent);
   opacity: 1;
-  transition: opacity 600ms var(--ease-out-expo);
+  /* entra 3s después de que termina la intro: primero se lee el nombre */
+  transition: opacity 600ms var(--ease-out-expo) 3s;
+}
+
+html.booting .hero__scroll {
+  opacity: 0;
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__scroll {
+    transition: opacity 1ms linear 3s;
+  }
+
+  html.nav-revealed .hero__scroll {
+    transition: opacity 1ms linear;
+  }
 }
 
 .hero__scroll__track {
@@ -218,8 +246,11 @@
   100% { rotate: 360deg; }
 }
 
+/* Al primer scroll se va de inmediato: el retraso de 3s es solo para
+   entrar, y sin esta transición propia también se aplicaría al salir. */
 html.nav-revealed .hero__scroll {
   opacity: 0;
+  transition: opacity 260ms var(--ease-out-expo);
 }
 
 @media (prefers-reduced-motion: reduce) {

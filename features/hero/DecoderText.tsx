@@ -175,6 +175,20 @@ export default function DecoderText({
   useEffect(() => {
     if (!ambientDriver || reduceMotion()) return;
 
+    // Con el cursor sobre el nombre manda el video: el juego de letras
+    // se detiene y las que estén a medio ciclo vuelven a su sitio.
+    const NOMBRE = ["abstract1", "abstract2"];
+    let pausado = false;
+
+    // Solo suelta las letras del ciclo aleatorio. La letra que el cursor
+    // esté tocando conserva su redacted de hover, que es otro efecto.
+    const soltarOcupadas = () => {
+      busyLetters.current.forEach((el) => {
+        el.classList.remove("decoder-char--ambient");
+        if (!el.matches(":hover")) el.style.fontFamily = "";
+      });
+    };
+
     const clearAmbient = () => {
       ambientTimers.current.forEach((t) => {
         window.clearInterval(t);
@@ -184,24 +198,31 @@ export default function DecoderText({
       busyLetters.current.clear();
     };
 
+    // Cada tick revisa la pausa: al entrar el hover puede quedar un tick
+    // ya encolado que volvería a ensuciar la letra después de limpiarla.
+    const soltarLetra = (el: HTMLSpanElement, id?: number) => {
+      if (id !== undefined) window.clearInterval(id);
+      el.classList.remove("decoder-char--ambient");
+      if (!el.matches(":hover")) el.style.fontFamily = "";
+      busyLetters.current.delete(el);
+    };
+
     const runCycle = (el: HTMLSpanElement) => {
       busyLetters.current.add(el);
       el.classList.add("decoder-char--ambient");
 
       let level = -1;
       const upId = window.setInterval(() => {
+        if (pausado) return soltarLetra(el, upId);
         level += 1;
         if (level >= LEVELS.length) {
           window.clearInterval(upId);
           const restoreId = window.setTimeout(() => {
+            if (pausado) return soltarLetra(el);
             let level2 = LEVELS.length - 1;
             const downId = window.setInterval(() => {
-              if (level2 < 0) {
-                window.clearInterval(downId);
-                el.style.fontFamily = "";
-                el.classList.remove("decoder-char--ambient");
-                busyLetters.current.delete(el);
-                return;
+              if (pausado || level2 < 0) {
+                return soltarLetra(el, downId);
               }
               el.style.fontFamily = LEVELS[level2];
               level2 -= 1;
@@ -216,6 +237,24 @@ export default function DecoderText({
       ambientTimers.current.push(upId);
     };
 
+    const sincronizarPausa = () => {
+      const hover = document.documentElement.dataset.hover ?? "";
+      const siguiente = NOMBRE.includes(hover);
+      if (siguiente === pausado) return;
+      pausado = siguiente;
+      if (pausado) {
+        soltarOcupadas();
+        clearAmbient();
+      }
+    };
+
+    const hoverObserver = new MutationObserver(sincronizarPausa);
+    hoverObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-hover"],
+    });
+    sincronizarPausa();
+
     const onScroll = () => {
       clearAmbient();
       window.clearInterval(loopId);
@@ -225,6 +264,7 @@ export default function DecoderText({
     let loopId = 0;
     const startLoop = () => {
       loopId = window.setInterval(() => {
+        if (pausado) return;
         const pool = ambientLetters.filter(
           (el) => el.isConnected && !busyLetters.current.has(el)
         );
@@ -242,6 +282,7 @@ export default function DecoderText({
     window.addEventListener("scroll", onScroll, { passive: true });
 
     return () => {
+      hoverObserver.disconnect();
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("boot:complete", startLoop);
       window.clearInterval(loopId);

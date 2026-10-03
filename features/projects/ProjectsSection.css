@@ -69,38 +69,11 @@ html.scroll-mid .projects__vline {
   opacity: 1;
 }
 
-.projects__vline::before,
 .projects__vline::after {
   content: "";
   position: absolute;
   inset: 0;
-}
-
-.projects__vline::before {
-  background: repeating-linear-gradient(
-    180deg,
-    var(--frame-line) 0 6px,
-    transparent 6px 12px
-  );
-  opacity: 0;
-}
-
-.projects__vline::after {
   background: var(--frame-line);
-  opacity: 1;
-}
-
-.projects__vline::before,
-.projects__vline::after {
-  transition: opacity 400ms ease-in-out;
-}
-
-html.scroll-mid.cursor-motion .projects__vline::before {
-  opacity: 1;
-}
-
-html.scroll-mid.cursor-motion .projects__vline::after {
-  opacity: 0;
 }
 
 .projects__media {
@@ -123,6 +96,61 @@ html.scroll-mid.cursor-motion .projects__vline::after {
   font-family: var(--font-meta);
   font-size: 0.85em;
   overflow: hidden;
+}
+
+/* Duotono con los colores del tema: el video se pasa a grises y dos capas
+   lo remapean (negro → --bg, blanco → --fg). Así no importa el wallpaper
+   de la grabación, se ve como parte de la página en cualquier tema. */
+.projects__media--video {
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.projects__video {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: grayscale(1) brightness(0.9) contrast(1.3);
+}
+
+.projects__media--video::before,
+.projects__media--video::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* multiply: blanco → --fg. lighten: negro → --bg */
+.projects__media--video::before {
+  z-index: 1;
+  background: var(--fg);
+  mix-blend-mode: multiply;
+}
+
+.projects__media--video::after {
+  z-index: 2;
+  background: var(--bg);
+  mix-blend-mode: lighten;
+}
+
+/* En claro el fondo es claro y la tinta oscura: se invierte el video
+   y se intercambian las capas para que la terminal quede en papel. */
+html[data-theme="light"] .projects__video {
+  filter: grayscale(1) invert(1) brightness(1.05) contrast(1.3);
+}
+
+html[data-theme="light"] .projects__media--video::before {
+  background: var(--bg);
+}
+
+html[data-theme="light"] .projects__media--video::after {
+  background: var(--fg);
 }
 
 .projects__placeholder__no {
@@ -185,7 +213,6 @@ html.scroll-mid.cursor-motion .projects__vline::after {
   transition: color 220ms var(--ease-out-expo);
 }
 
-.projects__row::before,
 .projects__row::after {
   content: "";
   position: absolute;
@@ -193,29 +220,7 @@ html.scroll-mid.cursor-motion .projects__vline::after {
   right: 0;
   bottom: 0;
   height: 1px;
-  transition: opacity 400ms ease-in-out;
-}
-
-.projects__row::before {
-  background: repeating-linear-gradient(
-    90deg,
-    var(--frame-line) 0 6px,
-    transparent 6px 12px
-  );
-  opacity: 0;
-}
-
-.projects__row::after {
   background: var(--frame-line);
-  opacity: 1;
-}
-
-html.scroll-mid.cursor-motion .projects__row::before {
-  opacity: 1;
-}
-
-html.scroll-mid.cursor-motion .projects__row::after {
-  opacity: 0;
 }
 
 .projects__row__top-hairline {
@@ -225,34 +230,11 @@ html.scroll-mid.cursor-motion .projects__row::after {
   pointer-events: none;
 }
 
-.projects__row__top-hairline::before,
 .projects__row__top-hairline::after {
   content: "";
   position: absolute;
   inset: 0;
-  transition: opacity 400ms ease-in-out;
-}
-
-.projects__row__top-hairline::before {
-  background: repeating-linear-gradient(
-    90deg,
-    var(--frame-line) 0 6px,
-    transparent 6px 12px
-  );
-  opacity: 0;
-}
-
-.projects__row__top-hairline::after {
   background: var(--frame-line);
-  opacity: 1;
-}
-
-html.scroll-mid.cursor-motion .projects__row__top-hairline::before {
-  opacity: 1;
-}
-
-html.scroll-mid.cursor-motion .projects__row__top-hairline::after {
-  opacity: 0;
 }
 
 .projects__row:hover,

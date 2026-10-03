@@ -5,19 +5,31 @@ import RevealTitle from "./RevealTitle";
 import { useT } from "@/features/i18n/useLang";
 import "./ProjectsSection.css";
 
+type Project = {
+  id: string;
+  no: string;
+  title: string;
+  description: { es: string; en: string };
+  stack: string[];
+  url: string | null;
+  repo: string | null;
+  video?: string; // nombre en /assets/videos (mp4 + jpg de poster)
+};
+
 // Mis proyectos. TODO: links y descripciones finales
-const PROJECTS = [
+const PROJECTS: Project[] = [
   {
     id: "tnews",
     no: "01",
     title: "tnews",
     description: {
-      es: "Briefing diario de noticias en la terminal. Scrapea fuentes configurables por XPath, resume con Ollama local y entrega el digest en una TUI de Terminal.Gui. Sin navegador, sin ruido.",
-      en: "A daily news briefing in the terminal. It scrapes sources configured by XPath, summarizes them with a local Ollama model and delivers the digest in a Terminal.Gui TUI. No browser, no noise.",
+      es: "Briefing diario de noticias en la terminal. Scrapea fuentes configurables por XPath, resume con Ollama local y entrega el digest en una TUI con Spectre.Console. Sin navegador, sin ruido.",
+      en: "A daily news briefing in the terminal. It scrapes sources configured by XPath, summarizes them with a local Ollama model and delivers the digest in a Spectre.Console TUI. No browser, no noise.",
     },
-    stack: ["ASP.NET Core", "Ollama", "Terminal.Gui", "PostgreSQL"],
+    stack: ["ASP.NET Core", "Ollama", "Spectre.Console", "PostgreSQL"],
     url: "https://github.com/maugalcst/tnews",
     repo: "https://github.com/maugalcst/tnews",
+    video: "tnews",
   },
   {
     id: "draftagent",
@@ -81,15 +93,36 @@ export default function ProjectsSection() {
         </header>
 
         <div className="projects__grid">
-          <div className="projects__media">
-            <div className="projects__placeholder">
-              <span className="projects__placeholder__no">{selected.no}</span>
-              <ul className="projects__placeholder__stack">
-                {selected.stack.map((s) => (
-                  <li key={s}>{s}</li>
-                ))}
-              </ul>
-            </div>
+          <div
+            className={
+              selected.video
+                ? "projects__media projects__media--video"
+                : "projects__media"
+            }
+          >
+            {selected.video ? (
+              <video
+                key={selected.video}
+                className="projects__video"
+                src={`/assets/videos/${selected.video}.mp4`}
+                poster={`/assets/videos/${selected.video}.jpg`}
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="metadata"
+                aria-label={selected.title}
+              />
+            ) : (
+              <div className="projects__placeholder">
+                <span className="projects__placeholder__no">{selected.no}</span>
+                <ul className="projects__placeholder__stack">
+                  {selected.stack.map((s) => (
+                    <li key={s}>{s}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           <ol className="projects__index">

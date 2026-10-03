@@ -3,19 +3,18 @@
 import "./AboutSection.css";
 import { useT, type Localized } from "@/features/i18n/useLang";
 
-// TODO: escribir mi texto aquí, en los dos idiomas
-const PLACEHOLDER: Localized<string>[] = [
+// Mi texto. Si lo cambio, en los dos idiomas.
+const TEXTO: Localized<string>[] = [
   {
-    es: "Aquí va el texto: unas líneas en primera persona, sin currículum ni adjetivos de relleno.",
-    en: "My text goes here: a few lines in first person, no résumé and no filler adjectives.",
+    es: "Me gusta entender las cosas por dentro. Desarmo lo que ya funcionaba, le muevo hasta ver cómo se sostiene y casi siempre acabo con algo que solo existía en mi cabeza. Soy necio con el detalle: ahí es donde está lo bueno.",
+    en: "I like understanding things from the inside. I take apart what already worked, poke at it until I see what holds it up, and usually end up with something that only existed in my head. I'm stubborn about detail: that's where the good part is.",
   },
   {
-    es: "Tres o cuatro frases, una idea por frase, con espacio para respirar entre ellas.",
-    en: "Three or four sentences, one idea each, with room to breathe between them.",
+    es: "Juego tenis y escalo boulder, pero lo que de verdad me ordena la cabeza es el cerro. Un río y unos árboles me arreglan la semana; lo que no, lo arregla un piano. Vivo en Monterrey y estoy a gusto, aunque quiero conocer el mundo entero.",
+    en: "I play tennis and boulder, but what really sorts my head out is the mountains. A river and a few trees fix my week; whatever they don't, a piano does. I live in Monterrey and I'm happy here, though I want to see the whole world.",
   },
 ];
 
-// TODO: mi correo real y el LinkedIn
 const CONTACTO: {
   label: Localized<string>;
   text: Localized<string>;
@@ -23,8 +22,8 @@ const CONTACTO: {
 }[] = [
   {
     label: { es: "correo", en: "email" },
-    text: { es: "tu@correo.com", en: "tu@correo.com" },
-    href: "mailto:tu@correo.com",
+    text: { es: "maugal.cst@gmail.com", en: "maugal.cst@gmail.com" },
+    href: "mailto:maugal.cst@gmail.com",
   },
   {
     label: { es: "github", en: "github" },
@@ -33,8 +32,8 @@ const CONTACTO: {
   },
   {
     label: { es: "linkedin", en: "linkedin" },
-    text: { es: "pendiente", en: "pending" },
-    href: null,
+    text: { es: "mauricio-gallegos-castillo", en: "mauricio-gallegos-castillo" },
+    href: "https://www.linkedin.com/in/mauricio-gallegos-castillo-4b9503288/",
   },
 ];
 
@@ -55,7 +54,7 @@ export default function AboutSection() {
         </header>
 
         <div className="about__body">
-          {PLACEHOLDER.map((line, i) => (
+          {TEXTO.map((line, i) => (
             <p key={i} className="about__line">
               {t(line)}
             </p>

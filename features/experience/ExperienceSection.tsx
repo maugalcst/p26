@@ -3,35 +3,40 @@
 import { useEffect, useRef, useState } from "react";
 import "./ExperienceSection.css";
 import DitherField from "./DitherField";
-import { useT } from "@/features/i18n/useLang";
+import { useT, type Localized } from "@/features/i18n/useLang";
 
-// Mi trayectoria. TODO: cambiar las métricas de ejemplo por cifras reales
-const EXPERIENCE = [
+// Mi trayectoria. Cada entrada: un verso de entrada, dos párrafos cortos
+// y las herramientas al pie
+const EXPERIENCE: {
+  id: string;
+  period: Localized<string>;
+  role: Localized<string>;
+  company: string;
+  lede: Localized<string>;
+  body: Localized<string>[];
+  tools: string[];
+  terminalPath: string;
+}[] = [
   {
     id: "epicor-qa",
     period: { es: "2026 — Presente", en: "2026 — Present" },
     role: { es: "QA Automation Developer", en: "QA Automation Developer" },
     company: "@Epicor Software",
-    metrics: [
+    lede: {
+      es: "Mismo equipo, ahora de tiempo completo.",
+      en: "Same team, now full time.",
+    },
+    body: [
       {
-        value: "6h",
-        label: {
-          es: "ciclo de regresión [cifra de ejemplo]",
-          en: "regression cycle [sample figure]",
-        },
+        es: "Sigo automatizando, pero ahora pruebo las stories de funcionalidades nuevas: regresiones en UI y validaciones de backend con Postman, Newman y Bruno, leyendo Swagger y OpenAPI hasta entender las reglas de negocio de verdad.",
+        en: "I still automate, but now I test the stories behind new features: UI regressions and backend validation with Postman, Newman and Bruno, reading Swagger and OpenAPI until the real business rules make sense.",
       },
       {
-        value: "120",
-        label: {
-          es: "casos automatizados cada PR",
-          en: "automated cases per PR",
-        },
+        es: "Migré la suite de WebdriverIO a Playwright con TypeScript y armé en .NET y Blazor un scraper que asigna tickets y sigue su estatus solo. Entre muchos otros proyectos.",
+        en: "I migrated the suite from WebdriverIO to Playwright with TypeScript and built a ticket scraper in .NET and Blazor that handles assignments and status on its own. Among plenty of other projects.",
       },
     ],
-    description: {
-      es: "El equipo corría la regresión a mano antes de cada release. Construí la suite automatizada que hoy se ejecuta en cada pull request, y documenté el proceso para que el resto del equipo pudiera extenderla.",
-      en: "The team ran regression by hand before every release. I built the automated suite that now runs on each pull request, and documented the process so the rest of the team could extend it.",
-    },
+    tools: ["Playwright", "TypeScript", "Postman", "Bruno", "OpenAPI", ".NET", "Blazor"],
     terminalPath: "~/trayectoria/epicor-qa",
   },
   {
@@ -42,26 +47,21 @@ const EXPERIENCE = [
       en: "QA Automation Developer Intern",
     },
     company: "@Epicor Software",
-    metrics: [
+    lede: {
+      es: "Entré como becario a mitad de la carrera y aprendí a automatizar casi desde cero.",
+      en: "I joined as an intern halfway through my degree and learned automation pretty much from scratch.",
+    },
+    body: [
       {
-        value: "6h",
-        label: {
-          es: "ciclo de regresión [cifra de ejemplo]",
-          en: "regression cycle [sample figure]",
-        },
+        es: "Aprendí a automatizar con WebdriverIO, a trabajar tickets en Jira y Zephyr y a seguir un cambio por los pipelines de Azure DevOps. Escribí scripts híbridos con Axios contra la API y generadores de reportes en Python y Excel.",
+        en: "I learned to automate with WebdriverIO, work tickets in Jira and Zephyr, and follow a change through Azure DevOps pipelines. I wrote hybrid scripts hitting the API with Axios and report generators in Python and Excel.",
       },
       {
-        value: "120",
-        label: {
-          es: "casos automatizados cada PR",
-          en: "automated cases per PR",
-        },
+        es: "Después llegaron los agentes: Rovo, MCP y, de ahí, DraftAgent. Muchos mini proyectos, muchos retos y un gran equipo, automatizando desde la UI gran parte del ERP COBRA Autocatalog.",
+        en: "Then came the agents: Rovo, MCP and, out of that, DraftAgent. Lots of small projects, lots of challenges and a great team, automating a big part of the COBRA Autocatalog ERP from the UI.",
       },
     ],
-    description: {
-      es: "Comencé como becario automatizando regresiones manuales del equipo de plataforma.",
-      en: "I started as an intern automating the platform team's manual regressions.",
-    },
+    tools: ["WebdriverIO", "Jira", "Zephyr", "Azure DevOps", "Axios", "Python", "MCP"],
     terminalPath: "~/trayectoria/epicor-intern",
   },
   {
@@ -69,26 +69,21 @@ const EXPERIENCE = [
     period: { es: "2022 — 2026", en: "2022 — 2026" },
     role: { es: "Ingeniería de Software", en: "Software Engineering" },
     company: "@UANL FIME",
-    metrics: [
+    lede: {
+      es: "Diez semestres en FIME, entre clases, proyectos y el equipo de tenis.",
+      en: "Ten semesters at FIME, between classes, projects and the tennis team.",
+    },
+    body: [
       {
-        value: "6h",
-        label: {
-          es: "ciclo de regresión [cifra de ejemplo]",
-          en: "regression cycle [sample figure]",
-        },
+        es: "Bases de datos, estándares de la industria, redes neuronales en notebooks de Python, hardware y microcontroladores. Un e-commerce para una perfumería, un hackatón y el equipo de tenis.",
+        en: "Databases, industry standards, neural networks in Python notebooks, hardware and microcontrollers. An e-commerce site for a perfume shop, a hackathon and the tennis team.",
       },
       {
-        value: "120",
-        label: {
-          es: "casos automatizados cada PR",
-          en: "automated cases per PR",
-        },
+        es: "De proyecto final, el sistema de asignación de salones que hoy usa la facultad entre maestros, coordinadores y administradores, desde un servidor de FIME y con miras a toda la UANL. Me divertí mucho. Me gradúo en diciembre de 2026.",
+        en: "For my capstone, the classroom assignment system the faculty now uses between teachers, coordinators and admins, running on a FIME server with plans to reach all of UANL. I had a lot of fun. I graduate in December 2026.",
       },
     ],
-    description: {
-      es: "Carrera profesional en la Facultad de Ingeniería Mecánica y Eléctrica. Graduación diciembre 2026.",
-      en: "Degree at the Faculty of Mechanical and Electrical Engineering. Graduating December 2026.",
-    },
+    tools: ["Python", "Next.js", "Prisma", "SQLite"],
     terminalPath: "~/trayectoria/uanl-fime",
   },
 ];
@@ -109,6 +104,17 @@ export default function ExperienceSection() {
     : null;
 
   const activeId = hoveredId ?? selectedId;
+
+  // El cursor se oculta dentro de una card, salvo en la seleccionada:
+  // ahí sigue visible.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle(
+      "cursor-dim",
+      hoveredId !== null && hoveredId !== selectedId,
+    );
+    return () => root.classList.remove("cursor-dim");
+  }, [hoveredId, selectedId]);
 
   useEffect(() => {
     let raf1 = 0;
@@ -224,14 +230,10 @@ export default function ExperienceSection() {
                   <button
                     type="button"
                     className="experience__card"
-                    onMouseEnter={() => {
-                      setHoveredId(e.id);
-                      document.documentElement.classList.add("cursor-dim");
-                    }}
-                    onMouseLeave={() => {
-                      setHoveredId((h) => (h === e.id ? null : h));
-                      document.documentElement.classList.remove("cursor-dim");
-                    }}
+                    onMouseEnter={() => setHoveredId(e.id)}
+                    onMouseLeave={() =>
+                      setHoveredId((h) => (h === e.id ? null : h))
+                    }
                     onFocus={() => setHoveredId(e.id)}
                     onBlur={() => setHoveredId((h) => (h === e.id ? null : h))}
                     onClick={() => setSelectedId((s) => (s === e.id ? null : e.id))}
@@ -262,21 +264,15 @@ export default function ExperienceSection() {
             {selected ? (
 
               <div key={selected.id} className="experience__detail__content">
-                <div className="experience__detail__metrics">
-                  {selected.metrics.map((m, i) => (
-                    <p key={i} className="experience__detail__metric">
-                      <span className="experience__detail__metric__value">
-                        {m.value}
-                      </span>{" "}
-                      <span className="experience__detail__metric__label">
-                        {t(m.label)}
-                      </span>
-                    </p>
+                <p className="experience__detail__lede">{t(selected.lede)}</p>
+                <div className="experience__detail__body">
+                  {selected.body.map((p, i) => (
+                    <p key={i}>{t(p)}</p>
                   ))}
+                  <p className="experience__detail__tools">
+                    {selected.tools.join(" · ")}
+                  </p>
                 </div>
-                <p className="experience__detail__desc">
-                  {t(selected.description)}
-                </p>
                 <div className="experience__detail__terminal">
                   <span className="experience__detail__terminal__cmd">
                     <span className="experience__detail__terminal__user">

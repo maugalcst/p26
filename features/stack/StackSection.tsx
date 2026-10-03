@@ -10,27 +10,28 @@ import {
 import "./StackSection.css";
 import { useT } from "@/features/i18n/useLang";
 
-// Mis tecnologías, en el orden en que salen en la columna derecha
+// Mis tecnologías, en el orden en que salen en la columna derecha:
+// de la más importante/contratable (arriba) a la menos (abajo)
 const TECH = [
-  "Terminal.Gui",
-  "Ollama",
-  "PostgreSQL",
-  "ASP.NET Core",
-  "JWT",
-  "MongoDB",
-  "Docker",
-  "Next.js",
   "TypeScript",
-  "Prisma",
-  "SQLite",
+  "ASP.NET Core",
+  "PostgreSQL",
+  "Next.js",
+  "Docker",
+  "MongoDB",
   "WebdriverIO",
-  "Jira",
+  "Prisma",
+  "Ollama",
+  "JWT",
   "GitHub Copilot",
+  "SQLite",
+  "Jira",
+  "Spectre.Console",
 ];
 
 // Qué usé en cada proyecto/trabajo. TODO: confirmar qué puedo publicar de Epicor
 const SOURCES = [
-  { id: "tnews", name: "tnews", uses: ["Terminal.Gui", "Ollama", "PostgreSQL", "ASP.NET Core"] },
+  { id: "tnews", name: "tnews", uses: ["Spectre.Console", "Ollama", "PostgreSQL", "ASP.NET Core"] },
   { id: "dnalabapi", name: "DnaLabApi", uses: ["ASP.NET Core", "JWT", "MongoDB", "Docker"] },
   { id: "salones", name: "Asignación de Salones", uses: ["Next.js", "TypeScript", "Prisma", "SQLite"] },
   { id: "draftagent", name: "DraftAgent", uses: ["WebdriverIO", "Jira", "GitHub Copilot"] },

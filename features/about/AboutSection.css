@@ -43,6 +43,8 @@
 }
 
 .about__contact {
+  /* aire garantizado contra el texto, por largo que quede */
+  margin-block-start: var(--space-1);
   padding-bottom: calc(var(--frame-offset) - 1rem);
 }
 

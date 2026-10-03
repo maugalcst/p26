@@ -393,13 +393,8 @@ html.scroll-about.nav-revealed .frame__top {
   top: -2px;
 }
 
-html.video-active .frame__top,
-html.video-active .frame__bottom,
-html.video-active .frame__left,
-html.video-active .frame__right {
-  opacity: 0.35;
-}
-
+/* con un video activo las líneas solo se contraen: ni se atenúan ni
+   cambian de tinta */
 html.video-active .frame__top {
   top: calc(var(--frame-offset) + var(--frame-grow));
 }

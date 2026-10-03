@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <title>Mau's place</title>
+  <style>
+    .fondo { fill: #efedea }
+    .cruz { fill: #0137bf }
+    .cota { fill: #2c2726; opacity: 0.35 }
+    @media (prefers-color-scheme: dark) {
+      .fondo { fill: #0f0e0e }
+      .cruz { fill: #ff8f63 }
+      .cota { fill: #eadac8; opacity: 0.4 }
+    }
+  </style>
+  <rect class="fondo" width="32" height="32" />
+  <rect class="cruz" x="4" y="13" width="24" height="6" />
+  <rect class="cruz" x="13" y="4" width="6" height="24" />
+  <rect class="cota" x="15" y="0" width="2" height="3" />
+  <rect class="cota" x="15" y="29" width="2" height="3" />
+  <rect class="cota" x="0" y="15" width="3" height="2" />
+  <rect class="cota" x="29" y="15" width="3" height="2" />
+</svg>

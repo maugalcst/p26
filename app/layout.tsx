@@ -10,6 +10,7 @@ import NavKeyboard from "@/features/nav/NavKeyboard";
 import ScrollProgress from "@/features/scroll/ScrollProgress";
 import RotatingCursor from "@/features/cursor/RotatingCursor";
 import BootSequence from "@/features/boot/BootSequence";
+import FaviconTheme from "@/features/theme/FaviconTheme";
 
 const fontBody = localFont({
   src: [
@@ -25,8 +26,9 @@ const fontMeta = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Mau — Portafolio 2026",
-  description: "Portafolio de QA Automation Developer y desarrollador fullstack.",
+  title: "Mau's Portafolio",
+  description:
+    "El portafolio de Mauricio Gallegos: proyectos, trayectoria y las herramientas con las que trabajo.",
 };
 
 export default function RootLayout({
@@ -49,6 +51,7 @@ export default function RootLayout({
       </head>
       <body>
         <BootSequence />
+        <FaviconTheme />
         <ScrollProgress />
         <ScrollNav />
         <NavKeyboard />
